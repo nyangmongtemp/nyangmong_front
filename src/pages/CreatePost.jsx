@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,10 +19,10 @@ const CreatePost = () => {
 
   // 게시판 제목 매핑
   const boardTitles = {
-    free: '자유게시판',
-    question: '질문게시판',
-    review: '후기게시판',
-    notice: '공지사항'
+    free: "자유게시판",
+    question: "질문게시판",
+    review: "후기게시판",
+    notice: "공지사항",
   };
 
   const handleImageChange = (e) => {
@@ -49,7 +48,7 @@ const CreatePost = () => {
       alert("제목과 내용을 입력해주세요.");
       return;
     }
-    
+
     // TODO: 실제 게시글 생성 로직
     console.log("게시글 생성:", { title, content, image: selectedImage });
     navigate(`/board/${type}`);
@@ -82,14 +81,17 @@ const CreatePost = () => {
             <Card className="border-orange-200 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-orange-100 to-pink-100 border-b border-orange-200">
                 <CardTitle className="text-2xl font-bold text-gray-800">
-                  {boardTitles[type] || '게시판'} 글쓰기
+                  {boardTitles[type] || "게시판"} 글쓰기
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* 제목 입력 */}
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="title"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       제목 <span className="text-red-500">*</span>
                     </Label>
                     <Input
@@ -118,12 +120,18 @@ const CreatePost = () => {
                                 type="button"
                                 variant="outline"
                                 className="border-orange-300 text-orange-600 hover:bg-orange-50 relative"
-                                onClick={() => document.getElementById('image-upload').click()}
+                                onClick={() =>
+                                  document
+                                    .getElementById("image-upload")
+                                    .click()
+                                }
                               >
                                 <Upload className="h-4 w-4 mr-2" />
                                 이미지 업로드
                               </Button>
-                              <p className="text-gray-500 mt-2">PNG, JPG, JPEG (최대 10MB)</p>
+                              <p className="text-gray-500 mt-2">
+                                PNG, JPG, JPEG (최대 10MB)
+                              </p>
                             </div>
                             <input
                               id="image-upload"
@@ -155,7 +163,10 @@ const CreatePost = () => {
 
                   {/* 내용 입력 */}
                   <div className="space-y-2">
-                    <Label htmlFor="content" className="text-sm font-medium text-gray-700">
+                    <Label
+                      htmlFor="content"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       내용 <span className="text-red-500">*</span>
                     </Label>
                     <Textarea

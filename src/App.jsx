@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,8 @@ import AdoptionBoard from "./components/AdoptionBoard";
 import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
 import MapPage from "./pages/MapPage";
+import ChildCreate from "./components/ChildCreate";
+import ChildIList from "./components/ChildIList";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,8 @@ const App = () => (
           <Route path="/post/:type/:id" element={<PostDetail />} />
           <Route path="/create-post/:type" element={<CreatePost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/child/create" element={<ChildCreate />} />
+          <Route path="/child/list" element={<ChildIList />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Index />} />
           <Route path="/signup" element={<Signup />} />

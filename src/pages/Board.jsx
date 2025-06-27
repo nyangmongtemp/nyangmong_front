@@ -37,6 +37,7 @@ const Board = () => {
     free: "자유게시판",
     question: "질문게시판",
     review: "후기게시판",
+    event: "행사게시판",
   };
 
   // 샘플 데이터
@@ -175,13 +176,17 @@ const Board = () => {
                 {/* 게시글 목록 */}
                 <div className="space-y-4 mb-8">
                   <div className="flex justify-end mb-4">
-                    <Button
-                      onClick={handleCreatePost}
-                      className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      글쓰기
-                    </Button>
+                    {type === "event" ? (
+                      <></>
+                    ) : (
+                      <Button
+                        onClick={handleCreatePost}
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        글쓰기
+                      </Button>
+                    )}
                   </div>
                   {currentPosts.map((post) => (
                     <div
