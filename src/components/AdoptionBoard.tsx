@@ -70,8 +70,9 @@ const AdoptionBoard = () => {
       <div className="space-y-4">
         {adoptionPosts.map((post) => (
           <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex">
-              <div className="relative w-32 h-24 flex-shrink-0">
+            {/* PC: 세로형 레이아웃, 모바일: 가로형 레이아웃 */}
+            <div className="flex flex-col md:flex-row">
+              <div className="relative w-full h-48 md:w-32 md:h-32 flex-shrink-0">
                 <img
                   src={post.image}
                   alt={post.title}

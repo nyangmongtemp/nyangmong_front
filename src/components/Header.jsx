@@ -65,7 +65,7 @@ const Header = () => {
             </button>
           </div>
 
-          <nav className="hidden md:flex gap-x-16 items-center">
+          <nav className="hidden md:flex gap-x-8 items-center">
             {categories.map((category) => (
               <div key={category.name}>
                 {category.submenu ? (
@@ -103,16 +103,18 @@ const Header = () => {
           </nav>
 
           {/* 모바일 메뉴 - md 이하에서만 표시 */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="md:hidden p-2 rounded-md hover:bg-orange-50">
-                <Menu className="h-6 w-6 text-gray-700" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80">
-              <MobileSidebar />
-            </SheetContent>
-          </Sheet>
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2 rounded-md hover:bg-orange-50">
+                  <Menu className="h-6 w-6 text-gray-700" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <MobileSidebar />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
