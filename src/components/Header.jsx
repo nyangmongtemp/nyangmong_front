@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Menu, MapPin, ChevronDown, User, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -64,11 +65,11 @@ const Header = () => {
             </button>
           </div>
 
-          <nav className="hidden md:flex gap-x-10 items-center">
+          <nav className="hidden md:flex gap-x-16 items-center">
             {categories.map((category) => (
-              <div key={category.name} className="gap-x-30">
+              <div key={category.name}>
                 {category.submenu ? (
-                  <DropdownMenu className="m1-20">
+                  <DropdownMenu>
                     <DropdownMenuTrigger className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1">
                       <span>{category.name}</span>
                       <ChevronDown className="h-4 w-4" />
@@ -91,17 +92,17 @@ const Header = () => {
                     onClick={() =>
                       category.href !== "#" && navigate(category.href)
                     }
-                    className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1 m1-20"
+                    className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1"
                   >
                     {category.icon && <category.icon className="h-4 w-4" />}
-                    <span className="m1-20">{category.name}</span>
+                    <span>{category.name}</span>
                   </button>
                 )}
               </div>
             ))}
           </nav>
 
-          {/* 모바일 메뉴 */}
+          {/* 모바일 메뉴 - md 이하에서만 표시 */}
           <Sheet>
             <SheetTrigger asChild>
               <button className="md:hidden p-2 rounded-md hover:bg-orange-50">

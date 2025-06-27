@@ -111,13 +111,19 @@ const CreatePost = () => {
                     <div className="space-y-4">
                       {!imagePreview ? (
                         <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
-                          <div className="flex flex-col items-center space-y-2">
-                            <Upload className="h-8 w-8 text-orange-400" />
+                          <div className="flex flex-col items-center space-y-4">
+                            <Upload className="h-12 w-12 text-orange-400" />
                             <div className="text-sm text-gray-600">
-                              <label htmlFor="image-upload" className="font-medium text-orange-600 hover:text-orange-500 cursor-pointer">
-                                클릭하여 이미지 업로드
-                              </label>
-                              <p className="text-gray-500">PNG, JPG, JPEG (최대 10MB)</p>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="border-orange-300 text-orange-600 hover:bg-orange-50 relative"
+                                onClick={() => document.getElementById('image-upload').click()}
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                이미지 업로드
+                              </Button>
+                              <p className="text-gray-500 mt-2">PNG, JPG, JPEG (최대 10MB)</p>
                             </div>
                             <input
                               id="image-upload"

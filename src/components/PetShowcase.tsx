@@ -35,7 +35,7 @@ const PetShowcase = () => {
   ];
 
   const PetCard = ({ pet, isLarge = false }) => (
-    <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer ${isLarge ? 'h-96' : 'h-48'} relative`}>
+    <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer ${isLarge ? 'md:h-96' : 'h-48'} relative`}>
       <div className="relative h-full">
         <img
           src={pet.image}
@@ -57,16 +57,16 @@ const PetShowcase = () => {
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className={`font-bold mb-1 ${isLarge ? 'text-xl' : 'text-sm'}`}>{pet.name}</h3>
-          <p className={`text-gray-200 mb-2 ${isLarge ? 'text-sm' : 'text-xs'}`}>by {pet.owner}</p>
+          <h3 className={`font-bold mb-1 ${isLarge ? 'md:text-xl text-sm' : 'text-sm'}`}>{pet.name}</h3>
+          <p className={`text-gray-200 mb-2 ${isLarge ? 'md:text-sm text-xs' : 'text-xs'}`}>by {pet.owner}</p>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
-              <Heart className={`${isLarge ? 'h-4 w-4' : 'h-3 w-3'} text-pink-400`} />
-              <span className={isLarge ? 'text-sm' : 'text-xs'}>{pet.likes}</span>
+              <Heart className={`${isLarge ? 'md:h-4 md:w-4 h-3 w-3' : 'h-3 w-3'} text-pink-400`} />
+              <span className={isLarge ? 'md:text-sm text-xs' : 'text-xs'}>{pet.likes}</span>
             </div>
             <div className="flex items-center space-x-1">
-              <MessageCircle className={`${isLarge ? 'h-4 w-4' : 'h-3 w-3'} text-blue-400`} />
-              <span className={isLarge ? 'text-sm' : 'text-xs'}>{pet.comments}</span>
+              <MessageCircle className={`${isLarge ? 'md:h-4 md:w-4 h-3 w-3' : 'h-3 w-3'} text-blue-400`} />
+              <span className={isLarge ? 'md:text-sm text-xs' : 'text-xs'}>{pet.comments}</span>
             </div>
           </div>
         </div>
