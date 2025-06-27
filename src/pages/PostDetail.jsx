@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -80,20 +79,21 @@ const PostDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 컨텐츠 영역 */}
           <div className="lg:col-span-3 space-y-6">
-            {/* 뒤로가기 버튼 */}
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate(`/board/${type}`)}
-                className="p-2 hover:bg-orange-50"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <h1 className="text-lg font-semibold text-gray-800">뒤로 가기</h1>
-            </div>
-
             {/* 게시물 내용 */}
             <Card className="border-orange-200 shadow-sm">
+              {/* 뒤로가기 버튼 */}
+              <div className="flex items-center gap-4 mb-6 pl-4 pt-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate(`/board/${type}`)}
+                  className="p-2 hover:bg-orange-50"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <h1 className="text-lg font-semibold text-gray-800">
+                  뒤로 가기
+                </h1>
+              </div>
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -106,7 +106,9 @@ const PostDetail = () => {
                         {post.createdAt}
                       </span>
                     </div>
-                    <h1 className="text-2xl font-bold mb-4 text-gray-900">{post.title}</h1>
+                    <h1 className="text-2xl font-bold mb-4 text-gray-900">
+                      {post.title}
+                    </h1>
                     <div className="flex items-center gap-6 text-sm text-gray-500">
                       <div className="flex items-center">
                         <Eye className="w-4 h-4 mr-1" />
@@ -142,8 +144,6 @@ const PostDetail = () => {
                   </div>
                 </div>
 
-                <Separator className="my-6" />
-
                 <div className="flex justify-between items-center">
                   <Button
                     onClick={handleLike}
@@ -153,16 +153,7 @@ const PostDetail = () => {
                     <Heart className="w-4 h-4" />
                     좋아요 {post.likes}
                   </Button>
-                  <div className="flex gap-2">
-                    <Link to={`/board/${type}`}>
-                      <Button
-                        variant="outline"
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                      >
-                        목록으로
-                      </Button>
-                    </Link>
-                  </div>
+                  <div className="flex gap-2"></div>
                 </div>
               </CardContent>
             </Card>
@@ -212,7 +203,11 @@ const PostDetail = () => {
                           <p className="text-gray-700">{comment.content}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" className="text-orange-600 hover:bg-orange-50">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-orange-600 hover:bg-orange-50"
+                          >
                             답글
                           </Button>
                         </div>

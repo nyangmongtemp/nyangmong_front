@@ -1,21 +1,20 @@
-
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  MessageCircle, 
-  Eye, 
-  Heart, 
-  Clock, 
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  MessageCircle,
+  Eye,
+  Heart,
+  Clock,
   User,
   ChevronLeft,
   ChevronRight,
-  Edit
-} from 'lucide-react';
+  Edit,
+} from "lucide-react";
 
 const Board = () => {
   const { type } = useParams();
@@ -25,10 +24,9 @@ const Board = () => {
 
   // 게시판 제목 매핑
   const boardTitles = {
-    free: '자유게시판',
-    question: '질문게시판',
-    review: '후기게시판',
-    notice: '공지사항'
+    free: "자유게시판",
+    question: "질문게시판",
+    review: "후기게시판",
   };
 
   // 샘플 데이터
@@ -36,14 +34,15 @@ const Board = () => {
     {
       id: 1,
       title: "강아지 산책 시 주의사항이 궁금해요",
-      content: "처음으로 강아지를 키우게 되었는데, 산책할 때 어떤 점들을 주의해야 할까요?",
+      content:
+        "처음으로 강아지를 키우게 되었는데, 산책할 때 어떤 점들을 주의해야 할까요?",
       author: "초보집사",
       createdAt: "10분 전",
       views: 234,
       likes: 12,
       comments: 8,
       category: "질문",
-      isHot: true
+      isHot: true,
     },
     {
       id: 2,
@@ -55,7 +54,7 @@ const Board = () => {
       likes: 24,
       comments: 12,
       category: "자유",
-      isHot: false
+      isHot: false,
     },
     // ... 더 많은 샘플 데이터 추가
     ...Array.from({ length: 50 }, (_, i) => ({
@@ -68,8 +67,8 @@ const Board = () => {
       likes: Math.floor(Math.random() * 30) + 1,
       comments: Math.floor(Math.random() * 15) + 1,
       category: i % 2 === 0 ? "자유" : "질문",
-      isHot: Math.random() > 0.8
-    }))
+      isHot: Math.random() > 0.8,
+    })),
   ];
 
   // 페이지네이션 계산
@@ -121,8 +120,8 @@ const Board = () => {
           onClick={() => handlePageChange(i)}
           className={`px-4 py-2 rounded-lg border ${
             currentPage === i
-              ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white border-orange-500'
-              : 'border-gray-300 hover:bg-orange-50 hover:border-orange-300'
+              ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white border-orange-500"
+              : "border-gray-300 hover:bg-orange-50 hover:border-orange-300"
           }`}
         >
           {i}
@@ -149,7 +148,7 @@ const Board = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 콘텐츠 */}
@@ -158,12 +157,22 @@ const Board = () => {
               <CardHeader className="bg-gradient-to-r from-orange-100 to-pink-100 border-b border-orange-200">
                 <CardTitle className="text-2xl font-bold text-gray-800 flex items-center space-x-2">
                   <MessageCircle className="h-6 w-6 text-orange-500" />
-                  <span>{boardTitles[type] || '게시판'}</span>
+                  <span className="m1-2">{boardTitles[type] || "게시판"}</span>
+                  <div className="flex-grow" />
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {/* 게시글 목록 */}
                 <div className="space-y-4 mb-8">
+                  <div className="flex justify-end mb-4">
+                    <Button
+                      onClick={handleCreatePost}
+                      className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      글쓰기
+                    </Button>
+                  </div>
                   {currentPosts.map((post) => (
                     <div
                       key={post.id}
@@ -173,12 +182,12 @@ const Board = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={`text-xs ${
-                                post.category === '질문' 
-                                  ? 'border-blue-300 text-blue-600 bg-blue-50' 
-                                  : 'border-green-300 text-green-600 bg-green-50'
+                                post.category === "질문"
+                                  ? "border-blue-300 text-blue-600 bg-blue-50"
+                                  : "border-green-300 text-green-600 bg-green-50"
                               }`}
                             >
                               {post.category}
@@ -229,16 +238,7 @@ const Board = () => {
 
                 {/* 페이지네이션과 글쓰기 버튼 */}
                 <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    {renderPagination()}
-                  </div>
-                  <Button
-                    onClick={handleCreatePost}
-                    className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    글쓰기
-                  </Button>
+                  <div className="flex space-x-2">{renderPagination()}</div>
                 </div>
               </CardContent>
             </Card>
