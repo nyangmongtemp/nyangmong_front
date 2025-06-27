@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Menu, MapPin, ChevronDown, User, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -65,45 +64,43 @@ const Header = () => {
             </button>
           </div>
 
-          <nav className="hidden md:flex gap-x-8 items-center">
-            {categories.map((category) => (
-              <div key={category.name}>
-                {category.submenu ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1">
-                      <span>{category.name}</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-white border border-orange-200 shadow-lg z-50">
-                      {category.submenu.map((subItem) => (
-                        <DropdownMenuItem key={subItem.name}>
-                          <a
-                            href={subItem.href}
-                            className="text-gray-700 hover:text-orange-500"
-                          >
-                            {subItem.name}
-                          </a>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <button
-                    onClick={() =>
-                      category.href !== "#" && navigate(category.href)
-                    }
-                    className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1"
-                  >
-                    {category.icon && <category.icon className="h-4 w-4" />}
+          <nav className="hidden md:flex space-x-6">
+            {categories.map((category) =>
+              category.submenu ? (
+                <DropdownMenu key={category.name}>
+                  <DropdownMenuTrigger className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1">
                     <span>{category.name}</span>
-                  </button>
-                )}
-              </div>
-            ))}
+                    <ChevronDown className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-white border border-orange-200 shadow-lg z-50">
+                    {category.submenu.map((subItem) => (
+                      <DropdownMenuItem key={subItem.name}>
+                        <a
+                          href={subItem.href}
+                          className="text-gray-700 hover:text-orange-500"
+                        >
+                          {subItem.name}
+                        </a>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <button
+                  key={category.name}
+                  onClick={() =>
+                    category.href !== "#" && navigate(category.href)
+                  }
+                  className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1"
+                >
+                  {category.icon && <category.icon className="h-4 w-4" />}
+                  <span>{category.name}</span>
+                </button>
+              )
+            )}
           </nav>
-
-          {/* 모바일 메뉴 - md 이하에서만 표시 */}
-          <div className="md:hidden">
+          {/* 모바일 메뉴 (모바일에서만 보임) */}
+          <div className="block md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <button className="p-2 rounded-md hover:bg-orange-50">

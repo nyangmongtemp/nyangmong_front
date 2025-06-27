@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
@@ -21,6 +21,16 @@ const Board = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 게시판 제목 매핑
   const boardTitles = {
@@ -245,9 +255,11 @@ const Board = () => {
           </div>
 
           {/* 사이드바 */}
-          <div className="lg:col-span-1">
-            <Sidebar />
-          </div>
+          {!isMobile && (
+            <div className="lg:col-span-1">
+              <Sidebar />
+            </div>
+          )}
         </div>
       </div>
     </div>

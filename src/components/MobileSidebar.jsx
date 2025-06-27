@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,12 +25,12 @@ const MobileSidebar = () => {
       name: "정보게시판",
       href: "#",
       submenu: [
-        { name: "질문게시판", href: "#" },
+        { name: "질문게시판", href: "/board/question" },
         { name: "우리아이 소개 게시판", href: "#" },
-        { name: "후기게시판", href: "#" },
+        { name: "후기게시판", href: "/board/review" },
       ],
     },
-    { name: "자유게시판", href: "/board" },
+    { name: "자유게시판", href: "/board/free" },
     { name: "행사게시판", href: "#" },
     { name: "지도", href: "/map", icon: MapPin },
   ];
