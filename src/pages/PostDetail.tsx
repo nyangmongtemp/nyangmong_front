@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Eye, Heart, MessageCircle, Share2, Edit, Trash2 } from 'lucide-react';
 import { Post, Comment } from '@/types/post';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -50,7 +52,6 @@ const PostDetail = () => {
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      // TODO: 댓글 추가 로직
       setNewComment('');
     }
   };
@@ -65,144 +66,180 @@ const PostDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/board')}
-              className="p-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <h1 className="text-lg font-semibold">게시물 상세</h1>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
+      <Header />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* 메인 컨텐츠 영역 */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* 뒤로가기 헤더 */}
+            <div className="bg-white rounded-lg shadow-sm border border-orange-100 p-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/board')}
+                  className="p-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <h1 className="text-lg font-semibold">게시물 상세</h1>
+              </div>
+            </div>
+
+            {/* 게시물 내용 */}
+            <Card className="border-orange-200">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="secondary">{post.category}</Badge>
+                      <span className="text-sm text-gray-500">{post.author}</span>
+                      <span className="text-sm text-gray-400">•</span>
+                      <span className="text-sm text-gray-500">{post.createdAt}</span>
+                    </div>
+                    <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+                    <div className="flex items-center gap-6 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Eye className="w-4 h-4 mr-1" />
+                        조회 {post.views}
+                      </div>
+                      <div className="flex items-center">
+                        <Heart className="w-4 h-4 mr-1" />
+                        좋아요 {post.likes}
+                      </div>
+                      <div className="flex items-center">
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        댓글 {comments.length}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleShare}>
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none">
+                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                    {post.content}
+                  </div>
+                </div>
+                
+                <Separator className="my-6" />
+                
+                <div className="flex justify-between items-center">
+                  <Button
+                    onClick={handleLike}
+                    variant="outline"
+                    className="flex items-center gap-2 border-orange-300 text-orange-600 hover:bg-orange-50"
+                  >
+                    <Heart className="w-4 h-4" />
+                    좋아요 {post.likes}
+                  </Button>
+                  <div className="flex gap-2">
+                    <Link to="/board">
+                      <Button 
+                        variant="outline"
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                      >
+                        목록으로
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 댓글 섹션 */}
+            <Card className="border-orange-200">
+              <CardHeader>
+                <h3 className="text-lg font-semibold">댓글 {comments.length}개</h3>
+              </CardHeader>
+              <CardContent>
+                {/* 댓글 작성 */}
+                <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-pink-50 rounded-lg border border-orange-100">
+                  <Textarea
+                    placeholder="댓글을 입력하세요..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="mb-3 resize-none"
+                    rows={3}
+                  />
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleCommentSubmit} 
+                      disabled={!newComment.trim()}
+                      className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
+                    >
+                      댓글 작성
+                    </Button>
+                  </div>
+                </div>
+
+                {/* 댓글 목록 */}
+                <div className="space-y-4">
+                  {comments.map((comment, index) => (
+                    <div key={comment.id}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-medium text-sm">{comment.author}</span>
+                            <span className="text-xs text-gray-500">{comment.createdAt}</span>
+                          </div>
+                          <p className="text-gray-700">{comment.content}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm">
+                            답글
+                          </Button>
+                        </div>
+                      </div>
+                      {index < comments.length - 1 && <Separator className="mt-4" />}
+                    </div>
+                  ))}
+                </div>
+
+                {comments.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    첫 번째 댓글을 작성해보세요!
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 사이드바 영역 */}
+          <div className="hidden lg:block lg:col-span-1">
+            <Sidebar />
           </div>
         </div>
-      </div>
+      </main>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Post Content */}
-        <Card className="mb-8">
-          <CardHeader className="pb-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary">{post.category}</Badge>
-                  <span className="text-sm text-gray-500">{post.author}</span>
-                  <span className="text-sm text-gray-400">•</span>
-                  <span className="text-sm text-gray-500">{post.createdAt}</span>
-                </div>
-                <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
-                <div className="flex items-center gap-6 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Eye className="w-4 h-4 mr-1" />
-                    조회 {post.views}
-                  </div>
-                  <div className="flex items-center">
-                    <Heart className="w-4 h-4 mr-1" />
-                    좋아요 {post.likes}
-                  </div>
-                  <div className="flex items-center">
-                    <MessageCircle className="w-4 h-4 mr-1" />
-                    댓글 {comments.length}
-                  </div>
-                </div>
+      {/* 푸터 */}
+      <footer className="bg-white border-t mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center text-gray-600">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">냥</span>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              <p className="font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+                냥몽 - 반려동물과 함께하는 따뜻한 커뮤니티
+              </p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                {post.content}
-              </div>
-            </div>
-            
-            <Separator className="my-6" />
-            
-            <div className="flex justify-between items-center">
-              <Button
-                onClick={handleLike}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Heart className="w-4 h-4" />
-                좋아요 {post.likes}
-              </Button>
-              <div className="flex gap-2">
-                <Link to="/board">
-                  <Button variant="outline">목록으로</Button>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Comments Section */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold">댓글 {comments.length}개</h3>
-          </CardHeader>
-          <CardContent>
-            {/* Comment Form */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <Textarea
-                placeholder="댓글을 입력하세요..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="mb-3 resize-none"
-                rows={3}
-              />
-              <div className="flex justify-end">
-                <Button onClick={handleCommentSubmit} disabled={!newComment.trim()}>
-                  댓글 작성
-                </Button>
-              </div>
-            </div>
-
-            {/* Comments List */}
-            <div className="space-y-4">
-              {comments.map((comment, index) => (
-                <div key={comment.id}>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-sm">{comment.author}</span>
-                        <span className="text-xs text-gray-500">{comment.createdAt}</span>
-                      </div>
-                      <p className="text-gray-700">{comment.content}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
-                        답글
-                      </Button>
-                    </div>
-                  </div>
-                  {index < comments.length - 1 && <Separator className="mt-4" />}
-                </div>
-              ))}
-            </div>
-
-            {comments.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                첫 번째 댓글을 작성해보세요!
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-sm">© 2024 냥몽. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
