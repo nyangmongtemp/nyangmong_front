@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,17 +15,16 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { Post, Comment } from "@/types/post";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
 const PostDetail = () => {
-  const { id } = useParams();
+  const { type, id } = useParams();
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState("");
 
   // 샘플 데이터
-  const post: Post = {
+  const post = {
     id: 1,
     title: "안녕하세요! 첫 번째 게시물입니다.",
     content: `게시판 테스트를 위한 첫 번째 게시물입니다. 많은 관심 부탁드립니다.
@@ -40,7 +40,7 @@ const PostDetail = () => {
     likes: 8,
   };
 
-  const [comments] = useState<Comment[]>([
+  const [comments] = useState([
     {
       id: 1,
       postId: 1,
@@ -69,32 +69,31 @@ const PostDetail = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    const ips = window.alert("링크가 복사되었습니다!");
+    window.alert("링크가 복사되었습니다!");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 컨텐츠 영역 */}
           <div className="lg:col-span-3 space-y-6">
+            {/* 뒤로가기 버튼 */}
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                variant="ghost"
+                onClick={() => navigate(`/board/${type}`)}
+                className="p-2 hover:bg-orange-50"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <h1 className="text-lg font-semibold text-gray-800">뒤로 가기</h1>
+            </div>
+
             {/* 게시물 내용 */}
-            <Card className="border-orange-200">
-              {/* 뒤로가기 헤더 */}
-              <div className="bg-white rounded-lg border-orange-100 p-4">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate("/board")}
-                    className="p-2"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                  </Button>
-                  <h1 className="text-lg font-semibold">뒤로 가기</h1>
-                </div>
-              </div>
+            <Card className="border-orange-200 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -107,7 +106,7 @@ const PostDetail = () => {
                         {post.createdAt}
                       </span>
                     </div>
-                    <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+                    <h1 className="text-2xl font-bold mb-4 text-gray-900">{post.title}</h1>
                     <div className="flex items-center gap-6 text-sm text-gray-500">
                       <div className="flex items-center">
                         <Eye className="w-4 h-4 mr-1" />
@@ -138,7 +137,7 @@ const PostDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6">
                     {post.content}
                   </div>
                 </div>
@@ -155,7 +154,7 @@ const PostDetail = () => {
                     좋아요 {post.likes}
                   </Button>
                   <div className="flex gap-2">
-                    <Link to="/board">
+                    <Link to={`/board/${type}`}>
                       <Button
                         variant="outline"
                         className="border-orange-300 text-orange-600 hover:bg-orange-50"
@@ -169,9 +168,9 @@ const PostDetail = () => {
             </Card>
 
             {/* 댓글 섹션 */}
-            <Card className="border-orange-200">
+            <Card className="border-orange-200 shadow-sm">
               <CardHeader>
-                <h3 className="text-lg font-semibold">
+                <h3 className="text-lg font-semibold text-gray-900">
                   댓글 {comments.length}개
                 </h3>
               </CardHeader>
@@ -182,7 +181,7 @@ const PostDetail = () => {
                     placeholder="댓글을 입력하세요..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    className="mb-3 resize-none"
+                    className="mb-3 resize-none border-orange-200 focus:border-orange-400"
                     rows={3}
                   />
                   <div className="flex justify-end">
@@ -203,7 +202,7 @@ const PostDetail = () => {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-sm">
+                            <span className="font-medium text-sm text-gray-800">
                               {comment.author}
                             </span>
                             <span className="text-xs text-gray-500">
@@ -213,7 +212,7 @@ const PostDetail = () => {
                           <p className="text-gray-700">{comment.content}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" className="text-orange-600 hover:bg-orange-50">
                             답글
                           </Button>
                         </div>
@@ -242,7 +241,7 @@ const PostDetail = () => {
       </main>
 
       {/* 푸터 */}
-      <footer className="bg-white border-t mt-16">
+      <footer className="bg-white border-t border-orange-100 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-600">
             <div className="flex items-center justify-center space-x-2 mb-2">
