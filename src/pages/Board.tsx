@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Search, Edit, Eye, Heart, MessageCircle } from 'lucide-react';
-import { Post } from '@/types/post';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
+import React, { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, Edit, Eye, Heart, MessageCircle } from "lucide-react";
+import { Post } from "@/types/post";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import {
   Pagination,
   PaginationContent,
@@ -19,51 +19,64 @@ import {
 } from "@/components/ui/pagination";
 
 const Board = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
+
+  const { type } = useParams<{ type: string }>();
+
+  const boardTitles: Record<string, string> = {
+    free: "자유게시판",
+    review: "후기게시판",
+    intro: "우리아이 소개 게시판",
+    question: "질문게시판",
+    event: "행사게시판",
+  };
+
+  const title = boardTitles[type || ""] || "게시판";
 
   // 샘플 데이터 확장
   const [posts] = useState<Post[]>([
     {
       id: 1,
-      title: '안녕하세요! 첫 번째 게시물입니다.',
-      content: '게시판 테스트를 위한 첫 번째 게시물입니다. 많은 관심 부탁드립니다.',
-      author: '사용자1',
-      category: '자유',
-      createdAt: '2024-01-15',
+      title: "안녕하세요! 첫 번째 게시물입니다.",
+      content:
+        "게시판 테스트를 위한 첫 번째 게시물입니다. 많은 관심 부탁드립니다.",
+      author: "사용자1",
+      category: "자유",
+      createdAt: "2024-01-15",
       views: 124,
-      likes: 8
+      likes: 8,
     },
     {
       id: 2,
-      title: '질문이 있습니다',
-      content: 'React에 대해서 궁금한 점이 있어서 질문드립니다.',
-      author: '개발자',
-      category: '질문',
-      createdAt: '2024-01-14',
+      title: "질문이 있습니다",
+      content: "React에 대해서 궁금한 점이 있어서 질문드립니다.",
+      author: "개발자",
+      category: "질문",
+      createdAt: "2024-01-14",
       views: 87,
-      likes: 5
+      likes: 5,
     },
     {
       id: 3,
-      title: '유용한 정보 공유합니다',
-      content: '개발에 도움이 되는 팁을 공유해드립니다.',
-      author: '정보왕',
-      category: '정보',
-      createdAt: '2024-01-13',
+      title: "유용한 정보 공유합니다",
+      content: "개발에 도움이 되는 팁을 공유해드립니다.",
+      author: "정보왕",
+      category: "정보",
+      createdAt: "2024-01-13",
       views: 256,
-      likes: 15
-    }
+      likes: 15,
+    },
   ]);
 
-  const categories = ['전체', '자유', '질문', '정보', '공지'];
-
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === '전체' || post.category === selectedCategory;
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "전체" || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -76,38 +89,25 @@ const Board = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 컨텐츠 영역 */}
           <div className="lg:col-span-3 space-y-6">
-            {/* 페이지 제목 */}
-            <div className="bg-white rounded-lg shadow-sm border border-orange-100 p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">자유 게시판</h1>
-              <p className="text-gray-600">자유롭게 이야기를 나누는 공간입니다.</p>
-            </div>
-
             {/* 카테고리 & 검색 */}
             <Card className="border-orange-200">
+              <div className="bg-white rounded-lg border-orange-100 p-6">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  {title}
+                </h1>
+                <p className="text-gray-600">
+                  자유롭게 이야기를 나누는 공간입니다.
+                </p>
+              </div>
               <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map(category => (
-                      <Button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        variant={selectedCategory === category ? "default" : "outline"}
-                        size="sm"
-                        className={selectedCategory === category 
-                          ? "bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500" 
-                          : "border-orange-300 text-orange-600 hover:bg-orange-50"
-                        }
-                      >
-                        {category}
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="relative flex-1 md:max-w-xs">
+                <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+                  {/* 검색창 */}
+                  <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
                       placeholder="게시물을 검색하세요..."
@@ -116,35 +116,45 @@ const Board = () => {
                       className="pl-10"
                     />
                   </div>
-                </div>
 
-                {/* 글쓰기 버튼 */}
-                <div className="flex justify-end mb-4">
-                  <Link to="/create-post">
-                    <Button className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500">
-                      <Edit className="w-4 h-4 mr-2" />
-                      글쓰기
-                    </Button>
-                  </Link>
+                  {/* 글쓰기 버튼 */}
+                  <div className="w-full md:w-auto md:ml-auto">
+                    <Link to="/create-post">
+                      <Button className="w-full md:w-auto bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500">
+                        <Edit className="w-4 h-4 mr-2" />
+                        글쓰기
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
 
                 {/* 게시물 목록 */}
                 <div className="space-y-3">
-                  {currentPosts.map(post => (
-                    <Link key={post.id} to={`/post/${post.id}`}>
+                  {currentPosts.map((post) => (
+                    <Link
+                      key={post.id}
+                      to={`/post/${post.id}`}
+                      className="block"
+                    >
                       <div className="p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer bg-white">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="secondary">{post.category}</Badge>
-                              <span className="text-sm text-gray-500">{post.author}</span>
+                              {/* <Badge variant="secondary">{post.category}</Badge> */}
+                              <span className="text-sm text-gray-500">
+                                {post.author}
+                              </span>
                               <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{post.createdAt}</span>
+                              <span className="text-sm text-gray-500">
+                                {post.createdAt}
+                              </span>
                             </div>
                             <h3 className="font-semibold mb-2 hover:text-orange-600 transition-colors">
                               {post.title}
                             </h3>
-                            <p className="text-gray-600 text-sm line-clamp-2">{post.content}</p>
+                            <p className="text-gray-600 text-sm line-clamp-2">
+                              {post.content}
+                            </p>
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-500 ml-4">
                             <div className="flex items-center">
@@ -174,37 +184,54 @@ const Board = () => {
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          <PaginationPrevious
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
                           />
                         </PaginationItem>
-                        
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          const pageNum = i + 1;
-                          return (
-                            <PaginationItem key={pageNum}>
-                              <PaginationLink
-                                onClick={() => setCurrentPage(pageNum)}
-                                isActive={currentPage === pageNum}
-                                className="cursor-pointer"
-                              >
-                                {pageNum}
-                              </PaginationLink>
-                            </PaginationItem>
-                          );
-                        })}
-                        
+
+                        {Array.from(
+                          { length: Math.min(5, totalPages) },
+                          (_, i) => {
+                            const pageNum = i + 1;
+                            return (
+                              <PaginationItem key={pageNum}>
+                                <PaginationLink
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  isActive={currentPage === pageNum}
+                                  className="cursor-pointer"
+                                >
+                                  {pageNum}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          }
+                        )}
+
                         {totalPages > 5 && (
                           <PaginationItem>
                             <PaginationEllipsis />
                           </PaginationItem>
                         )}
-                        
+
                         <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          <PaginationNext
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                              )
+                            }
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
                           />
                         </PaginationItem>
                       </PaginationContent>

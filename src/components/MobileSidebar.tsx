@@ -1,49 +1,55 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { User, Mail, Lock, MapPin, ChevronDown, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  User,
+  Mail,
+  Lock,
+  MapPin,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const MobileSidebar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [showInfoSubmenu, setShowInfoSubmenu] = useState(false);
   const navigate = useNavigate();
 
   const categories = [
-    { name: '분양게시판', href: '#' },
-    { 
-      name: '정보게시판', 
-      href: '#',
+    { name: "분양게시판", href: "/adoption" },
+    {
+      name: "정보게시판",
+      href: "#",
       submenu: [
-        { name: '질문게시판', href: '#' },
-        { name: '우리아이 소개 게시판', href: '#' },
-        { name: '후기게시판', href: '#' }
-      ]
+        { name: "질문게시판", href: "#" },
+        { name: "우리아이 소개 게시판", href: "#" },
+        { name: "후기게시판", href: "#" },
+      ],
     },
-    { name: '자유게시판', href: '#' },
-    { name: '행사게시판', href: '#' },
-    { name: '지도', href: '#', icon: MapPin }
+    { name: "자유게시판", href: "/board" },
+    { name: "행사게시판", href: "#" },
+    { name: "지도", href: "/map", icon: MapPin },
   ];
 
   const handleLogin = () => {
-    if (loginData.email === 'test1' && loginData.password === 'test1234') {
+    if (loginData.email === "test1" && loginData.password === "test1234") {
       setIsLoggedIn(true);
     } else {
-      alert('아이디 또는 비밀번호가 잘못되었습니다.');
+      alert("아이디 또는 비밀번호가 잘못되었습니다.");
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setLoginData({ email: '', password: '' });
+    setLoginData({ email: "", password: "" });
   };
 
   const handleSignupClick = () => {
-    navigate('/signup');
+    navigate("/signup");
   };
 
   return (
@@ -63,7 +69,11 @@ const MobileSidebar = () => {
                     className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-orange-50 transition-colors"
                   >
                     <span>{category.name}</span>
-                    {showInfoSubmenu ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    {showInfoSubmenu ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                   </button>
                   {showInfoSubmenu && (
                     <div className="ml-4 space-y-1">
@@ -97,7 +107,7 @@ const MobileSidebar = () => {
       <Card className="border-pink-200">
         <CardHeader className="bg-gradient-to-r from-pink-50 to-orange-50">
           <CardTitle className="text-center text-gray-800">
-            {isLoggedIn ? '내 정보' : '로그인'}
+            {isLoggedIn ? "내 정보" : "로그인"}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
@@ -114,18 +124,26 @@ const MobileSidebar = () => {
                   <span>구독자 0명</span>
                 </div>
               </div>
-              <Button 
+              <Button
                 onClick={handleLogout}
-                variant="outline" 
+                variant="outline"
                 className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
               >
                 로그아웃
               </Button>
             </div>
           ) : (
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}
+            >
               <div className="space-y-2">
-                <Label htmlFor="mobile-email" className="text-sm font-medium">이메일</Label>
+                <Label htmlFor="mobile-email" className="text-sm font-medium">
+                  이메일
+                </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <Input
@@ -134,13 +152,20 @@ const MobileSidebar = () => {
                     placeholder="아이디를 입력하세요"
                     className="pl-10"
                     value={loginData.email}
-                    onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, email: e.target.value })
+                    }
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="mobile-password" className="text-sm font-medium">비밀번호</Label>
+                <Label
+                  htmlFor="mobile-password"
+                  className="text-sm font-medium"
+                >
+                  비밀번호
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <Input
@@ -149,34 +174,48 @@ const MobileSidebar = () => {
                     placeholder="비밀번호를 입력하세요"
                     className="pl-10"
                     value={loginData.password}
-                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
                   />
                 </div>
               </div>
-              
-              <Button type="submit" className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500">
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
+              >
                 로그인
               </Button>
-              
-              <Button 
+
+              <Button
                 type="button"
                 onClick={handleSignupClick}
-                variant="outline" 
+                variant="outline"
                 className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
               >
                 회원가입
               </Button>
-              
+
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-gray-600 text-center">소셜 로그인</p>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
+                  >
                     카카오 로그인
                   </Button>
-                  <Button variant="outline" className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500"
+                  >
                     네이버 로그인
                   </Button>
-                  <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">
+                  <Button
+                    variant="outline"
+                    className="w-full border-gray-300 hover:bg-gray-50"
+                  >
                     구글 로그인
                   </Button>
                 </div>

@@ -1,58 +1,65 @@
-
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Eye, Heart, MessageCircle, Share2, Edit, Trash2 } from 'lucide-react';
-import { Post, Comment } from '@/types/post';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
+import React, { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  ArrowLeft,
+  Eye,
+  Heart,
+  MessageCircle,
+  Share2,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { Post, Comment } from "@/types/post";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 
 const PostDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
 
   // 샘플 데이터
   const post: Post = {
     id: 1,
-    title: '안녕하세요! 첫 번째 게시물입니다.',
+    title: "안녕하세요! 첫 번째 게시물입니다.",
     content: `게시판 테스트를 위한 첫 번째 게시물입니다. 많은 관심 부탁드립니다.
 
 이 게시물은 새로운 게시판 시스템을 테스트하기 위해 작성되었습니다. 
 다양한 기능들이 잘 작동하는지 확인해보겠습니다.
 
 앞으로 더 많은 유용한 정보들을 공유할 예정이니 많은 관심 부탁드립니다!`,
-    author: '사용자1',
-    category: '자유',
-    createdAt: '2024-01-15 14:30',
+    author: "사용자1",
+    category: "자유",
+    createdAt: "2024-01-15 14:30",
     views: 124,
-    likes: 8
+    likes: 8,
   };
 
   const [comments] = useState<Comment[]>([
     {
       id: 1,
       postId: 1,
-      author: '댓글러1',
-      content: '좋은 게시물 감사합니다!',
-      createdAt: '2024-01-15 15:00'
+      author: "댓글러1",
+      content: "좋은 게시물 감사합니다!",
+      createdAt: "2024-01-15 15:00",
     },
     {
       id: 2,
       postId: 1,
-      author: '사용자2',
-      content: '도움이 많이 되었습니다. 앞으로도 좋은 글 부탁드려요.',
-      createdAt: '2024-01-15 16:30'
-    }
+      author: "사용자2",
+      content: "도움이 많이 되었습니다. 앞으로도 좋은 글 부탁드려요.",
+      createdAt: "2024-01-15 16:30",
+    },
   ]);
 
   const handleCommentSubmit = () => {
     if (newComment.trim()) {
-      setNewComment('');
+      setNewComment("");
     }
   };
 
@@ -62,41 +69,43 @@ const PostDetail = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert('링크가 복사되었습니다!');
+    const ips = window.alert("링크가 복사되었습니다!");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 컨텐츠 영역 */}
           <div className="lg:col-span-3 space-y-6">
-            {/* 뒤로가기 헤더 */}
-            <div className="bg-white rounded-lg shadow-sm border border-orange-100 p-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/board')}
-                  className="p-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </Button>
-                <h1 className="text-lg font-semibold">게시물 상세</h1>
-              </div>
-            </div>
-
             {/* 게시물 내용 */}
             <Card className="border-orange-200">
+              {/* 뒤로가기 헤더 */}
+              <div className="bg-white rounded-lg border-orange-100 p-4">
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate("/board")}
+                    className="p-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <h1 className="text-lg font-semibold">뒤로 가기</h1>
+                </div>
+              </div>
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">{post.category}</Badge>
-                      <span className="text-sm text-gray-500">{post.author}</span>
+                      <span className="text-sm text-gray-500">
+                        {post.author}
+                      </span>
                       <span className="text-sm text-gray-400">•</span>
-                      <span className="text-sm text-gray-500">{post.createdAt}</span>
+                      <span className="text-sm text-gray-500">
+                        {post.createdAt}
+                      </span>
                     </div>
                     <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
                     <div className="flex items-center gap-6 text-sm text-gray-500">
@@ -133,9 +142,9 @@ const PostDetail = () => {
                     {post.content}
                   </div>
                 </div>
-                
+
                 <Separator className="my-6" />
-                
+
                 <div className="flex justify-between items-center">
                   <Button
                     onClick={handleLike}
@@ -147,7 +156,7 @@ const PostDetail = () => {
                   </Button>
                   <div className="flex gap-2">
                     <Link to="/board">
-                      <Button 
+                      <Button
                         variant="outline"
                         className="border-orange-300 text-orange-600 hover:bg-orange-50"
                       >
@@ -162,7 +171,9 @@ const PostDetail = () => {
             {/* 댓글 섹션 */}
             <Card className="border-orange-200">
               <CardHeader>
-                <h3 className="text-lg font-semibold">댓글 {comments.length}개</h3>
+                <h3 className="text-lg font-semibold">
+                  댓글 {comments.length}개
+                </h3>
               </CardHeader>
               <CardContent>
                 {/* 댓글 작성 */}
@@ -175,8 +186,8 @@ const PostDetail = () => {
                     rows={3}
                   />
                   <div className="flex justify-end">
-                    <Button 
-                      onClick={handleCommentSubmit} 
+                    <Button
+                      onClick={handleCommentSubmit}
                       disabled={!newComment.trim()}
                       className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
                     >
@@ -192,8 +203,12 @@ const PostDetail = () => {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-sm">{comment.author}</span>
-                            <span className="text-xs text-gray-500">{comment.createdAt}</span>
+                            <span className="font-medium text-sm">
+                              {comment.author}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {comment.createdAt}
+                            </span>
                           </div>
                           <p className="text-gray-700">{comment.content}</p>
                         </div>
@@ -203,7 +218,9 @@ const PostDetail = () => {
                           </Button>
                         </div>
                       </div>
-                      {index < comments.length - 1 && <Separator className="mt-4" />}
+                      {index < comments.length - 1 && (
+                        <Separator className="mt-4" />
+                      )}
                     </div>
                   ))}
                 </div>

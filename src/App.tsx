@@ -26,9 +26,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/board" element={<Board />} />
-          <Route path="/post/:id" element={<PostDetail />} />
-          <Route path="/create-post" element={<CreatePost />} />
+          <Route path="/board/:type" element={<Board />} />
+          <Route path="/post/:type/:id" element={<PostDetail />} />
+          <Route path="/create-post/:type" element={<CreatePost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
           <Route path="/" element={<Index />} />
