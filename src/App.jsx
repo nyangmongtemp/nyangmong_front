@@ -17,6 +17,14 @@ import RescueDetail from "./pages/RescueDetail";
 import MapPage from "./pages/MapPage";
 import ChildCreate from "./components/ChildCreate";
 import ChildIList from "./components/ChildIList";
+import AdminMain from "./pages/AdminMain";
+import AdminUserManagement from "./pages/AdminUserManagement";
+import AdminUserDetail from "./pages/AdminUserDetail";
+import AdminManagerManagement from "./pages/AdminManagerManagement";
+import AdminLogManagement from "./pages/AdminLogManagement";
+import AdminBoardManagement from "./pages/AdminBoardManagement";
+import MyPage from "./pages/MyPage";
+import LoginPage from "./pages/LoginPage";
 
 const queryClient = new QueryClient();
 
@@ -31,17 +39,23 @@ const App = () => (
           <Route path="/board/:type" element={<Board />} />
           <Route path="/post/:type/:id" element={<PostDetail />} />
           <Route path="/create-post/:type" element={<CreatePost />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="/child/create" element={<ChildCreate />} />
           <Route path="/child/list" element={<ChildIList />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<Index />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/adoption" element={<AdoptionPage />} />
           <Route path="/adoption/create" element={<AdoptionCreate />} />
           <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
           <Route path="/rescue-detail/:id" element={<RescueDetail />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/admin" element={<AdminMain />} />
+          <Route path="/admin/users" element={<AdminUserManagement />} />
+          <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+          <Route path="/admin/managers" element={<AdminManagerManagement />} />
+          <Route path="/admin/logs" element={<AdminLogManagement />} />
+          <Route path="/admin/boards" element={<AdminBoardManagement />} />
+          <Route path="/admin/mypage" element={<MyPage />} />
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
