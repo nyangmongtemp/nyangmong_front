@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Phone, Lock, Calendar, Heart, MessageCircle, FileText, Star } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Lock, Calendar, Heart, MessageCircle, FileText, Star, Camera } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -22,6 +23,7 @@ const UserMyPage = () => {
     password: "",
     confirmPassword: "",
     joinDate: "2024-01-15",
+    profileImage: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
   });
 
   // 더미 데이터
@@ -66,6 +68,17 @@ const UserMyPage = () => {
     }
     console.log("수정된 정보:", formData);
     alert("정보가 수정되었습니다.");
+  };
+
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: imageUrl,
+      }));
+    }
   };
 
   const getDisplayData = () => {
@@ -119,6 +132,32 @@ const UserMyPage = () => {
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 프로필 사진 섹션 */}
+              <div className="flex flex-col items-center space-y-4 mb-6">
+                <div className="relative">
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={formData.profileImage} alt="프로필 사진" />
+                    <AvatarFallback className="bg-gray-200">
+                      <User className="w-12 h-12 text-gray-400" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <label
+                    htmlFor="profileImage"
+                    className="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full cursor-pointer transition-colors"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </label>
+                  <input
+                    id="profileImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfileImageChange}
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium flex items-center">
                   <User className="w-4 h-4 mr-2" />
