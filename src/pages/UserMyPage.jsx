@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -337,10 +336,6 @@ const UserMyPage = () => {
       <Header />
       
       <div className="flex">
-        <div className="w-80 flex-shrink-0">
-          <Sidebar />
-        </div>
-        
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
             {/* 뒤로가기 버튼 */}
@@ -439,6 +434,10 @@ const UserMyPage = () => {
               </div>
             )}
           </div>
+        </div>
+        
+        <div className="w-80 flex-shrink-0">
+          <Sidebar />
         </div>
       </div>
     </div>
