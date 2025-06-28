@@ -135,10 +135,10 @@ const UserMyPage = () => {
               {/* 프로필 사진 섹션 */}
               <div className="flex flex-col items-center space-y-4 mb-6">
                 <div className="relative">
-                  <Avatar className="w-24 h-24">
+                  <Avatar className="w-32 h-32">
                     <AvatarImage src={formData.profileImage} alt="프로필 사진" />
                     <AvatarFallback className="bg-gray-200">
-                      <User className="w-12 h-12 text-gray-400" />
+                      <User className="w-16 h-16 text-gray-400" />
                     </AvatarFallback>
                   </Avatar>
                   <label
