@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +26,7 @@ import AdminLogManagement from "./pages/AdminLogManagement";
 import AdminBoardManagement from "./pages/AdminBoardManagement";
 import MyPage from "./pages/MyPage";
 import LoginPage from "./pages/LoginPage";
+import UserMyPage from "./pages/UserMyPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,7 @@ const App = () => (
           <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
           <Route path="/rescue-detail/:id" element={<RescueDetail />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/mypage" element={<UserMyPage />} />
           <Route path="/admin" element={<AdminMain />} />
           <Route path="/admin/users" element={<AdminUserManagement />} />
           <Route path="/admin/users/:id" element={<AdminUserDetail />} />

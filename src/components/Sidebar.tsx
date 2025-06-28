@@ -55,6 +55,10 @@ const Sidebar = () => {
     navigate('/signup');
   };
 
+  const handleMyPageClick = () => {
+    navigate('/mypage');
+  };
+
   return (
     <div className="space-y-6">
       {/* 로그인/프로필 카드 */}
@@ -79,9 +83,13 @@ const Sidebar = () => {
                 </div>
               </div>
               <div className="w-full space-y-2">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700">마이페이지</p>
-                </div>
+                <Button
+                  onClick={handleMyPageClick}
+                  variant="outline"
+                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                >
+                  마이페이지
+                </Button>
                 <div className="flex justify-between text-sm bg-gray-50 p-3 rounded-lg">
                   <span>MY구독</span>
                   <span>알림</span>
