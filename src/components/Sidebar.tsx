@@ -10,8 +10,10 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  MessageCircle,
+  HelpCircle,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,6 +21,7 @@ const Sidebar = () => {
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const eventImages = [
     "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
@@ -65,6 +68,18 @@ const Sidebar = () => {
     navigate("/mypage");
   };
 
+  const handleMessagesClick = () => {
+    navigate("/messages");
+  };
+
+  const handleCustomerServiceClick = () => {
+    navigate("/customer-service");
+  };
+
+  const isActiveRoute = (route) => {
+    return location.pathname === route;
+  };
+
   return (
     <div className="space-y-6">
       {/* 로그인/프로필 카드 */}
@@ -90,20 +105,36 @@ const Sidebar = () => {
                 <Button
                   onClick={handleMyPageClick}
                   variant="outline"
-                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                  className={`w-full transition-colors ${
+                    isActiveRoute("/mypage")
+                      ? "bg-orange-500 text-white border-orange-500 hover:bg-orange-600"
+                      : "border-orange-300 text-orange-600 hover:bg-orange-50"
+                  }`}
                 >
                   마이페이지
                 </Button>
                 <Button
+                  onClick={handleMessagesClick}
                   variant="outline"
-                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                  className={`w-full transition-colors ${
+                    isActiveRoute("/messages")
+                      ? "bg-orange-500 text-white border-orange-500 hover:bg-orange-600"
+                      : "border-orange-300 text-orange-600 hover:bg-orange-50"
+                  }`}
                 >
+                  <MessageCircle className="h-4 w-4 mr-2" />
                   메시지
                 </Button>
                 <Button
+                  onClick={handleCustomerServiceClick}
                   variant="outline"
-                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                  className={`w-full transition-colors ${
+                    isActiveRoute("/customer-service")
+                      ? "bg-orange-500 text-white border-orange-500 hover:bg-orange-600"
+                      : "border-orange-300 text-orange-600 hover:bg-orange-50"
+                  }`}
                 >
+                  <HelpCircle className="h-4 w-4 mr-2" />
                   고객센터
                 </Button>
               </div>

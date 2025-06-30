@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +10,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const AdminInquiryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("createdAt_desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const inquiries = [
     {
@@ -52,6 +64,27 @@ const AdminInquiryManagement = () => {
       progress: "진행 완료",
       date: "N(응답 여부)",
     },
+    {
+      id: 6,
+      author: "사용자 이름",
+      title: "내용 (1줄 정도만 노출)",
+      progress: "진행 완료",
+      date: "Y(응답 여부)",
+    },
+    {
+      id: 7,
+      author: "사용자 이름",
+      title: "내용 (1줄 정도만 노출)",
+      progress: "진행 완료",
+      date: "N(응답 여부)",
+    },
+    {
+      id: 8,
+      author: "사용자 이름",
+      title: "내용 (1줄 정도만 노출)",
+      progress: "진행 완료",
+      date: "Y(응답 여부)",
+    }
   ];
 
   const handleInquiryClick = (inquiry) => {
@@ -64,6 +97,11 @@ const AdminInquiryManagement = () => {
       inquiry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inquiry.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 페이징 계산
+  const totalPages = Math.ceil(filteredInquiries.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedInquiries = filteredInquiries.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -91,7 +129,7 @@ const AdminInquiryManagement = () => {
 
       <div className="border rounded-lg overflow-hidden">
         <div className="bg-gray-50 px-4 py-3 border-b">
-          <div className="grid grid-cols-5 gap-4 text-sm font-medium text-gray-700">
+          <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-700">
             <span>사용자 이름</span>
             <span>내용 (1줄 정도만 노출)</span>
             <span>진행 완료</span>
@@ -99,13 +137,13 @@ const AdminInquiryManagement = () => {
           </div>
         </div>
 
-        {filteredInquiries.map((inquiry) => (
+        {paginatedInquiries.map((inquiry) => (
           <div
             key={inquiry.id}
             className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
             onClick={() => handleInquiryClick(inquiry)}
           >
-            <div className="grid grid-cols-5 gap-4 text-sm">
+            <div className="grid grid-cols-4 gap-4 text-sm">
               <span>{inquiry.author}</span>
               <span className="text-blue-600 hover:underline">
                 {inquiry.title}
@@ -117,9 +155,64 @@ const AdminInquiryManagement = () => {
         ))}
       </div>
 
-      <div className="text-center text-blue-600 cursor-pointer hover:underline">
-        페이지 열기
-      </div>
+      {/* 페이징 */}
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(
+                  (page) =>
+                    page === 1 ||
+                    page === totalPages ||
+                    Math.abs(page - currentPage) <= 2
+                )
+                .map((page, index, array) => (
+                  <React.Fragment key={page}>
+                    {index > 0 && array[index - 1] !== page - 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </React.Fragment>
+                ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <InquiryDetailModal
         isOpen={isModalOpen}
