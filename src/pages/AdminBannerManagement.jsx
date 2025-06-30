@@ -5,48 +5,74 @@ import { Input } from "@/components/ui/input";
 import AdminSidebar from "../components/AdminSidebar";
 import BannerDetailModal from "../components/BannerDetailModal";
 import BannerCreateModal from "../components/BannerCreateModal";
+import BannerOrderModal from "../components/BannerOrderModal";
 
 const AdminBannerManagement = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedBanner, setSelectedBanner] = useState(null);
-
-  const banners = [
+  const [banners, setBanners] = useState([
     {
       id: 1,
-      title: "기본 배너",
-      description: "추가 배너",
-      status: "상세 보기"
+      name: "기본 배너",
+      type: "default",
+      imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop"
     },
     {
       id: 2,
-      title: "추가 배너",
-      description: "상세 보기",
-      status: "상세 보기"
+      name: "행사 배너", 
+      type: "event",
+      imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop"
     },
     {
       id: 3,
-      title: "추가 배너",
-      description: "상세 보기",
-      status: "상세 보기"
+      name: "추가된 배너",
+      type: "custom",
+      imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop"
     },
     {
       id: 4,
-      title: "추가 배너",
-      description: "상세 보기",
-      status: "상세 보기"
+      name: "추가된 배너",
+      type: "custom", 
+      imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop"
+    },
+    {
+      id: 5,
+      name: "추가된 배너",
+      type: "custom",
+      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=400&fit=crop"
     }
-  ];
+  ]);
+
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedBanner, setSelectedBanner] = useState(null);
 
   const handleDetailClick = (banner) => {
     setSelectedBanner(banner);
     setIsDetailModalOpen(true);
   };
 
-  const filteredBanners = banners.filter(banner =>
-    banner.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleBannerUpdate = (updatedBanner) => {
+    setBanners(prev => prev.map(banner => 
+      banner.id === updatedBanner.id ? updatedBanner : banner
+    ));
+  };
+
+  const handleBannerCreate = (newBanner) => {
+    const banner = {
+      id: Date.now(),
+      ...newBanner,
+      type: "custom"
+    };
+    setBanners(prev => [...prev, banner]);
+  };
+
+  const handleBannerDelete = (bannerId) => {
+    setBanners(prev => prev.filter(banner => banner.id !== bannerId));
+  };
+
+  const handleOrderUpdate = (newOrder) => {
+    setBanners(newOrder);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -59,43 +85,22 @@ const AdminBannerManagement = () => {
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <div className="border rounded-lg px-4 py-3">
-                    <span className="text-gray-700">기본 배너</span>
-                  </div>
-                  <div className="border rounded-lg px-4 py-3">
-                    <span className="text-gray-700">상세 보기</span>
-                  </div>
-                </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Input
-                      placeholder="공사 배너"
-                      className="flex-1"
-                    />
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleDetailClick(banners[0])}
-                    >
-                      상세 보기
-                    </Button>
-                  </div>
-
-                  {filteredBanners.map((banner) => (
+                  {banners.map((banner) => (
                     <div key={banner.id} className="flex items-center space-x-4">
                       <Input
-                        placeholder="추가 배너"
-                        defaultValue={banner.title === "기본 배너" ? "" : banner.title}
+                        value={banner.name}
+                        readOnly
                         className="flex-1"
                       />
-                      <Input
-                        placeholder="상세"
-                        className="w-20"
-                      />
+                      {banner.type === "custom" && (
+                        <Input
+                          placeholder="삭제"
+                          className="w-16 text-center"
+                          readOnly
+                        />
+                      )}
                       <Button 
                         variant="outline"
                         onClick={() => handleDetailClick(banner)}
@@ -108,13 +113,24 @@ const AdminBannerManagement = () => {
 
                 <div>
                   <div className="bg-gray-50 border rounded-lg h-64 flex items-center justify-center">
-                    <span className="text-gray-500">배너 이미지</span>
+                    {selectedBanner ? (
+                      <img 
+                        src={selectedBanner.imageUrl} 
+                        alt={selectedBanner.name}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-gray-500">배너 이미지</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-between">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsOrderModalOpen(true)}
+                >
                   순서 수정하기
                 </Button>
                 <Button 
@@ -133,11 +149,21 @@ const AdminBannerManagement = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         banner={selectedBanner}
+        onUpdate={handleBannerUpdate}
+        onDelete={handleBannerDelete}
       />
 
       <BannerCreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
+        onCreate={handleBannerCreate}
+      />
+
+      <BannerOrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        banners={banners}
+        onOrderUpdate={handleOrderUpdate}
       />
     </div>
   );
