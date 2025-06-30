@@ -1,55 +1,57 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import InquiryDetailModal from "./InquiryDetailModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminInquiryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState("createdAt_desc");
 
   const inquiries = [
     {
       id: 1,
-      status: "Y",
       author: "사용자 이름",
       title: "내용 (1줄 정도만 노출)",
       progress: "진행 완료",
-      date: "Y(응답 여부)"
+      date: "Y(응답 여부)",
     },
     {
       id: 2,
-      status: "Y",
       author: "사용자 이름",
       title: "내용 (1줄 정도만 노출)",
       progress: "진행 완료",
-      date: "Y(응답 여부)"
+      date: "Y(응답 여부)",
     },
     {
       id: 3,
-      status: "Y",
       author: "사용자 이름",
       title: "내용 (1줄 정도만 노출)",
       progress: "진행 완료",
-      date: "N(응답 여부)"
+      date: "N(응답 여부)",
     },
     {
       id: 4,
-      status: "Y",
       author: "사용자 이름",
       title: "내용 (1줄 정도만 노출)",
       progress: "진행 완료",
-      date: "N(응답 여부)"
+      date: "N(응답 여부)",
     },
     {
       id: 5,
-      status: "Y",
       author: "사용자 이름",
       title: "내용 (1줄 정도만 노출)",
       progress: "진행 완료",
-      date: "N(응답 여부)"
-    }
+      date: "N(응답 여부)",
+    },
   ];
 
   const handleInquiryClick = (inquiry) => {
@@ -57,9 +59,10 @@ const AdminInquiryManagement = () => {
     setIsModalOpen(true);
   };
 
-  const filteredInquiries = inquiries.filter(inquiry =>
-    inquiry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    inquiry.author.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInquiries = inquiries.filter(
+    (inquiry) =>
+      inquiry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inquiry.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -72,18 +75,23 @@ const AdminInquiryManagement = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-80"
           />
-          <Button variant="outline">전체 선택</Button>
-          <Button variant="outline">일괄조치</Button>
         </div>
-        <div className="text-sm text-gray-600">
-          최신순, 오래된 순, 응답 여부
-        </div>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="ml-4 w-40">
+            <SelectValue placeholder="정렬조건" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="createdAt_desc">최신순</SelectItem>
+            <SelectItem value="createdAt_asc">오래된순</SelectItem>
+            <SelectItem value="no_answer">응답</SelectItem>
+            <SelectItem value="yes_answer">미응답</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="border rounded-lg overflow-hidden">
         <div className="bg-gray-50 px-4 py-3 border-b">
           <div className="grid grid-cols-5 gap-4 text-sm font-medium text-gray-700">
-            <span>V</span>
             <span>사용자 이름</span>
             <span>내용 (1줄 정도만 노출)</span>
             <span>진행 완료</span>
@@ -92,15 +100,16 @@ const AdminInquiryManagement = () => {
         </div>
 
         {filteredInquiries.map((inquiry) => (
-          <div 
-            key={inquiry.id} 
+          <div
+            key={inquiry.id}
             className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
             onClick={() => handleInquiryClick(inquiry)}
           >
             <div className="grid grid-cols-5 gap-4 text-sm">
-              <span>{inquiry.status}</span>
               <span>{inquiry.author}</span>
-              <span className="text-blue-600 hover:underline">{inquiry.title}</span>
+              <span className="text-blue-600 hover:underline">
+                {inquiry.title}
+              </span>
               <span>{inquiry.progress}</span>
               <span>{inquiry.date}</span>
             </div>

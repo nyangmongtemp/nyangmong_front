@@ -1,8 +1,14 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProfileForm from "@/components/ProfileForm";
@@ -43,7 +49,7 @@ const UserMyPage = () => {
       default:
         return [];
     }
-    
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     return data.slice(startIndex, startIndex + itemsPerPage);
   };
@@ -68,7 +74,7 @@ const UserMyPage = () => {
 
   const renderTabContent = () => {
     const displayData = getDisplayData();
-    
+
     if (activeTab === "profile") {
       return (
         <ProfileForm
@@ -96,7 +102,7 @@ const UserMyPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="flex">
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
@@ -113,15 +119,17 @@ const UserMyPage = () => {
 
             {/* 페이지 제목 */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">마이페이지</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                마이페이지
+              </h1>
               <p className="text-gray-600">내 정보를 확인하고 관리하세요.</p>
             </div>
 
             {/* 탭 메뉴 */}
-            <TabNavigation 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
-              setCurrentPage={setCurrentPage} 
+            <TabNavigation
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              setCurrentPage={setCurrentPage}
             />
 
             {/* 탭 내용 */}
@@ -133,17 +141,24 @@ const UserMyPage = () => {
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
                       />
                     </PaginationItem>
-                    
+
                     {Array.from({ length: getTotalPages() }, (_, i) => i + 1)
-                      .filter(page => 
-                        page === 1 || 
-                        page === getTotalPages() || 
-                        Math.abs(page - currentPage) <= 2
+                      .filter(
+                        (page) =>
+                          page === 1 ||
+                          page === getTotalPages() ||
+                          Math.abs(page - currentPage) <= 2
                       )
                       .map((page, index, array) => (
                         <React.Fragment key={page}>
@@ -153,7 +168,7 @@ const UserMyPage = () => {
                             </PaginationItem>
                           )}
                           <PaginationItem>
-                            <PaginationLink 
+                            <PaginationLink
                               onClick={() => setCurrentPage(page)}
                               isActive={currentPage === page}
                               className="cursor-pointer"
@@ -163,11 +178,19 @@ const UserMyPage = () => {
                           </PaginationItem>
                         </React.Fragment>
                       ))}
-                    
+
                     <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(Math.min(getTotalPages(), currentPage + 1))}
-                        className={currentPage === getTotalPages() ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.min(getTotalPages(), currentPage + 1)
+                          )
+                        }
+                        className={
+                          currentPage === getTotalPages()
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>
@@ -176,7 +199,7 @@ const UserMyPage = () => {
             )}
           </div>
         </div>
-        
+
         <div className="w-80 flex-shrink-0">
           <Sidebar />
         </div>
