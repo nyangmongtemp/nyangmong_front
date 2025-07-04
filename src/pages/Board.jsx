@@ -893,7 +893,12 @@ const Board = () => {
                       <div className="flex justify-between items-start">
                         {/* 텍스트 영역 */}
                         <div className="flex-1">
+                          {/* 제목 + 카테고리 + HOT 뱃지 같이 묶기 */}
                           <div className="flex items-center space-x-2 mb-2">
+                            <h3 className="font-bold text-lg text-gray-900 hover:text-orange-600 transition-colors">
+                              {post.title}
+                            </h3>
+
                             <Badge
                               variant="outline"
                               className={`text-xs ${
@@ -901,20 +906,24 @@ const Board = () => {
                                   ? "border-blue-300 text-blue-600 bg-blue-50"
                                   : post.category === "후기"
                                   ? "border-green-300 text-green-600 bg-green-50"
+                                  : post.category === "진행예정"
+                                  ? "border-gray-400 text-gray-600 bg-gray-100"
+                                  : post.category === "진행중"
+                                  ? "border-orange-400 text-orange-600 bg-orange-100"
+                                  : post.category === "종료"
+                                  ? "border-red-400 text-red-600 bg-red-100"
                                   : "border-orange-300 text-orange-600 bg-orange-50"
                               }`}
                             >
                               {post.category}
                             </Badge>
+
                             {post.isHot && (
                               <Badge className="text-xs bg-red-500 hover:bg-red-500">
                                 HOT
                               </Badge>
                             )}
                           </div>
-                          <h3 className="font-bold text-lg text-gray-900 mb-2 hover:text-orange-600 transition-colors">
-                            {post.title}
-                          </h3>
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                             {post.content}
                           </p>
