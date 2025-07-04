@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Image } from "lucide-react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import ImageCropModal from "@/components/ImageCropModal";
 
 const CreatePost = () => {
   const { type } = useParams();
@@ -16,6 +18,8 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState(null);
+  const [showCropModal, setShowCropModal] = useState(false);
 
   // 게시판 제목 매핑
   const boardTitles = {
@@ -28,18 +32,32 @@ const CreatePost = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(file);
+      // 이미지 파일 형식 검증
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        alert("이미지 파일(JPG, PNG, BMP, GIF)만 업로드 가능합니다.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImagePreview(e.target.result);
+        setOriginalImageSrc(e.target.result);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const handleCropComplete = (croppedImageUrl, croppedBlob) => {
+    setImagePreview(croppedImageUrl);
+    setSelectedImage(croppedBlob);
+    setShowCropModal(false);
+  };
+
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
+    setOriginalImageSrc(null);
   };
 
   const handleSubmit = (e) => {
@@ -114,7 +132,7 @@ const CreatePost = () => {
                       {!imagePreview ? (
                         <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
                           <div className="flex flex-col items-center space-y-4">
-                            <Upload className="h-12 w-12 text-orange-400" />
+                            <Image className="h-12 w-12 text-orange-400" />
                             <div className="text-sm text-gray-600">
                               <Button
                                 type="button"
@@ -130,7 +148,7 @@ const CreatePost = () => {
                                 이미지 업로드
                               </Button>
                               <p className="text-gray-500 mt-2">
-                                PNG, JPG, JPEG (최대 10MB)
+                                JPG, PNG, BMP, GIF (이미지 파일만 가능)
                               </p>
                             </div>
                             <input
@@ -207,6 +225,14 @@ const CreatePost = () => {
           </div>
         </div>
       </main>
+
+      {/* 이미지 크롭 모달 */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={() => setShowCropModal(false)}
+        imageSrc={originalImageSrc}
+        onCropComplete={handleCropComplete}
+      />
 
       {/* 푸터 */}
       <footer className="bg-white border-t border-orange-100 mt-16">

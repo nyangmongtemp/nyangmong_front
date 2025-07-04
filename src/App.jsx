@@ -27,6 +27,11 @@ import AdminBoardManagement from "./pages/AdminBoardManagement";
 import MyPage from "./pages/MyPage";
 import LoginPage from "./pages/LoginPage";
 import UserMyPage from "./pages/UserMyPage";
+import AdminCustomerSupport from "./pages/AdminCustomerSupport";
+import AdminBannerManagement from "./pages/AdminBannerManagement";
+import AdminPolicyCreate from "./pages/AdminPolicyCreate";
+import MessagesPage from "./pages/MessagesPage";
+import CustomerServicePage from "./pages/CustomerServicePage";
 
 const queryClient = new QueryClient();
 
@@ -50,12 +55,17 @@ const App = () => (
           <Route path="/rescue-detail/:id" element={<RescueDetail />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/mypage" element={<UserMyPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/customer-service" element={<CustomerServicePage />} />
           <Route path="/admin" element={<AdminMain />} />
           <Route path="/admin/users" element={<AdminUserManagement />} />
           <Route path="/admin/users/:id" element={<AdminUserDetail />} />
           <Route path="/admin/managers" element={<AdminManagerManagement />} />
           <Route path="/admin/logs" element={<AdminLogManagement />} />
           <Route path="/admin/boards" element={<AdminBoardManagement />} />
+          <Route path="/admin/banner" element={<AdminBannerManagement />} />
+          <Route path="/admin/support" element={<AdminCustomerSupport />} />
+          <Route path="/admin/policy/create" element={<AdminPolicyCreate />} />
           <Route path="/admin/mypage" element={<MyPage />} />
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />

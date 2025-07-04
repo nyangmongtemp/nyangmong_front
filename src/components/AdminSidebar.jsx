@@ -1,9 +1,9 @@
+
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
   const location = useLocation();
-
   const navigate = useNavigate();
 
   const menuItems = [
@@ -11,6 +11,7 @@ const AdminSidebar = () => {
     { title: "관리자 관리", path: "/admin/managers" },
     { title: "로그 관리", path: "/admin/logs" },
     { title: "게시판 관리", path: "/admin/boards" },
+    { title: "배너 관리", path: "/admin/banner" },
     { title: "고객센터", path: "/admin/support" },
   ];
 
