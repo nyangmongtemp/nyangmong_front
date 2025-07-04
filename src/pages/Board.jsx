@@ -85,6 +85,7 @@ const Board = () => {
               url: festival.url, // 행사 URL
               reservationDate: festival.reservationDate, //예매기간
               description: festival.description, //행사설명
+              time: festival.festivalTime, //행사진행시간
             };
           });
 
@@ -947,6 +948,12 @@ const Board = () => {
                                 예매기간: {post.reservationDate}
                               </p>
                             )}
+                          {/* 행사 시간 추가 ✅ */}
+                          {post.time && post.time.trim() !== "" && (
+                            <p className="text-sm text-gray-700 mb-3">
+                              행사시간: {post.time}
+                            </p>
+                          )}
 
                           <div className="flex items-center justify-between text-sm text-gray-500">
                             <div className="flex items-center space-x-4">
