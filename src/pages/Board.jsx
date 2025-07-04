@@ -52,16 +52,40 @@ const Board = () => {
               }
             }
 
+            // festivalDate 예: "2025.07.04. (금) ~ 2025.07.06. (일)"
+            // 시작일과 종료일만 추출
+            const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
+            const dates = festival.festivalDate.match(datePattern);
+
+            let category = "행사"; // 기본값
+            if (dates && dates.length === 2) {
+              const [startStr, endStr] = dates;
+              // 날짜 객체 생성 (YYYY.MM.DD → YYYY-MM-DD 형식으로 변환 후)
+              const startDate = new Date(startStr.replace(/\./g, "-"));
+              const endDate = new Date(endStr.replace(/\./g, "-"));
+              const now = new Date();
+
+              if (now < startDate) {
+                category = "진행예정";
+              } else if (now >= startDate && now <= endDate) {
+                category = "진행중";
+              } else {
+                category = "종료";
+              }
+            }
+
             return {
               id: festival.festivalId,
               title: festival.title,
               content: festival.location ? `위치: ${festival.location}` : "",
-              author: "관리자",
               createdAt: festival.festivalDate,
-              category: "행사",
-              imageUrl: imageUrl,
+              category,
+              imageUrl,
+              money: festival.money, // 가격 정보
+              url: festival.url, // 행사 URL
             };
           });
+
           setApiPosts(mappedPosts);
           setCurrentPage(1); // 페이지 초기화
         })
@@ -755,8 +779,14 @@ const Board = () => {
   const currentPosts = allPosts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(allPosts.length / postsPerPage);
 
-  const handlePostClick = (postId) => {
-    navigate(`/post/${type}/${postId}`);
+  const handlePostClick = (post) => {
+    if (type === "event" && post.url) {
+      // 새 탭에서 해당 행사 URL로 이동
+      window.open(post.url, "_blank");
+    } else {
+      // 일반 게시판일 경우 상세 페이지로 이동
+      navigate(`/post/${type}/${post.id}`);
+    }
   };
 
   const handleCreatePost = () => {
@@ -854,7 +884,7 @@ const Board = () => {
                   {currentPosts.map((post) => (
                     <div
                       key={post.id}
-                      onClick={() => handlePostClick(post.id)}
+                      onClick={() => handlePostClick(post)}
                       className="p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-orange-300 transition-all cursor-pointer bg-white"
                     >
                       {/* 텍스트와 이미지 함께 flex로 묶기 */}
@@ -886,12 +916,21 @@ const Board = () => {
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                             {post.content}
                           </p>
+                          {post.money && (
+                            <p className="text-sm text-gray-700 mb-3 line-clamp-1">
+                              요금정보: {post.money}
+                            </p>
+                          )}
+
                           <div className="flex items-center justify-between text-sm text-gray-500">
                             <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-1">
-                                <User className="h-4 w-4" />
-                                <span>{post.author}</span>
-                              </div>
+                              {/* 작성자 정보는 event 게시판에서 숨기기 */}
+                              {type !== "event" && (
+                                <div className="flex items-center space-x-1">
+                                  <User className="h-4 w-4" />
+                                  <span>{post.author}</span>
+                                </div>
+                              )}
                               <div className="flex items-center space-x-1">
                                 <Clock className="h-4 w-4" />
                                 <span>{post.createdAt}</span>
@@ -918,6 +957,7 @@ const Board = () => {
                         </div>
 
                         {/* 이미지 영역 */}
+
                         {post.imageUrl && (
                           <img
                             src={post.imageUrl}
