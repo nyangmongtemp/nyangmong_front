@@ -83,6 +83,8 @@ const Board = () => {
               imageUrl,
               money: festival.money, // 가격 정보
               url: festival.url, // 행사 URL
+              reservationDate: festival.reservationDate, //예매기간
+              description: festival.description, //행사설명
             };
           });
 
@@ -916,11 +918,26 @@ const Board = () => {
                           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                             {post.content}
                           </p>
+
+                          {/* 행사 설명 */}
+                          {post.description && (
+                            <p className="text-sm text-gray-700 mb-1 line-clamp-2">
+                              {post.description}
+                            </p>
+                          )}
+
                           {post.money && (
                             <p className="text-sm text-gray-700 mb-3 line-clamp-1">
                               요금정보: {post.money}
                             </p>
                           )}
+                          {/* 🎟 예매 기간 정보 */}
+                          {post.reservationDate &&
+                            post.reservationDate.trim() !== "" && (
+                              <p className="text-sm text-gray-700 mb-3">
+                                예매기간: {post.reservationDate}
+                              </p>
+                            )}
 
                           <div className="flex items-center justify-between text-sm text-gray-500">
                             <div className="flex items-center space-x-4">
