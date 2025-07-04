@@ -78,7 +78,7 @@ const Board = () => {
               id: festival.festivalId,
               title: festival.title,
               content: festival.location ? `위치: ${festival.location}` : "",
-              createdAt: festival.festivalDate,
+              date: festival.festivalDate,
               category,
               imageUrl,
               money: festival.money, // 가격 정보
@@ -967,6 +967,7 @@ const Board = () => {
                               <div className="flex items-center space-x-1">
                                 <Clock className="h-4 w-4" />
                                 <span>{post.createdAt}</span>
+                                <span>{post.date}</span>
                               </div>
                             </div>
                             {/* 🎯 조회수/좋아요/댓글 아이콘은 event 게시판에서만 숨기기 */}
