@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,47 +31,56 @@ import AdminBannerManagement from "./pages/AdminBannerManagement";
 import AdminPolicyCreate from "./pages/AdminPolicyCreate";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
+import { AuthProvider } from "./context/UserContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/board/:type" element={<Board />} />
-          <Route path="/post/:type/:id" element={<PostDetail />} />
-          <Route path="/create-post/:type" element={<CreatePost />} />
-          <Route path="/child/create" element={<ChildCreate />} />
-          <Route path="/child/list" element={<ChildIList />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/adoption" element={<AdoptionPage />} />
-          <Route path="/adoption/create" element={<AdoptionCreate />} />
-          <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
-          <Route path="/rescue-detail/:id" element={<RescueDetail />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/mypage" element={<UserMyPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/customer-service" element={<CustomerServicePage />} />
-          <Route path="/admin" element={<AdminMain />} />
-          <Route path="/admin/users" element={<AdminUserManagement />} />
-          <Route path="/admin/users/:id" element={<AdminUserDetail />} />
-          <Route path="/admin/managers" element={<AdminManagerManagement />} />
-          <Route path="/admin/logs" element={<AdminLogManagement />} />
-          <Route path="/admin/boards" element={<AdminBoardManagement />} />
-          <Route path="/admin/banner" element={<AdminBannerManagement />} />
-          <Route path="/admin/support" element={<AdminCustomerSupport />} />
-          <Route path="/admin/policy/create" element={<AdminPolicyCreate />} />
-          <Route path="/admin/mypage" element={<MyPage />} />
-          <Route path="/admin/login" element={<LoginPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/board/:type" element={<Board />} />
+            <Route path="/post/:type/:id" element={<PostDetail />} />
+            <Route path="/create-post/:type" element={<CreatePost />} />
+            <Route path="/child/create" element={<ChildCreate />} />
+            <Route path="/child/list" element={<ChildIList />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/adoption" element={<AdoptionPage />} />
+            <Route path="/adoption/create" element={<AdoptionCreate />} />
+            <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
+            <Route path="/rescue-detail/:id" element={<RescueDetail />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/mypage" element={<UserMyPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/customer-service" element={<CustomerServicePage />} />
+            <Route path="/admin" element={<AdminMain />} />
+            <Route path="/admin/users" element={<AdminUserManagement />} />
+            <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+            <Route
+              path="/admin/managers"
+              element={<AdminManagerManagement />}
+            />
+            <Route path="/admin/logs" element={<AdminLogManagement />} />
+            <Route path="/admin/boards" element={<AdminBoardManagement />} />
+            <Route path="/admin/banner" element={<AdminBannerManagement />} />
+            <Route path="/admin/support" element={<AdminCustomerSupport />} />
+            <Route
+              path="/admin/policy/create"
+              element={<AdminPolicyCreate />}
+            />
+            <Route path="/admin/mypage" element={<MyPage />} />
+            <Route path="/admin/login" element={<LoginPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </AuthProvider>
 );
 
 export default App;

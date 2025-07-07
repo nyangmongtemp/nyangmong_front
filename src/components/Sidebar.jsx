@@ -14,9 +14,12 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, USER } from "../../configs/host-config";
+import { useAuth } from "../context/UserContext";
 
 const Sidebar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { token, isLoggedIn, login, logout } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
@@ -47,16 +50,18 @@ const Sidebar = () => {
     { id: 10, title: "강아지 산책 필수 용품", views: 398 },
   ];
 
-  const handleLogin = () => {
-    if (loginData.email === "test1" && loginData.password === "test1234") {
-      setIsLoggedIn(true);
-    } else {
-      alert("아이디 또는 비밀번호가 잘못되었습니다.");
-    }
+  const handleLogin = async (e) => {
+    try {
+      const res = await axiosInstance.post(`${API_BASE_URL}${USER}/login`, {
+        email: loginData.email,
+        password: loginData.password,
+      });
+      login(res.data.token, res.data.email);
+    } catch (error) {}
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    logout();
     setLoginData({ email: "", password: "" });
   };
 

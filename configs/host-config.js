@@ -20,6 +20,6 @@ if (clientHostName === "localhost") {
 }
 
 export const API_BASE_URL = backendHostName;
-export const USER = "/user-service";
+export const USER = "/user-service/user";
 export const FESTIVAL = "/festival-service";
 export const ABS = "/animalboard-service";

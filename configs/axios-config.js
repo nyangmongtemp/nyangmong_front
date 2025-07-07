@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 // ✅ 요청 인터셉터 설정
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,14 +44,14 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const userId = localStorage.getItem("user_id");
-        if (!userId) {
-          throw new Error("No user_id in localStorage");
+        const email = localStorage.getItem("email");
+        if (!email) {
+          throw new Error("No email in localStorage");
         }
 
         // Refresh token 요청
-        const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          userId,
+        const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
+          email,
         });
 
         const newToken = res.data.result.token;
