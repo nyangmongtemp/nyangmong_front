@@ -23,6 +23,8 @@ const Sidebar = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
+  const [nickname, setNickname] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,13 +58,19 @@ const Sidebar = () => {
         email: loginData.email,
         password: loginData.password,
       });
-      login(res.data.token, res.data.email);
+      console.log(res);
+
+      login(res.data.result.token, res.data.result.email);
+      setNickname(res.data.result.nickname);
+      setProfileImage(res.data.result.profileImage);
     } catch (error) {}
   };
 
   const handleLogout = () => {
     logout();
     setLoginData({ email: "", password: "" });
+    setNickname("");
+    setProfileImage("");
   };
 
   const handleSignupClick = () => {
@@ -97,11 +105,19 @@ const Sidebar = () => {
         <CardContent className="p-4">
           {isLoggedIn ? (
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-600" />
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300 bg-gray-100 flex items-center justify-center">
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt="프로필 이미지"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="h-8 w-8 text-gray-500" />
+                )}
               </div>
               <div className="text-center">
-                <p className="font-bold text-gray-800">{loginData.email}</p>
+                <p className="font-bold text-gray-800">{nickname}</p>
                 <div className="flex items-center justify-center space-x-4 mt-2 text-sm text-gray-600">
                   <span> 등급</span>
                 </div>

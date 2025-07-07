@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, Lock, Calendar, Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const ProfileForm = ({ formData, handleInputChange, handleSubmit, handleProfileImageChange }) => {
+const ProfileForm = ({
+  formData,
+  handleInputChange,
+  handleSubmit,
+  handleProfileImageChange,
+}) => {
   return (
     <Card className="border-gray-200 shadow-sm">
       <CardHeader className="bg-gradient-to-r from-orange-50 to-pink-50">
@@ -40,11 +44,16 @@ const ProfileForm = ({ formData, handleInputChange, handleSubmit, handleProfileI
                 className="hidden"
               />
             </div>
-            <p className="text-sm text-gray-600">프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요</p>
+            <p className="text-sm text-gray-600">
+              프로필 사진을 변경하려면 카메라 아이콘을 클릭하세요
+            </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium flex items-center">
+            <Label
+              htmlFor="name"
+              className="text-sm font-medium flex items-center"
+            >
               <User className="w-4 h-4 mr-2" />
               이름
             </Label>
@@ -52,13 +61,33 @@ const ProfileForm = ({ formData, handleInputChange, handleSubmit, handleProfileI
               id="name"
               name="name"
               value={formData.name}
+              readOnly
+              className="border-gray-300 bg-gray-100 cursor-not-allowed"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="nickname"
+              className="text-sm font-medium flex items-center"
+            >
+              <User className="w-4 h-4 mr-2" />
+              닉네임
+            </Label>
+            <Input
+              id="nickname"
+              name="nickname"
+              value={formData.nickname}
               onChange={handleInputChange}
               className="border-gray-300"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium flex items-center">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium flex items-center"
+            >
               <Mail className="w-4 h-4 mr-2" />
               이메일
             </Label>
@@ -67,13 +96,17 @@ const ProfileForm = ({ formData, handleInputChange, handleSubmit, handleProfileI
               name="email"
               type="email"
               value={formData.email}
+              readOnly
               onChange={handleInputChange}
               className="border-gray-300"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm font-medium flex items-center">
+            <Label
+              htmlFor="phone"
+              className="text-sm font-medium flex items-center"
+            >
               <Phone className="w-4 h-4 mr-2" />
               전화번호
             </Label>
@@ -85,44 +118,29 @@ const ProfileForm = ({ formData, handleInputChange, handleSubmit, handleProfileI
               className="border-gray-300"
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium flex items-center">
-              <Lock className="w-4 h-4 mr-2" />
-              새 비밀번호 (변경 시 입력)
+            <Label
+              htmlFor="nickname"
+              className="text-sm font-medium flex items-center"
+            >
+              <User className="w-4 h-4 mr-2" />
+              주소
             </Label>
             <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
+              id="nickname"
+              name="nickname"
+              value={formData.address}
               onChange={handleInputChange}
               className="border-gray-300"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-medium flex items-center">
-              <Lock className="w-4 h-4 mr-2" />
-              비밀번호 확인
-            </Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              className="border-gray-300"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center">
               <Calendar className="w-4 h-4 mr-2" />
               가입일
             </Label>
             <Input
-              value={formData.joinDate}
+              value={formData.joinDate ? formData.joinDate.slice(0, 10) : ""}
               readOnly
               className="bg-gray-100 cursor-not-allowed"
             />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -17,22 +17,65 @@ import CommentsList from "@/components/CommentsList";
 import LikedPostsList from "@/components/LikedPostsList";
 import TabNavigation from "@/components/TabNavigation";
 import { useUserPageData } from "@/hooks/useUserPageData";
+import { useAuth } from "../context/UserContext";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, USER } from "../../configs/host-config";
 
 const UserMyPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const { token } = useAuth();
 
-  const {
-    formData,
-    myPosts,
-    myComments,
-    likedPosts,
-    handleInputChange,
-    handleSubmit,
-    handleProfileImageChange,
-  } = useUserPageData();
+  const [formData, setFormData] = useState({
+    profileImage: "",
+    name: "",
+    nickname: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    joinDate: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get(
+          `${API_BASE_URL}${USER}/mypage`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response);
+
+        const data = response.data.result;
+
+        setFormData({
+          profileImage: data.profileImage || "",
+          name: data.userName || "",
+          email: data.email || email,
+          phone: data.phone || "",
+          nickname: data.nickname || "",
+          password: "",
+          confirmPassword: "",
+          joinDate: data.createAt || "",
+          address: data.address || "",
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (token) fetchUserData();
+  }, [token]);
+
+  const [myPosts, setMyPosts] = useState([]);
+  const [myComments, setMyComments] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
 
   const getDisplayData = () => {
     let data = [];
@@ -76,14 +119,7 @@ const UserMyPage = () => {
     const displayData = getDisplayData();
 
     if (activeTab === "profile") {
-      return (
-        <ProfileForm
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          handleProfileImageChange={handleProfileImageChange}
-        />
-      );
+      return <ProfileForm formData={formData} />;
     }
 
     if (activeTab === "posts") {
