@@ -12,6 +12,8 @@ import {
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProfileForm from "@/components/ProfileForm";
+import PasswordChangeForm from "@/components/PasswordChangeForm";
+import EmailChangeForm from "@/components/EmailChangeForm";
 import PostsList from "@/components/PostsList";
 import CommentsList from "@/components/CommentsList";
 import LikedPostsList from "@/components/LikedPostsList";
@@ -26,10 +28,11 @@ const UserMyPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { token } = useAuth();
+  const { token, email } = useAuth();
 
   const [formData, setFormData] = useState({
     profileImage: "",
+    profileImageBlob: null,
     name: "",
     nickname: "",
     email: "",
@@ -57,6 +60,7 @@ const UserMyPage = () => {
 
         setFormData({
           profileImage: data.profileImage || "",
+          profileImageBlob: null,
           name: data.userName || "",
           email: data.email || email,
           phone: data.phone || "",
@@ -71,7 +75,55 @@ const UserMyPage = () => {
       }
     };
     if (token) fetchUserData();
-  }, [token]);
+  }, [token, email]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleProfileImageChange = (croppedImageUrl, croppedBlob) => {
+    setFormData((prev) => ({
+      ...prev,
+      profileImage: croppedImageUrl,
+      profileImageBlob: croppedBlob,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('nickname', formData.nickname);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('address', formData.address);
+      
+      if (formData.profileImageBlob) {
+        formDataToSend.append('profileImage', formData.profileImageBlob);
+      }
+
+      const response = await axiosInstance.put(
+        `${API_BASE_URL}${USER}/profile`,
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      console.log("프로필 업데이트 성공:", response);
+      alert("프로필이 성공적으로 업데이트되었습니다.");
+    } catch (error) {
+      console.error("프로필 업데이트 실패:", error);
+      alert("프로필 업데이트에 실패했습니다.");
+    }
+  };
 
   const [myPosts, setMyPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
@@ -119,7 +171,18 @@ const UserMyPage = () => {
     const displayData = getDisplayData();
 
     if (activeTab === "profile") {
-      return <ProfileForm formData={formData} />;
+      return (
+        <div className="space-y-6">
+          <ProfileForm 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleSubmit={handleSubmit}
+            handleProfileImageChange={handleProfileImageChange}
+          />
+          <PasswordChangeForm />
+          <EmailChangeForm currentEmail={formData.email} />
+        </div>
+      );
     }
 
     if (activeTab === "posts") {

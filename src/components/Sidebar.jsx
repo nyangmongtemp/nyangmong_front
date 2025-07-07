@@ -17,6 +17,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
+import PasswordResetForm from "./PasswordResetForm";
 
 const Sidebar = () => {
   const { token, isLoggedIn, login, logout } = useAuth();
@@ -25,6 +26,7 @@ const Sidebar = () => {
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
   const [nickname, setNickname] = useState("");
   const [profileImage, setProfileImage] = useState("");
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -170,91 +172,106 @@ const Sidebar = () => {
             </div>
           ) : (
             <div>
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleLogin();
-                }}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    이메일
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="text"
-                      placeholder="아이디를 입력하세요"
-                      className="pl-10"
-                      value={loginData.email}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, email: e.target.value })
-                      }
-                    />
+              {showPasswordReset ? (
+                <PasswordResetForm onClose={() => setShowPasswordReset(false)} />
+              ) : (
+                <>
+                  <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleLogin();
+                    }}
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        이메일
+                      </Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <Input
+                          id="email"
+                          type="text"
+                          placeholder="아이디를 입력하세요"
+                          className="pl-10"
+                          value={loginData.email}
+                          onChange={(e) =>
+                            setLoginData({ ...loginData, email: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium">
+                        비밀번호
+                      </Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="비밀번호를 입력하세요"
+                          className="pl-10"
+                          value={loginData.password}
+                          onChange={(e) =>
+                            setLoginData({ ...loginData, password: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
+                    >
+                      로그인
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={handleSignupClick}
+                      variant="outline"
+                      className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
+                    >
+                      회원가입
+                    </Button>
+                  </form>
+
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm text-gray-600 text-center">소셜 로그인</p>
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
+                      >
+                        카카오 로그인
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500"
+                      >
+                        네이버 로그인
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-gray-300 hover:bg-gray-50"
+                      >
+                        구글 로그인
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => setShowPasswordReset(true)}
+                        variant="outline"
+                        className="w-full border-purple-300 text-purple-600 hover:bg-purple-50"
+                      >
+                        <Lock className="h-4 w-4 mr-2" />
+                        비밀번호 찾기
+                      </Button>
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    비밀번호
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="비밀번호를 입력하세요"
-                      className="pl-10"
-                      value={loginData.password}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, password: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
-                >
-                  로그인
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={handleSignupClick}
-                  variant="outline"
-                  className="w-full border-orange-300 text-orange-600 hover:bg-orange-50"
-                >
-                  회원가입
-                </Button>
-              </form>
-
-              <div className="mt-4 space-y-2">
-                <p className="text-sm text-gray-600 text-center">소셜 로그인</p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
-                  >
-                    카카오 로그인
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500"
-                  >
-                    네이버 로그인
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-gray-300 hover:bg-gray-50"
-                  >
-                    구글 로그인
-                  </Button>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           )}
         </CardContent>
