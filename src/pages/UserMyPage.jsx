@@ -95,33 +95,44 @@ const UserMyPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
+      // 닉네임, 전화번호, 주소를 JSON 문자열로 만들고 Blob으로 변환
+      const userJson = JSON.stringify({
+        nickname: formData.nickname,
+        phone: formData.phone,
+        address: formData.address,
+      });
+      const userBlob = new Blob([userJson], { type: "application/json" });
+
       const formDataToSend = new FormData();
-      formDataToSend.append('nickname', formData.nickname);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('address', formData.address);
-      
+      formDataToSend.append("user", userBlob);
+
       if (formData.profileImageBlob) {
-        formDataToSend.append('profileImage', formData.profileImageBlob);
+        // 원본 파일명을 유지하면서 Blob을 File 객체로 변환
+        const originalName = formData.profileImageBlob.name || "profile.jpg"; // 기본 파일명 설정
+        const imageFile = new File([formData.profileImageBlob], originalName, {
+          type: formData.profileImageBlob.type,
+        });
+        formDataToSend.append("profileImage", imageFile);
       }
 
-      const response = await axiosInstance.put(
-        `${API_BASE_URL}${USER}/profile`,
+      const response = await axiosInstance.patch(
+        `${API_BASE_URL}${USER}/modify-userinfo`,
         formDataToSend,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      console.log("프로필 업데이트 성공:", response);
-      alert("프로필이 성공적으로 업데이트되었습니다.");
+      console.log("회원 정보 수정 성공:", response);
+      alert("회원 정보가 성공적으로 수정되었습니다.");
     } catch (error) {
-      console.error("프로필 업데이트 실패:", error);
-      alert("프로필 업데이트에 실패했습니다.");
+      console.error("회원 정보 수정 실패:", error);
+      alert("회원 정보 수정에 실패했습니다.");
     }
   };
 
@@ -173,7 +184,7 @@ const UserMyPage = () => {
     if (activeTab === "profile") {
       return (
         <div className="space-y-6">
-          <ProfileForm 
+          <ProfileForm
             formData={formData}
             handleInputChange={handleInputChange}
             handleSubmit={handleSubmit}
