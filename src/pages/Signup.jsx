@@ -60,6 +60,7 @@ const Signup = () => {
         }
       );
       console.log(res);
+      setIsEmailVerified(true);
     } catch (error) {
       console.log(error);
     }
