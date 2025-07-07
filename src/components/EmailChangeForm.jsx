@@ -7,6 +7,7 @@ import { Mail } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const EmailChangeForm = ({ currentEmail }) => {
   const [formData, setFormData] = useState({
@@ -15,8 +16,11 @@ const EmailChangeForm = ({ currentEmail }) => {
   });
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [isSending, setIsSending] = useState(false); // 추가
 
   const { token } = useAuth();
+
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,6 +37,7 @@ const EmailChangeForm = ({ currentEmail }) => {
     }
 
     try {
+      setIsSending(true);
       const res = await axiosInstance.get(
         `${API_BASE_URL}${USER}/modify-email?newEmail=${formData.newEmail}`,
         {
@@ -44,9 +49,10 @@ const EmailChangeForm = ({ currentEmail }) => {
       console.log(res);
 
       setIsEmailSent(true);
-      alert("인증 코드가 새 이메일로 발송되었습니다.");
     } catch (error) {
       console.error("이메일 발송 실패:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -67,6 +73,7 @@ const EmailChangeForm = ({ currentEmail }) => {
       console.log(res);
       setIsCodeVerified(true);
       alert("이메일 변경이 완료되었습니다.");
+      navigate("/");
     } catch (error) {
       console.error("인증 실패:", error);
     }
@@ -130,7 +137,7 @@ const EmailChangeForm = ({ currentEmail }) => {
               disabled={isEmailSent || !formData.newEmail}
               className="bg-blue-500 hover:bg-blue-600 whitespace-nowrap"
             >
-              {isEmailSent ? "발송완료" : "인증발송"}
+              {isSending ? "발송중..." : isEmailSent ? "발송완료" : "인증발송"}
             </Button>
             {isEmailSent && !isCodeVerified && (
               <Button

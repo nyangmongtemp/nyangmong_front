@@ -7,6 +7,7 @@ import { Lock, Mail } from "lucide-react";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
+import { useNavigate } from "react-router-dom";
 
 const PasswordChangeForm = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +17,10 @@ const PasswordChangeForm = () => {
   });
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [isSending, setIsSending] = useState(false); // 추가
 
   const { isLoggedIn, logout, token, email } = useAuth();
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,6 +33,7 @@ const PasswordChangeForm = () => {
   const handleSendEmail = async () => {
     // 이메일 인증 코드 발송 API 호출
     try {
+      setIsSending(true);
       setIsEmailSent(true);
       const res = await axiosInstance.get(
         `${API_BASE_URL}${USER}/new-password-req`,
@@ -43,6 +47,8 @@ const PasswordChangeForm = () => {
     } catch (error) {
       console.error("이메일 발송 실패:", error);
       setIsEmailSent(false);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -106,6 +112,7 @@ const PasswordChangeForm = () => {
       });
       setIsEmailSent(false);
       setIsCodeVerified(false);
+      navigate("/");
     } catch (error) {
       console.error("비밀번호 변경 실패:", error);
     }
@@ -140,7 +147,11 @@ const PasswordChangeForm = () => {
                 disabled={isEmailSent}
                 className="bg-orange-500 hover:bg-orange-600 whitespace-nowrap"
               >
-                {isEmailSent ? "발송완료" : "인증발송"}
+                {isSending
+                  ? "발송중..."
+                  : isEmailSent
+                  ? "발송완료"
+                  : "인증발송"}
               </Button>
               {isEmailSent && !isCodeVerified && (
                 <Button
