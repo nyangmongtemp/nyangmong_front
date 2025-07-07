@@ -1,21 +1,25 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, Mail, Lock, Phone, ArrowLeft } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowLeft, Upload, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
+import ImageCropModal from "../components/ImageCropModal";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
+    nickname: "",
     email: "",
     password: "",
     confirmPassword: "",
     phone: "",
+    address: "",
     agreeToTerms: false,
     agreeToPrivacy: false,
     agreeToMarketing: false,
@@ -25,6 +29,12 @@ const Signup = () => {
   const [authCode, setAuthCode] = useState("");
   const [inputAuthCode, setInputAuthCode] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState(false);
+  
+  // 프로필 이미지 관련 상태
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState(null);
 
   // 입력 처리
   const handleInputChange = (e) => {
@@ -32,9 +42,29 @@ const Signup = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 체크박스 처리 수정
+  // 체크박스 처리
   const handleCheckboxChange = (name) => {
     setFormData((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  // 프로필 이미지 업로드 처리
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToCrop(reader.result);
+        setIsCropModalOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 이미지 크롭 완료 처리
+  const handleCropComplete = (croppedImageUrl, croppedBlob) => {
+    setProfileImagePreview(croppedImageUrl);
+    setProfileImage(croppedBlob);
+    setIsCropModalOpen(false);
   };
 
   // 인증코드 발송 버튼 클릭 시
@@ -44,6 +74,7 @@ const Signup = () => {
         `${API_BASE_URL}${USER}/verify-email?email=${formData.email}`
       );
       console.log(res);
+      setAuthCodeSent(true);
     } catch (error) {
       console.log(error);
     }
@@ -60,6 +91,7 @@ const Signup = () => {
         }
       );
       console.log(res);
+      setIsEmailVerified(true);
     } catch (error) {
       console.log(error);
     }
@@ -68,6 +100,7 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("회원가입 데이터:", formData);
+    console.log("프로필 이미지:", profileImage);
   };
 
   return (
@@ -126,60 +159,120 @@ const Signup = () => {
                 </div>
               </div>
 
-              <CardContent className="p-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* 이메일 입력 */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
-                      이메일
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="이메일을 입력하세요"
-                        className="pl-10"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isEmailVerified}
+              {/* 닉네임 */}
+              <div className="space-y-2">
+                <Label htmlFor="nickname" className="text-sm font-medium">
+                  닉네임
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="nickname"
+                    name="nickname"
+                    placeholder="닉네임을 입력하세요"
+                    className="pl-10"
+                    value={formData.nickname}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* 프로필 이미지 */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">프로필 이미지</Label>
+                <div className="flex items-center space-x-4">
+                  {profileImagePreview && (
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200">
+                      <img
+                        src={profileImagePreview}
+                        alt="프로필 미리보기"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    {!isEmailVerified && (
-                      <Button
-                        type="button"
-                        onClick={handleSendAuthCode}
-                        className="mt-2 text-sm"
-                      >
-                        인증코드 발송
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* 인증 코드 입력 */}
-                  {!isEmailVerified && authCodeSent && (
-                    <div className="space-y-2">
-                      <Label htmlFor="authCode" className="text-sm font-medium">
-                        인증코드
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="authCode"
-                          type="text"
-                          placeholder="인증코드를 입력하세요"
-                          value={inputAuthCode}
-                          onChange={(e) => setInputAuthCode(e.target.value)}
-                        />
-                        <Button type="button" onClick={handleVerifyCode}>
-                          인증하기
-                        </Button>
-                      </div>
-                    </div>
                   )}
-                </form>
-              </CardContent>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="profile-image"
+                    />
+                    <Label
+                      htmlFor="profile-image"
+                      className="cursor-pointer inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md border transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>이미지 업로드</span>
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* 이메일 */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  이메일
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="이메일을 입력하세요"
+                    className="pl-10"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    disabled={isEmailVerified}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  {!isEmailVerified && (
+                    <Button
+                      type="button"
+                      onClick={handleSendAuthCode}
+                      className="text-sm"
+                      size="sm"
+                    >
+                      인증코드 발송
+                    </Button>
+                  )}
+                  {isEmailVerified && (
+                    <span className="text-sm text-green-600 font-medium">
+                      이메일 인증 완료
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* 인증 코드 입력 */}
+              {!isEmailVerified && authCodeSent && (
+                <div className="space-y-2">
+                  <Label htmlFor="authCode" className="text-sm font-medium">
+                    인증코드
+                  </Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="authCode"
+                      type="text"
+                      placeholder="인증코드를 입력하세요"
+                      value={inputAuthCode}
+                      onChange={(e) => setInputAuthCode(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={handleVerifyCode}
+                      size="sm"
+                    >
+                      인증하기
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {/* 전화번호 */}
               <div className="space-y-2">
@@ -195,6 +288,25 @@ const Signup = () => {
                     placeholder="전화번호를 입력하세요"
                     className="pl-10"
                     value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* 주소 */}
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-medium">
+                  주소
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="address"
+                    name="address"
+                    placeholder="주소를 입력하세요"
+                    className="pl-10"
+                    value={formData.address}
                     onChange={handleInputChange}
                     required
                   />
@@ -359,6 +471,14 @@ const Signup = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* 이미지 크롭 모달 */}
+        <ImageCropModal
+          isOpen={isCropModalOpen}
+          onClose={() => setIsCropModalOpen(false)}
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+        />
       </div>
     </div>
   );
