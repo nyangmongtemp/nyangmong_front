@@ -1,12 +1,19 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, Mail, Lock, Phone, ArrowLeft, Upload, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Lock,
+  Phone,
+  ArrowLeft,
+  Upload,
+  MapPin,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
 import ImageCropModal from "../components/ImageCropModal";
@@ -26,15 +33,17 @@ const Signup = () => {
   });
 
   const [authCodeSent, setAuthCodeSent] = useState(false);
-  const [authCode, setAuthCode] = useState("");
+  const [isEmailSent, setEmailSent] = useState(false);
   const [inputAuthCode, setInputAuthCode] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  
+
   // 프로필 이미지 관련 상태
   const [profileImage, setProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState(null);
+
+  const navigate = useNavigate();
 
   // 입력 처리
   const handleInputChange = (e) => {
@@ -51,6 +60,7 @@ const Signup = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setProfileImage(file); // 파일 이름 보존용
       const reader = new FileReader();
       reader.onload = () => {
         setImageToCrop(reader.result);
@@ -63,13 +73,22 @@ const Signup = () => {
   // 이미지 크롭 완료 처리
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
     setProfileImagePreview(croppedImageUrl);
-    setProfileImage(croppedBlob);
+
+    // 기존에 업로드한 파일 이름에서 확장자 추출
+    const originalName = profileImage?.name || "cropped.png";
+    // ✅ Blob → File 변환하면서 이름 유지
+    const croppedFile = new File([croppedBlob], originalName, {
+      type: croppedBlob.type || "image/png", // fallback MIME type
+    });
+
+    setProfileImage(croppedFile); // File로 저장
     setIsCropModalOpen(false);
   };
 
   // 인증코드 발송 버튼 클릭 시
   const handleSendAuthCode = async (e) => {
     try {
+      setEmailSent(true);
       const res = await axiosInstance.get(
         `${API_BASE_URL}${USER}/verify-email?email=${formData.email}`
       );
@@ -77,6 +96,7 @@ const Signup = () => {
       setAuthCodeSent(true);
     } catch (error) {
       console.log(error);
+      setEmailSent(false);
     }
   };
 
@@ -97,10 +117,44 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("회원가입 데이터:", formData);
-    console.log("프로필 이미지:", profileImage);
+    const form = new FormData();
+
+    // 객체를 JSON 문자열로 변환 후 append
+    const userJson = JSON.stringify({
+      email: formData.email,
+      password: formData.password,
+      userName: formData.name,
+      phone: formData.phone,
+      nickname: formData.nickname,
+      address: formData.address,
+    });
+
+    form.append("user", new Blob([userJson], { type: "application/json" }));
+
+    // 이미지가 있을 경우만 첨부
+    if (profileImage) {
+      form.append("profileImage", profileImage);
+      console.log(profileImage);
+    }
+
+    try {
+      const res = await axiosInstance.post(
+        `${API_BASE_URL}${USER}/create`,
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("회원가입 성공:", res);
+      navigate("/");
+      // 성공 처리 추가 (예: 이동, 알림 등)
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+    }
   };
 
   return (
@@ -236,6 +290,7 @@ const Signup = () => {
                       onClick={handleSendAuthCode}
                       className="text-sm"
                       size="sm"
+                      disabled={isEmailSent}
                     >
                       인증코드 발송
                     </Button>
@@ -263,11 +318,7 @@ const Signup = () => {
                       onChange={(e) => setInputAuthCode(e.target.value)}
                       className="flex-1"
                     />
-                    <Button 
-                      type="button" 
-                      onClick={handleVerifyCode}
-                      size="sm"
-                    >
+                    <Button type="button" onClick={handleVerifyCode} size="sm">
                       인증하기
                     </Button>
                   </div>
@@ -416,7 +467,11 @@ const Signup = () => {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 mt-6"
-                disabled={!formData.agreeToTerms || !formData.agreeToPrivacy}
+                disabled={
+                  !formData.agreeToTerms ||
+                  !formData.agreeToPrivacy ||
+                  !isEmailVerified
+                }
               >
                 회원가입
               </Button>
