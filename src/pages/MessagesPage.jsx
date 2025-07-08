@@ -44,12 +44,14 @@ const MessagesPage = () => {
 
         const data = response.data.result;
         setMessages(data);
-        const firstChat = messages[0];
+        const firstChat = data[0];
+
         if (firstChat.nickname1 === firstChat.requestNickname) {
           setMyUserId(firstChat.userId1);
         } else {
           setMyUserId(firstChat.userId2);
         }
+        console.log(myUserId);
       } catch (err) {
         console.log(err);
       }
