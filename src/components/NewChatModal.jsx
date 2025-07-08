@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Search, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,12 +26,10 @@ const NewChatModal = ({ onSuccess }) => {
 
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/search`, {
-        params: {
-          query: searchTerm
-        }
-      });
-      
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${USER}/search/${searchTerm}`
+      );
+
       console.log("Search results:", response);
       if (response.data && response.data.result) {
         setSearchResults(response.data.result);
@@ -55,11 +52,11 @@ const NewChatModal = ({ onSuccess }) => {
 
     try {
       setLoading(true);
-      const response = await axiosInstance.post(`${API_BASE_URL}${USER}/chat/create`, {
+      const response = await axiosInstance.post(`${API_BASE_URL}${USER}/send`, {
         receiverId: selectedUser.userId,
-        content: message
+        content: message,
       });
-      
+
       console.log("Chat created:", response);
       alert("메시지가 전송되었습니다!");
       onSuccess();
@@ -96,7 +93,7 @@ const NewChatModal = ({ onSuccess }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   handleSearch();
                 }
               }}
@@ -142,12 +139,17 @@ const NewChatModal = ({ onSuccess }) => {
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                 <span className="text-orange-600 font-semibold text-lg">
-                  {selectedUser.nickname?.charAt(0) || selectedUser.email?.charAt(0)}
+                  {selectedUser.nickname?.charAt(0) ||
+                    selectedUser.email?.charAt(0)}
                 </span>
               </div>
               <div>
-                <div className="font-medium text-lg">{selectedUser.nickname}</div>
-                <div className="text-sm text-gray-500">{selectedUser.email}</div>
+                <div className="font-medium text-lg">
+                  {selectedUser.nickname}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {selectedUser.email}
+                </div>
               </div>
             </div>
           </div>

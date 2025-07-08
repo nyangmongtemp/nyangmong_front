@@ -16,13 +16,17 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
+  const [nickname, setNickname] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
-  const login = (token, email) => {
+  const login = (token, email, nickname, profileImage) => {
     localStorage.setItem("token", token);
     localStorage.setItem("email", email);
     setToken(token);
     setEmail(email);
+    setNickname(nickname);
+    setProfileImage(profileImage);
     setIsLoggedIn(true);
   };
 
@@ -31,11 +35,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("email");
     setToken("");
     setEmail("");
+    setNickname(null);
+    setProfileImage(null);
     setIsLoggedIn(false);
   };
 
   return (
-    <AuthContext.Provider value={{ token, email, isLoggedIn, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        email,
+        isLoggedIn,
+        login,
+        logout,
+        nickname,
+        profileImage,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

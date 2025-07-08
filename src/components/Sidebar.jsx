@@ -20,12 +20,11 @@ import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
 
 const Sidebar = () => {
-  const { token, isLoggedIn, login, logout } = useAuth();
+  const { token, isLoggedIn, login, logout, nickname, profileImage } =
+    useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
-  const [nickname, setNickname] = useState("");
-  const [profileImage, setProfileImage] = useState("");
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,7 +61,12 @@ const Sidebar = () => {
       });
       console.log(res);
 
-      login(res.data.result.token, res.data.result.email);
+      login(
+        res.data.result.token,
+        res.data.result.email,
+        res.data.result.nickname,
+        res.data.result.profileImage
+      );
       setNickname(res.data.result.nickname);
       setProfileImage(res.data.result.profileImage);
     } catch (error) {}
@@ -173,7 +177,9 @@ const Sidebar = () => {
           ) : (
             <div>
               {showPasswordReset ? (
-                <PasswordResetForm onClose={() => setShowPasswordReset(false)} />
+                <PasswordResetForm
+                  onClose={() => setShowPasswordReset(false)}
+                />
               ) : (
                 <>
                   <form
@@ -196,7 +202,10 @@ const Sidebar = () => {
                           className="pl-10"
                           value={loginData.email}
                           onChange={(e) =>
-                            setLoginData({ ...loginData, email: e.target.value })
+                            setLoginData({
+                              ...loginData,
+                              email: e.target.value,
+                            })
                           }
                         />
                       </div>
@@ -215,7 +224,10 @@ const Sidebar = () => {
                           className="pl-10"
                           value={loginData.password}
                           onChange={(e) =>
-                            setLoginData({ ...loginData, password: e.target.value })
+                            setLoginData({
+                              ...loginData,
+                              password: e.target.value,
+                            })
                           }
                         />
                       </div>
@@ -239,7 +251,9 @@ const Sidebar = () => {
                   </form>
 
                   <div className="mt-4 space-y-2">
-                    <p className="text-sm text-gray-600 text-center">소셜 로그인</p>
+                    <p className="text-sm text-gray-600 text-center">
+                      소셜 로그인
+                    </p>
                     <div className="space-y-2">
                       <Button
                         variant="outline"
