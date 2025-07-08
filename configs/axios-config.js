@@ -39,7 +39,11 @@ axiosInstance.interceptors.response.use(
     }
 
     // 401 Unauthorized 에러일 경우 (토큰 만료)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      error.response?.msg === "Invalid token" &&
+      !originalRequest._retry
+    ) {
       console.log("401 Unauthorized — trying token refresh...");
       originalRequest._retry = true;
 
@@ -51,11 +55,11 @@ axiosInstance.interceptors.response.use(
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
-          email,
+          userEmail: email,
         });
 
         const newToken = res.data.result.token;
-        localStorage.setItem("access_token", newToken);
+        localStorage.setItem("token", newToken);
 
         // 새 토큰으로 Authorization 헤더 갱신
         originalRequest.headers.Authorization = `Bearer ${newToken}`;

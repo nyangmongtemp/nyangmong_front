@@ -1,66 +1,54 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import { API_BASE_URL, USER } from "../../configs/host-config";
+import { useAuth } from "../context/UserContext";
+import axiosInstance from "../../configs/axios-config";
 
 const MessagesPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("latest");
 
-  const messages = [
-    {
-      id: 1,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    },
-    {
-      id: 2,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    },
-    {
-      id: 3,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    },
-    {
-      id: 4,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    },
-    {
-      id: 5,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    },
-    {
-      id: 6,
-      senderName: "사용자 이름",
-      content: "내용 (1줄만 보여주기)",
-      status: "전송완료"
-    }
-  ];
+  const { token, isLoggedIn, email } = useAuth();
 
-  const filteredMessages = messages.filter(message =>
-    message.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    message.content.toLowerCase().includes(searchTerm.toLowerCase())
+  const messages = [];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
+        console.log(response);
+
+        const data = response.data.result;
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (token) fetchUserData();
+  }, [token, email]);
+
+  const filteredMessages = messages.filter(
+    (message) =>
+      message.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      message.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="flex">
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
@@ -107,14 +95,20 @@ const MessagesPage = () => {
               {/* 메시지 목록 */}
               <div className="space-y-3">
                 {filteredMessages.map((message) => (
-                  <div 
-                    key={message.id} 
+                  <div
+                    key={message.id}
                     className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <div className="grid grid-cols-3 gap-4 items-center">
-                      <div className="text-sm text-gray-800">{message.senderName}</div>
-                      <div className="text-sm text-gray-600">{message.content}</div>
-                      <div className="text-sm text-gray-800 text-right">{message.status}</div>
+                      <div className="text-sm text-gray-800">
+                        {message.senderName}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {message.content}
+                      </div>
+                      <div className="text-sm text-gray-800 text-right">
+                        {message.status}
+                      </div>
                     </div>
                   </div>
                 ))}
