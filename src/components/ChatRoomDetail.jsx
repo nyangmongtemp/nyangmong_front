@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
   };
 
   const isMyMessage = (message) => {
-    return message.requestNickname === currentUserNickname;
+    return message.senderId === myUserId;
   };
 
   if (loading) {
