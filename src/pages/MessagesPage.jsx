@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Plus, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,26 +36,27 @@ const MessagesPage = () => {
 
   const { token, isLoggedIn, email } = useAuth();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
-        console.log(response);
+  const fetchUserData = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
+      console.log(response);
 
-        const data = response.data.result;
-        setMessages(data);
-        const firstChat = data[0];
+      const data = response.data.result;
+      setMessages(data);
+      const firstChat = data[0];
 
-        if (firstChat.nickname1 === firstChat.requestNickname) {
-          setMyUserId(firstChat.userId1);
-        } else {
-          setMyUserId(firstChat.userId2);
-        }
-        console.log(myUserId);
-      } catch (err) {
-        console.log(err);
+      if (firstChat.nickname1 === firstChat.requestNickname) {
+        setMyUserId(firstChat.userId1);
+      } else {
+        setMyUserId(firstChat.userId2);
       }
-    };
+      console.log(myUserId);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  useEffect(() => {
     if (token) fetchUserData();
   }, [token, email]);
 
@@ -102,7 +103,7 @@ const MessagesPage = () => {
   // 메시지 보낸 사람의 닉네임을 찾는 함수
   const getSenderNickname = (chat) => {
     if (!chat.message || !chat.message.senderId) return "";
-    
+
     // senderId가 userId1과 같으면 nickname1, userId2와 같으면 nickname2
     if (chat.message.senderId === chat.userId1) {
       return chat.nickname1;
@@ -120,6 +121,7 @@ const MessagesPage = () => {
 
   const handleBackToList = () => {
     setSelectedChatId(null);
+    fetchUserData();
   };
 
   const handleNewChatSuccess = () => {
