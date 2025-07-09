@@ -25,9 +25,10 @@ const Board = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
-
+  const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
+  const [searchWord, setSearchWord] = useState("");
+  const [searchWordInput, setSearchWordInput] = useState("");
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -36,31 +37,33 @@ const Board = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 행사 게시판일 때 API 호출
+  // API 호출 및 데이터 매핑
+  // 페이지나 type이 바뀔 때마다 API 호출
   useEffect(() => {
+    console.log("useEffect triggered:", { currentPage, type });
     if (type === "event") {
       axios
-        .get("http://localhost:8000/festival-service/api/festivals")
+        .get(
+          `http://localhost:8000/festival-service/api/festivals?searchWord=${searchWord}&page=${currentPage}&size=${postsPerPage}`
+        )
         .then((res) => {
-          const mappedPosts = res.data.map((festival) => {
+          const festivals = res.data.content || [];
+
+          const mappedPosts = festivals.map((festival) => {
             let imageUrl = null;
             if (festival.imagePath) {
-              // imagePath에서 src= 뒤의 URL 추출
               const match = festival.imagePath.match(/src\s*=\s*([^&\s]+)/i);
               if (match && match[1]) {
                 imageUrl = decodeURIComponent(match[1]);
               }
             }
 
-            // festivalDate 예: "2025.07.04. (금) ~ 2025.07.06. (일)"
-            // 시작일과 종료일만 추출
             const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
             const dates = festival.festivalDate.match(datePattern);
 
-            let category = "행사"; // 기본값
+            let category = "행사";
             if (dates && dates.length === 2) {
               const [startStr, endStr] = dates;
-              // 날짜 객체 생성 (YYYY.MM.DD → YYYY-MM-DD 형식으로 변환 후)
               const startDate = new Date(startStr.replace(/\./g, "-"));
               const endDate = new Date(endStr.replace(/\./g, "-"));
               const now = new Date();
@@ -81,23 +84,25 @@ const Board = () => {
               date: festival.festivalDate,
               category,
               imageUrl,
-              money: festival.money, // 가격 정보
-              url: festival.url, // 행사 URL
-              reservationDate: festival.reservationDate, //예매기간
-              description: festival.description, //행사설명
-              time: festival.festivalTime, //행사진행시간
+              money: festival.money,
+              url: festival.url,
+              reservationDate: festival.reservationDate,
+              description: festival.description,
+              time: festival.festivalTime,
             };
           });
 
           setApiPosts(mappedPosts);
-          setCurrentPage(1); // 페이지 초기화
+          console.log(" 매핑된 게시글:", mappedPosts);
+          setTotalPages(res.data.totalPages || 1);
         })
         .catch((err) => {
           console.error("행사 게시글 불러오기 실패", err);
-          setApiPosts([]); // 에러 시 빈 배열
+          setApiPosts([]);
+          setTotalPages(1);
         });
     }
-  }, [type]);
+  }, [type, currentPage, searchWord]);
 
   // 게시판 제목 매핑
   const boardTitles = {
@@ -112,6 +117,7 @@ const Board = () => {
     if (boardType === "event") {
       return apiPosts;
     }
+
     // 기존 더미 데이터 (생략 없이 그대로 넣으세요)
     const basePosts = {
       free: [
@@ -770,8 +776,7 @@ const Board = () => {
         },
       ],
     };
-    // 추가 더미 데이터 생성 로직도 기존 그대로 유지
-    // 예시: 단순 return 기존 더미 (필요시 추가 더미도 넣으세요)
+
     return basePosts[boardType] || basePosts.free;
   };
 
@@ -779,8 +784,10 @@ const Board = () => {
   // 페이지네이션 계산
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = allPosts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(allPosts.length / postsPerPage);
+  const currentPosts =
+    type === "event"
+      ? allPosts // 서버에서 이미 페이지 적용되어 왔음
+      : allPosts.slice(indexOfFirstPost, indexOfLastPost); // 로컬에서 잘라야 하는 경우
 
   const handlePostClick = (post) => {
     if (type === "event" && post.url) {
@@ -796,10 +803,13 @@ const Board = () => {
     navigate(`/create-post/${type}`);
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  // 페이지 변경 핸들러
+  const handlePageChange = (newPage) => {
+    console.log(" 버튼 클릭, 새 페이지:", newPage);
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
   };
-
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 5;
@@ -849,6 +859,7 @@ const Board = () => {
         </button>
       );
     }
+
     return pages;
   };
 
@@ -868,6 +879,26 @@ const Board = () => {
                   <div className="flex-grow" />
                 </CardTitle>
               </CardHeader>
+              {type === "event" && (
+                <div className="p-6 mt-4 mb-4 flex space-x-2 ">
+                  <input
+                    type="text"
+                    placeholder="행사 제목으로 검색하세요"
+                    value={searchWordInput}
+                    onChange={(e) => setSearchWordInput(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                  <Button
+                    onClick={() => {
+                      setSearchWord(searchWordInput); // 실제 검색어 상태 변경
+                      setCurrentPage(1); // 검색 시 페이지 초기화
+                    }}
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600"
+                  >
+                    검색
+                  </Button>
+                </div>
+              )}
               <CardContent className="p-6">
                 {/* 게시글 목록 */}
                 <div className="space-y-4 mb-8">
@@ -884,6 +915,7 @@ const Board = () => {
                       </Button>
                     )}
                   </div>
+
                   {currentPosts.map((post) => (
                     <div
                       key={post.id}
