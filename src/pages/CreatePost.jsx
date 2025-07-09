@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ImageCropModal from "@/components/ImageCropModal";
 import axiosInstance from "../../configs/axios-config";
+import { useAuth } from "../context/UserContext";
 
 const CreatePost = () => {
   const { type } = useParams();
