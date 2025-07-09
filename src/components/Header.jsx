@@ -23,7 +23,7 @@ const Header = () => {
       href: "/",
       submenu: [
         { name: "질문게시판", href: "/board/question" },
-        { name: "우리아이 소개 게시판", href: "/child/list" },
+        { name: "우리아이 소개 게시판", href: "/board/introduction" },
         { name: "후기게시판", href: "/board/review" },
       ],
     },

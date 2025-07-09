@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -17,43 +17,40 @@ import {
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import CommentSection from "@/components/CommentSection";
+import axiosInstance from "../../configs/axios-config";
 
 const PostDetail = () => {
   const { type, id } = useParams();
   const navigate = useNavigate();
-  // 샘플 데이터
-  const post = {
-    id: 1,
-    title: "안녕하세요! 첫 번째 게시물입니다.",
-    content: `게시판 테스트를 위한 첫 번째 게시물입니다. 많은 관심 부탁드립니다.
+  const [newComment, setNewComment] = useState("");
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-이 게시물은 새로운 게시판 시스템을 테스트하기 위해 작성되었습니다. 
-다양한 기능들이 잘 작동하는지 확인해보겠습니다.
+  // 댓글도 실제 데이터로 연동하려면 별도 상태 필요
+  const [comments, setComments] = useState([]);
 
-앞으로 더 많은 유용한 정보들을 공유할 예정이니 많은 관심 부탁드립니다!`,
-    author: "사용자1",
-    category: "자유",
-    createdAt: "2024-01-15 14:30",
-    views: 124,
-    likes: 8,
-  };
-
-  const [comments] = useState([
-    {
-      id: 1,
-      postId: 1,
-      author: "댓글러1",
-      content: "좋은 게시물 감사합니다!",
-      createdAt: "2024-01-15 15:00",
-    },
-    {
-      id: 2,
-      postId: 1,
-      author: "사용자2",
-      content: "도움이 많이 되었습니다. 앞으로도 좋은 글 부탁드려요.",
-      createdAt: "2024-01-15 16:30",
-    },
-  ]);
+  useEffect(() => {
+    if (!type || !id) return;
+    setLoading(true);
+    setError(null);
+    axiosInstance
+      .get(`/board-service/board/detail/${type.toUpperCase()}/${id}`)
+      .then((res) => {
+        // 응답 구조에 따라 데이터 파싱
+        let data = res.data.result || res.data.data || res.data;
+        if (Array.isArray(data)) data = data[0]; // result가 배열이면 첫 번째 요소만 사용
+        console.log("상세 post 데이터:", data); // 콘솔 출력 추가
+        setPost(data);
+        // 댓글이 포함되어 있다면 분리
+        if (data && data.comments) setComments(data.comments);
+      })
+      .catch((err) => {
+        setError("게시글을 불러오지 못했습니다.");
+        setPost(null);
+      })
+      .finally(() => setLoading(false));
+  }, [type, id]);
 
   const handleLike = () => {
     // TODO: 좋아요 기능
@@ -63,6 +60,17 @@ const PostDetail = () => {
     navigator.clipboard.writeText(window.location.href);
     window.alert("링크가 복사되었습니다!");
   };
+
+  // 렌더링 시 post가 없으면 로딩/에러 처리
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
+  }
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
+  }
+  if (!post) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
@@ -131,6 +139,16 @@ const PostDetail = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* 썸네일 이미지 */}
+                {post.thumbnailimage && (
+                  <div className="mb-6 flex justify-center">
+                    <img
+                      src={post.thumbnailimage}
+                      alt={post.title}
+                      className="max-h-80 rounded-lg object-contain"
+                    />
+                  </div>
+                )}
                 <div className="prose max-w-none">
                   <div className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6">
                     {post.content}
