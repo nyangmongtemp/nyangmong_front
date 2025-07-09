@@ -11,9 +11,14 @@ const clientHostName = window.location.hostname;
 
 let backendHostName;
 
-if (clientHostName === "localhost") {
-  // 개발 중
+if (clientHostName === "localhost" || clientHostName === "127.0.0.1") {
+  // 개발 중 (로컬)
   backendHostName = "http://localhost:8000";
+} else if (clientHostName.includes("192.168.") || clientHostName.includes("10.") || clientHostName.includes("172.")) {
+  // 로컬 네트워크 (모바일 접속 시)
+  // 같은 네트워크의 컴퓨터 IP로 백엔드 서버에 접근
+  const currentHost = window.location.hostname;
+  backendHostName = `http://${currentHost}:8000`;
 } else if (clientHostName === "playdatashop8917.store") {
   // 배포해서 현재 서비스 중
   backendHostName = "https://api.playdatashop8917.store";

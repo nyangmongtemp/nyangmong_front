@@ -18,7 +18,7 @@ const EmailChangeForm = ({ currentEmail }) => {
   const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [isSending, setIsSending] = useState(false); // 추가
 
-  const { token } = useAuth();
+  const { token, isLoggedIn, logout } = useAuth();
 
   const navigate = useNavigate();
 
@@ -73,6 +73,7 @@ const EmailChangeForm = ({ currentEmail }) => {
       console.log(res);
       setIsCodeVerified(true);
       alert("이메일 변경이 완료되었습니다.");
+      logout();
       navigate("/");
     } catch (error) {
       console.error("인증 실패:", error);

@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Plus, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -33,28 +32,41 @@ const MessagesPage = () => {
   const [messages, setMessages] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
+  const [myUserId, setMyUserId] = useState(null);
 
   const { token, isLoggedIn, email } = useAuth();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
-        console.log(response);
+  const fetchUserData = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
+      console.log(response);
 
-        const data = response.data.result;
-        setMessages(data);
-      } catch (err) {
-        console.log(err);
+      const data = response.data.result;
+      setMessages(data);
+      const firstChat = data[0];
+
+      if (firstChat.nickname1 === firstChat.requestNickname) {
+        setMyUserId(firstChat.userId1);
+      } else {
+        setMyUserId(firstChat.userId2);
       }
-    };
+      console.log(myUserId);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  useEffect(() => {
     if (token) fetchUserData();
   }, [token, email]);
 
   // 채팅방 목록 필터링 및 정렬
   const getFilteredAndSortedMessages = () => {
     let filtered = messages.filter((chat) => {
-      const otherNickname = chat.requestNickname === chat.nickname1 ? chat.nickname2 : chat.nickname1;
+      const otherNickname =
+        chat.requestNickname === chat.nickname1
+          ? chat.nickname2
+          : chat.nickname1;
       return otherNickname.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
@@ -74,12 +86,31 @@ const MessagesPage = () => {
     const diffInHours = (now - date) / (1000 * 60 * 60);
 
     if (diffInHours < 24) {
-      return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+      return date.toLocaleTimeString("ko-KR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else if (diffInHours < 24 * 7) {
       return date.toLocaleDateString("ko-KR", { weekday: "short" });
     } else {
-      return date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
+      return date.toLocaleDateString("ko-KR", {
+        month: "short",
+        day: "numeric",
+      });
     }
+  };
+
+  // 메시지 보낸 사람의 닉네임을 찾는 함수
+  const getSenderNickname = (chat) => {
+    if (!chat.message || !chat.message.senderId) return "";
+
+    // senderId가 userId1과 같으면 nickname1, userId2와 같으면 nickname2
+    if (chat.message.senderId === chat.userId1) {
+      return chat.nickname1;
+    } else if (chat.message.senderId === chat.userId2) {
+      return chat.nickname2;
+    }
+    return "";
   };
 
   const filteredMessages = getFilteredAndSortedMessages();
@@ -90,6 +121,7 @@ const MessagesPage = () => {
 
   const handleBackToList = () => {
     setSelectedChatId(null);
+    fetchUserData();
   };
 
   const handleNewChatSuccess = () => {
@@ -115,10 +147,14 @@ const MessagesPage = () => {
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
             {selectedChatId ? (
-              <ChatRoomDetail 
-                chatId={selectedChatId} 
+              <ChatRoomDetail
+                chatId={selectedChatId}
                 onBack={handleBackToList}
-                currentUserNickname={messages.find(m => m.chatId === selectedChatId)?.requestNickname}
+                myUserId={myUserId}
+                currentUserNickname={
+                  messages.find((m) => m.chatId === selectedChatId)
+                    ?.requestNickname
+                }
               />
             ) : (
               <>
@@ -135,7 +171,9 @@ const MessagesPage = () => {
 
                 {/* 페이지 제목 */}
                 <div className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-2">메시지</h1>
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                    메시지
+                  </h1>
                 </div>
 
                 {/* 검색 및 정렬 */}
@@ -148,7 +186,10 @@ const MessagesPage = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-80"
                       />
-                      <Dialog open={isNewChatModalOpen} onOpenChange={setIsNewChatModalOpen}>
+                      <Dialog
+                        open={isNewChatModalOpen}
+                        onOpenChange={setIsNewChatModalOpen}
+                      >
                         <DialogTrigger asChild>
                           <Button className="bg-orange-500 hover:bg-orange-600">
                             <Plus className="h-4 w-4 mr-2" />
@@ -180,7 +221,11 @@ const MessagesPage = () => {
                       </div>
                     ) : (
                       filteredMessages.map((chat) => {
-                        const otherNickname = chat.requestNickname === chat.nickname1 ? chat.nickname2 : chat.nickname1;
+                        const otherNickname =
+                          chat.requestNickname === chat.nickname1
+                            ? chat.nickname2
+                            : chat.nickname1;
+                        const senderNickname = getSenderNickname(chat);
                         return (
                           <div
                             key={chat.chatId}
@@ -190,20 +235,38 @@ const MessagesPage = () => {
                             <div className="flex justify-between items-center">
                               <div className="flex-1">
                                 <div className="flex justify-between items-start mb-2">
-                                  <h3 className="font-semibold text-gray-800">{otherNickname}</h3>
-                                  <span className="text-xs text-gray-500">{formatDate(chat.updateAt)}</span>
+                                  <h3 className="font-semibold text-gray-800">
+                                    {otherNickname}
+                                  </h3>
+                                  <span className="text-xs text-gray-500">
+                                    {formatDate(chat.updateAt)}
+                                  </span>
                                 </div>
-                                <p className="text-sm text-gray-600 truncate">{chat.message?.content || "메시지가 없습니다."}</p>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  {senderNickname && (
+                                    <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                                      {senderNickname}
+                                    </span>
+                                  )}
+                                  <p className="text-sm text-gray-600 truncate flex-1">
+                                    {chat.message?.content ||
+                                      "메시지가 없습니다."}
+                                  </p>
+                                </div>
                                 <div className="flex justify-between items-center mt-2">
                                   <span className="text-xs text-gray-400">
                                     채팅방 생성: {formatDate(chat.createAt)}
                                   </span>
-                                  {!chat.message?.readed && chat.message?.senderId !== chat.userId1 && chat.requestNickname === chat.nickname1 && (
-                                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                                  )}
-                                  {!chat.message?.readed && chat.message?.senderId !== chat.userId2 && chat.requestNickname === chat.nickname2 && (
-                                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                                  )}
+                                  {!chat.message?.readed &&
+                                    chat.message?.senderId !== chat.userId1 &&
+                                    chat.requestNickname === chat.nickname1 && (
+                                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                    )}
+                                  {!chat.message?.readed &&
+                                    chat.message?.senderId !== chat.userId2 &&
+                                    chat.requestNickname === chat.nickname2 && (
+                                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                    )}
                                 </div>
                               </div>
                             </div>

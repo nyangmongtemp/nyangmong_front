@@ -20,12 +20,11 @@ import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
 
 const Sidebar = () => {
-  const { token, isLoggedIn, login, logout } = useAuth();
+  const { token, isLoggedIn, login, logout, nickname, profileImage, email } =
+    useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
-  const [nickname, setNickname] = useState("");
-  const [profileImage, setProfileImage] = useState("");
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [popularPosts, setPopularPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -51,13 +50,19 @@ const Sidebar = () => {
       });
       console.log(res);
 
-      login(res.data.result.token, res.data.result.email);
+      login(
+        res.data.result.token,
+        res.data.result.email,
+        res.data.result.nickname,
+        res.data.result.profileImage
+      );
       setNickname(res.data.result.nickname);
       setProfileImage(res.data.result.profileImage);
     } catch (error) {}
   };
 
   const handleLogout = () => {
+    navigate("/");
     logout();
     setLoginData({ email: "", password: "" });
     setNickname("");
