@@ -20,7 +20,7 @@ import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
 
 const Sidebar = () => {
-  const { token, isLoggedIn, login, logout, nickname, profileImage } =
+  const { token, isLoggedIn, login, logout, nickname, profileImage, email } =
     useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
@@ -73,6 +73,7 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
+    navigate("/");
     logout();
     setLoginData({ email: "", password: "" });
     setNickname("");
