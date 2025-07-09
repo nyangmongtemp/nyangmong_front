@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -17,7 +16,7 @@ const AdminUserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("createdAt_desc");
 
-  // 임시 사용자 데이터
+  // 임시 사용자 데이터 추가용입니다.
   const users = [
     {
       id: 1,
@@ -110,12 +109,24 @@ const AdminUserManagement = () => {
                     <SelectValue placeholder="정렬조건" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="createdAt_desc">생성일자 최신순</SelectItem>
-                    <SelectItem value="createdAt_asc">생성일자 오래된순</SelectItem>
-                    <SelectItem value="lastLogin_desc">최근 접속일자 최신순</SelectItem>
-                    <SelectItem value="lastLogin_asc">최근 접속일자 오래된순</SelectItem>
-                    <SelectItem value="reports_desc">신고횟수 내림차순</SelectItem>
-                    <SelectItem value="reports_asc">신고횟수 오름차순</SelectItem>
+                    <SelectItem value="createdAt_desc">
+                      생성일자 최신순
+                    </SelectItem>
+                    <SelectItem value="createdAt_asc">
+                      생성일자 오래된순
+                    </SelectItem>
+                    <SelectItem value="lastLogin_desc">
+                      최근 접속일자 최신순
+                    </SelectItem>
+                    <SelectItem value="lastLogin_asc">
+                      최근 접속일자 오래된순
+                    </SelectItem>
+                    <SelectItem value="reports_desc">
+                      신고횟수 내림차순
+                    </SelectItem>
+                    <SelectItem value="reports_asc">
+                      신고횟수 오름차순
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
