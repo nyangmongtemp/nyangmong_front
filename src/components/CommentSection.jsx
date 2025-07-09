@@ -578,149 +578,148 @@ const CommentSection = ({
                           </div>
                         </>
                       )}
-                    </div>
-
-                    {/* 댓글 액션 버튼들 */}
-                    {isLoggedIn && (
-                      <div className="flex gap-2">
-                        {
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setEditingComment(comment.commentId);
-                                setEditText(comment.content);
-                              }}
-                              className="text-blue-600 hover:bg-blue-50"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleCommentDelete(comment.commentId)
-                              }
-                              className="text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </>
-                        }
-
-                        {/* 답글 버튼 */}
-                        {showReplies && (
+                    </div>{" "}
+                    {/* flex-1 닫힘 */}
+                  </div>{" "}
+                  {/* flex justify-between items-start 닫힘 */}
+                  {/* 댓글 액션 버튼들 */}
+                  {isLoggedIn && (
+                    <div className="flex gap-2">
+                      {
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingComment(comment.commentId);
+                              setEditText(comment.content);
+                            }}
+                            className="text-blue-600 hover:bg-blue-50"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              setReplyTo(
-                                replyTo === comment.commentId
-                                  ? null
-                                  : comment.commentId
-                              )
+                              handleCommentDelete(comment.commentId)
                             }
-                            className="text-orange-600 hover:bg-orange-50"
+                            className="text-red-600 hover:bg-red-50"
                           >
-                            <Reply className="w-4 h-4 mr-1" />
-                            답글
+                            <Trash2 className="w-4 h-4" />
                           </Button>
-                        )}
+                        </>
+                      }
+
+                      {/* 답글 버튼 */}
+                      {showReplies && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setReplyTo(
+                              replyTo === comment.commentId
+                                ? null
+                                : comment.commentId
+                            )
+                          }
+                          className="text-orange-600 hover:bg-orange-50"
+                        >
+                          <Reply className="w-4 h-4 mr-1" />
+                          답글
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  {/* 대댓글 더보기 버튼 */}
+                  {comment.reply &&
+                    (!comment.hidden ||
+                      revealedComments[comment.commentId]) && (
+                      <div className="w-full mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
+                          onClick={() => handleReplyToggle(comment.commentId)}
+                        >
+                          {replyOpen[comment.commentId]
+                            ? "대댓글 숨기기"
+                            : "대댓글 더보기"}
+                        </Button>
                       </div>
                     )}
-
-                    {/* 대댓글 더보기 버튼 */}
-                    {comment.reply &&
-                      (!comment.hidden ||
-                        revealedComments[comment.commentId]) && (
-                        <div className="w-full mt-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
-                            onClick={() => handleReplyToggle(comment.commentId)}
-                          >
-                            {replyOpen[comment.commentId]
-                              ? "대댓글 숨기기"
-                              : "대댓글 더보기"}
-                          </Button>
-                        </div>
-                      )}
-
-                    {/* 대댓글 목록 - 댓글 하단에 댓글과 같은 너비로 표시 */}
-                    {replyOpen[comment.commentId] &&
-                      repliesByCommentId[comment.commentId] &&
-                      repliesByCommentId[comment.commentId].length > 0 &&
-                      (!comment.hidden ||
-                        revealedComments[comment.commentId]) && (
-                        <div className="w-full mt-3">
-                          <div className="border-l-2 border-orange-200 pl-4 space-y-2">
-                            {repliesByCommentId[comment.commentId].map(
-                              (reply) => (
-                                <div
-                                  key={reply.replyId}
-                                  className="w-full bg-gray-50 p-3 rounded-lg border border-gray-200"
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        {reply.profileImage && (
-                                          <img
-                                            src={reply.profileImage}
-                                            alt={reply.nickname}
-                                            className="w-6 h-6 rounded-full"
-                                          />
-                                        )}
-                                        <span className="font-medium text-xs text-gray-800">
-                                          {reply.nickname}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                          {reply.createAt
-                                            ? reply.createAt.slice(0, 10)
-                                            : ""}
-                                        </span>
-                                      </div>
-                                      <div className="text-gray-700 text-sm break-words whitespace-pre-line">
-                                        {reply.content}
-                                      </div>
+                  {/* 대댓글 목록 - 댓글과 같은 너비로 표시 */}
+                  {replyOpen[comment.commentId] &&
+                    repliesByCommentId[comment.commentId] &&
+                    repliesByCommentId[comment.commentId].length > 0 &&
+                    (!comment.hidden ||
+                      revealedComments[comment.commentId]) && (
+                      <div className="w-full mt-3">
+                        <div className="border-l-2 border-orange-200 pl-4 space-y-2">
+                          {repliesByCommentId[comment.commentId].map(
+                            (reply) => (
+                              <div
+                                key={reply.replyId}
+                                className="w-full bg-gray-50 p-3 rounded-lg border border-gray-200"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      {reply.profileImage && (
+                                        <img
+                                          src={reply.profileImage}
+                                          alt={reply.nickname}
+                                          className="w-6 h-6 rounded-full"
+                                        />
+                                      )}
+                                      <span className="font-medium text-xs text-gray-800">
+                                        {reply.nickname}
+                                      </span>
+                                      <span className="text-xs text-gray-400">
+                                        {reply.createAt
+                                          ? reply.createAt.slice(0, 10)
+                                          : ""}
+                                      </span>
                                     </div>
-                                    {isLoggedIn && (
-                                      <div className="flex gap-1 ml-2 shrink-0">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setReplyEdit((prev) => ({
-                                              ...prev,
-                                              [reply.replyId]: true,
-                                            }));
-                                            setReplyEditText(reply.content);
-                                          }}
-                                          className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
-                                        >
-                                          <Edit className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() =>
-                                            handleReplyDelete(reply.replyId)
-                                          }
-                                          className="text-red-600 hover:bg-red-50 p-1 h-auto"
-                                        >
-                                          <Trash2 className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    )}
+                                    <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                                      {reply.content}
+                                    </div>
                                   </div>
+                                  {isLoggedIn && (
+                                    <div className="flex gap-1 ml-2 shrink-0">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          setReplyEdit((prev) => ({
+                                            ...prev,
+                                            [reply.replyId]: true,
+                                          }));
+                                          setReplyEditText(reply.content);
+                                        }}
+                                        className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                          handleReplyDelete(reply.replyId)
+                                        }
+                                        className="text-red-600 hover:bg-red-50 p-1 h-auto"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
-                              )
-                            )}
-                          </div>
+                              </div>
+                            )
+                          )}
                         </div>
-                      )}
-
+                      </div>
+                    )}
                   {index < comments.length - 1 && (
                     <Separator className="mt-4" />
                   )}
