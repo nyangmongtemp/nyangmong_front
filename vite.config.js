@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean
   ),
+  define: {
+    global: "window", // crypto-browserify가 필요로 함
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
