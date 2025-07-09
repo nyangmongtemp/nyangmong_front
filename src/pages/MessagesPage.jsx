@@ -99,6 +99,19 @@ const MessagesPage = () => {
     }
   };
 
+  // 메시지 보낸 사람의 닉네임을 찾는 함수
+  const getSenderNickname = (chat) => {
+    if (!chat.message || !chat.message.senderId) return "";
+    
+    // senderId가 userId1과 같으면 nickname1, userId2와 같으면 nickname2
+    if (chat.message.senderId === chat.userId1) {
+      return chat.nickname1;
+    } else if (chat.message.senderId === chat.userId2) {
+      return chat.nickname2;
+    }
+    return "";
+  };
+
   const filteredMessages = getFilteredAndSortedMessages();
 
   const handleChatClick = (chatId) => {
@@ -210,6 +223,7 @@ const MessagesPage = () => {
                           chat.requestNickname === chat.nickname1
                             ? chat.nickname2
                             : chat.nickname1;
+                        const senderNickname = getSenderNickname(chat);
                         return (
                           <div
                             key={chat.chatId}
@@ -226,10 +240,17 @@ const MessagesPage = () => {
                                     {formatDate(chat.updateAt)}
                                   </span>
                                 </div>
-                                <p className="text-sm text-gray-600 truncate">
-                                  {chat.message?.content ||
-                                    "메시지가 없습니다."}
-                                </p>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  {senderNickname && (
+                                    <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                                      {senderNickname}
+                                    </span>
+                                  )}
+                                  <p className="text-sm text-gray-600 truncate flex-1">
+                                    {chat.message?.content ||
+                                      "메시지가 없습니다."}
+                                  </p>
+                                </div>
                                 <div className="flex justify-between items-center mt-2">
                                   <span className="text-xs text-gray-400">
                                     채팅방 생성: {formatDate(chat.createAt)}
