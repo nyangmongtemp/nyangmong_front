@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,11 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
         if (response.data && response.data.result) {
           setMessages(response.data.result);
         }
+        if (myUserId !== response.data.result[0].senderId) {
+          setReceiverId(response.data.result[0].senderId);
+        } else {
+          setReceiverId(response.data.result[0].receiverId);
+        }
       } catch (err) {
         console.error("Failed to fetch messages:", err);
       } finally {
@@ -40,16 +44,10 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-    const mess = messages[0];
-    console.log(messages);
-    console.log(mess);
 
-    if (mess.senderId !== myUserId) {
-      setReceiverId(mess.senderId);
-    } else {
-      setReceiverId(mess.receiverId);
-    }
     try {
+      console.log(receiverId);
+
       const response = await axiosInstance.post(`${API_BASE_URL}${USER}/send`, {
         receiverId: receiverId,
         content: newMessage,
