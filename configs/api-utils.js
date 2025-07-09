@@ -169,8 +169,17 @@ export const adoptionAPI = {
   },
 
   // 분양글 등록
-  createAdoptionPost: async (postData) => {
-    return await apiUtils.post('/animalboard-service/animal-board/create', postData);
+  createAdoptionPost: async (formData, token) => {
+    return await apiUtils.post(
+      '/animalboard-service/animal-board',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+          // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
+        }
+      }
+    );
   },
 
   // 분양 상세 조회 (별칭)

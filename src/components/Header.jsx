@@ -64,7 +64,7 @@ const Header = () => {
             </button>
           </div>
 
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden lg:flex space-x-6">
             {categories.map((category) =>
               category.submenu ? (
                 <DropdownMenu key={category.name}>
@@ -99,8 +99,8 @@ const Header = () => {
               )
             )}
           </nav>
-          {/* 모바일 메뉴 (모바일에서만 보임) */}
-          <div className="block md:hidden">
+          {/* 모바일 메뉴 (사이드바가 사라질 때 보임) */}
+          <div className="block lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <button className="p-2 rounded-md hover:bg-orange-50">

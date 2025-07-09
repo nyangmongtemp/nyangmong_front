@@ -14,41 +14,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, Image, X } from "lucide-react";
 import { useAuth } from "@/context/UserContext";
 import { adoptionAPI } from "../../configs/api-utils.js";
+import ImageCropModal from "@/components/ImageCropModal";
 
 const AdoptionCreate = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [originalImageType, setOriginalImageType] = useState("image/jpeg");
 
   // 로그인 체크
   useEffect(() => {
     if (!isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
-      navigate("/login");
+      alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
+      navigate("/adoption");
     }
   }, [isLoggedIn, navigate]);
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     petCategory: "",
+    petKind: "",
     sex: "",
     age: "",
     address: "",
     neutered: "",
     vaccinated: "",
-    contact: "",
-    email: "",
-    price: "무료분양",
+    fee: "",
     imageUrl: ""
   });
 
   const categories = ["강아지", "고양이", "기타"];
-  const genderOptions = ["수컷", "암컷", "미상"];
-  const neuteredOptions = ["예", "아니오", "모름"];
-  const vaccinatedOptions = ["예", "아니오", "모름"];
+  // 성별, 중성화 옵션을 코드와 라벨로 구성
+  const genderOptions = [
+    { label: "수컷", value: "M" },
+    { label: "암컷", value: "F" },
+    { label: "미상", value: "Q" }
+  ];
+  const neuteredOptions = [
+    { label: "예", value: "Y" },
+    { label: "아니오", value: "N" },
+    { label: "모름", value: "U" }
+  ];
   const regions = [
     { value: "서울", label: "서울" },
     { value: "경기", label: "경기" },
@@ -70,6 +84,47 @@ const AdoptionCreate = () => {
     { value: "제주", label: "제주" },
   ];
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setOriginalImageType(file.type || "image/jpeg");
+      // 1. MIME 타입 체크
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+      // 2. 확장자 체크
+      const allowedExts = ['jpg', 'jpeg', 'png', 'bmp', 'gif'];
+      const fileExt = file.name.split('.').pop().toLowerCase();
+
+      if (
+        (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt))
+        || fileExt === ''
+      ) {
+        alert("이미지 파일(JPG, PNG, BMP, GIF)만 업로드 가능합니다.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setOriginalImageSrc(e.target.result);
+        setShowCropModal(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = (croppedImageUrl, croppedBlob) => {
+    console.log('크롭된 이미지 타입:', croppedBlob.type);
+    console.log('크롭된 이미지 name:', croppedBlob.name);
+    setImagePreview(croppedImageUrl);
+    setSelectedImage(croppedBlob);
+    setShowCropModal(false);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setOriginalImageSrc(null);
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -79,10 +134,10 @@ const AdoptionCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다.");
-      navigate("/login");
+      alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
+      navigate("/adoption");
       return;
     }
 
@@ -103,17 +158,59 @@ const AdoptionCreate = () => {
       alert("지역을 선택해주세요.");
       return;
     }
+    // 추가 필수값 검증 (백엔드 요구사항에 따라)
+    if (!formData.petKind) {
+      alert("품종을 입력해주세요.");
+      return;
+    }
+    if (!formData.sex) {
+      alert("성별을 선택해주세요.");
+      return;
+    }
+    if (!formData.neutered) {
+      alert("중성화 여부를 선택해주세요.");
+      return;
+    }
+
+    // animalRequest 객체 생성
+    const animalRequest = {
+      title: formData.title,
+      content: formData.content,
+      petCategory: formData.petCategory,
+      petKind: formData.petKind,
+      age: formData.age,
+      vaccine: formData.vaccinated,
+      sexCode: formData.sex,
+      neuterYn: formData.neutered,
+      address: formData.address,
+      fee: formData.fee
+    };
+
+    // FormData 구성
+    const form = new FormData();
+    form.append("animalRequest", new Blob([JSON.stringify(animalRequest)], { type: "application/json" }));
+    if (selectedImage) {
+      const ext = selectedImage.type.split('/')[1] || 'jpg';
+      form.append("thumbnailImage", selectedImage, `thumbnail.${ext}`);
+    }
 
     setLoading(true);
-    
+    const token = localStorage.getItem("token");
+
     try {
-      const response = await adoptionAPI.createAdoptionPost(formData);
-      console.log('분양글 등록 성공:', response);
+      const response = await adoptionAPI.createAdoptionPost(form, token);
       alert("분양글이 성공적으로 등록되었습니다.");
       navigate("/adoption");
     } catch (error) {
       console.error('분양글 등록 실패:', error);
-      alert("분양글 등록에 실패했습니다. 다시 시도해주세요.");
+      if (error.response) {
+        // axios 에러 응답
+        alert(`에러: ${error.response.status} - ${error.response.data?.message || '등록 실패'}`);
+      } else if (error.message) {
+        alert(`에러: ${error.message}`);
+      } else {
+        alert("분양글 등록에 실패했습니다. 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -127,7 +224,7 @@ const AdoptionCreate = () => {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-orange-500 mr-2" />
-            <span className="text-gray-600">로그인 페이지로 이동 중...</span>
+            <span className="text-gray-600">목록으로 이동 중...</span>
           </div>
         </main>
       </div>
@@ -198,7 +295,18 @@ const AdoptionCreate = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="sex">성별</Label>
+                      <Label htmlFor="petKind">품종 *</Label>
+                      <Input
+                        id="petKind"
+                        value={formData.petKind}
+                        onChange={(e) => handleInputChange("petKind", e.target.value)}
+                        placeholder="예: 믹스견"
+                      />
+                    </div>
+
+                    {/* 성별 셀렉트박스 부분 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="sex">성별 *</Label>
                       <Select
                         value={formData.sex}
                         onValueChange={(value) => handleInputChange("sex", value)}
@@ -208,8 +316,8 @@ const AdoptionCreate = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {genderOptions.map((gender) => (
-                            <SelectItem key={gender} value={gender}>
-                              {gender}
+                            <SelectItem key={gender.value} value={gender.value}>
+                              {gender.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -217,12 +325,22 @@ const AdoptionCreate = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="age">나이</Label>
+                      <Label htmlFor="age">나이 *</Label>
                       <Input
                         id="age"
                         value={formData.age}
                         onChange={(e) => handleInputChange("age", e.target.value)}
                         placeholder="예: 2살, 6개월"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="petKind">책임비</Label>
+                      <Input
+                        id="fee"
+                        value={formData.fee}
+                        onChange={(e) => handleInputChange("fee", e.target.value)}
+                        placeholder="예: 200000원"
                       />
                     </div>
 
@@ -245,8 +363,9 @@ const AdoptionCreate = () => {
                       </Select>
                     </div>
 
+                    {/* 중성화 셀렉트박스 부분 */}
                     <div className="space-y-2">
-                      <Label htmlFor="neutered">중성화</Label>
+                      <Label htmlFor="neutered">중성화 *</Label>
                       <Select
                         value={formData.neutered}
                         onValueChange={(value) => handleInputChange("neutered", value)}
@@ -256,8 +375,8 @@ const AdoptionCreate = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {neuteredOptions.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -266,57 +385,69 @@ const AdoptionCreate = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="vaccinated">예방접종</Label>
-                      <Select
+                      <Input
+                        id="vaccinated"
                         value={formData.vaccinated}
-                        onValueChange={(value) => handleInputChange("vaccinated", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="예방접종 여부를 선택하세요" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {vaccinatedOptions.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* 연락처 정보 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="contact">연락처</Label>
-                      <Input
-                        id="contact"
-                        value={formData.contact}
-                        onChange={(e) => handleInputChange("contact", e.target.value)}
-                        placeholder="전화번호를 입력하세요"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">이메일</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="이메일을 입력하세요"
+                        onChange={(e) => handleInputChange("vaccinated", e.target.value)}
+                        placeholder="예방접종 상태여부를 입력하세요."
                       />
                     </div>
                   </div>
 
-                  {/* 이미지 URL */}
+                  {/* 이미지 업로드 */}
                   <div className="space-y-2">
-                    <Label htmlFor="imageUrl">이미지 URL</Label>
-                    <Input
-                      id="imageUrl"
-                      value={formData.imageUrl}
-                      onChange={(e) => handleInputChange("imageUrl", e.target.value)}
-                      placeholder="반려동물 이미지 URL을 입력하세요"
-                    />
+                    <Label className="text-sm font-medium text-gray-700">
+                      이미지 첨부 *
+                    </Label>
+                    <div className="space-y-4">
+                      {!imagePreview ? (
+                        <div className="border-2 border-dashed border-orange-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                          <div className="flex flex-col items-center space-y-4">
+                            <Image className="h-12 w-12 text-orange-400" />
+                            <div className="text-sm text-gray-600">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="border-orange-300 text-orange-600 hover:bg-orange-50 relative"
+                                onClick={() =>
+                                  document
+                                    .getElementById("image-upload")
+                                    .click()
+                                }
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                이미지 업로드
+                              </Button>
+                              <p className="text-gray-500 mt-2">
+                                JPG, PNG, BMP, GIF (이미지 파일만 가능)
+                              </p>
+                            </div>
+                            <input
+                              id="image-upload"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="미리보기"
+                            className="w-full max-w-md h-48 object-cover rounded-lg border border-orange-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* 상세 내용 */}
@@ -366,6 +497,15 @@ const AdoptionCreate = () => {
           </div>
         </div>
       </main>
+
+      {/* 이미지 크롭 모달 */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={() => setShowCropModal(false)}
+        imageSrc={originalImageSrc}
+        onCropComplete={handleCropComplete}
+        outputType={originalImageType}
+      />
 
       <footer className="bg-white border-t mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

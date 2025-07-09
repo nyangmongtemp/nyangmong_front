@@ -79,42 +79,6 @@ const AdoptionDetail = () => {
       } catch (err) {
         console.error('분양 상세 조회 실패:', err);
         setError('분양글을 불러오는데 실패했습니다.');
-        
-        // API 실패 시 더미 데이터로 표시
-        setPost({
-          id: id,
-          postId: id,
-          title: "골든리트리버 분양합니다",
-          content: "건강하고 활발한 골든리트리버 남아입니다. 엄마, 아빠 모두 혈통서가 있는 순혈이며, 1차 예방접종까지 완료된 상태입니다. 현재 이유식을 잘 먹고 있으며, 배변 훈련도 어느 정도 되어 있습니다. 좋은 가정에서 평생 함께할 가족을 찾고 있습니다.",
-          petCategory: "강아지",
-          petKind: "골든리트리버",
-          age: "2개월",
-          sexCode: "M",
-          neuterYn: "N",
-          vaccine: "1차 완료",
-          fee: "책임비 50만원",
-          price: "책임비 50만원",
-          address: "서울 강남구",
-          location: "서울 강남구",
-          thumbnailImage: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-          ],
-          viewCount: 125,
-          views: 125,
-          likes: 15,
-          createdAt: "2024-06-20T10:30:00Z",
-          createdDate: "2024-06-20T10:30:00Z",
-          authorName: "사랑이맘",
-          writerName: "사랑이맘",
-          phone: "010-1234-5678",
-          breed: "골든리트리버",
-          gender: "수컷",
-          vaccination: "1차 완료",
-          neutering: "미완료"
-        });
       } finally {
         setLoading(false);
       }
@@ -265,7 +229,7 @@ const AdoptionDetail = () => {
                       <ArrowLeft className="h-4 w-4" />
                       <span>목록으로</span>
                     </Button>
-                    <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                       <span>분양게시판</span>
                       <span>{'>'}</span>
                       <span>{post.title}</span>
@@ -306,7 +270,7 @@ const AdoptionDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <Badge className="bg-orange-500">{post.fee || post.price}</Badge>
+                  <Badge className="bg-orange-500">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</Badge>
                 </div>
 
                 {/* 이미지 갤러리 */}
@@ -392,7 +356,7 @@ const AdoptionDetail = () => {
                       </div>
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
-                        <p className="font-medium text-orange-600">{post.fee || post.price}</p>
+                        <p className="font-medium text-orange-600">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</p>
                       </div>
                     </div>
                   </CardContent>

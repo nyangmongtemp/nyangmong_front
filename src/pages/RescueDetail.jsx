@@ -212,7 +212,7 @@ const RescueDetail = () => {
                         <ArrowLeft className="h-4 w-4" />
                         <span>목록으로</span>
                       </Button>
-                      <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+                      <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                         <span>유기동물분양게시판</span>
                         <span>{'>'}</span>
                         <span>{animal.kindNm || '유기동물'}</span>
