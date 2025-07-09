@@ -49,6 +49,7 @@ const App = () => (
             <Route path="/create-post/:type" element={<CreatePost />} />
             <Route path="/child/create" element={<ChildCreate />} />
             <Route path="/child/list" element={<ChildIList />} />
+            <Route path="/board/introduction" element={<ChildIList />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/adoption" element={<AdoptionPage />} />
             <Route path="/adoption/create" element={<AdoptionCreate />} />

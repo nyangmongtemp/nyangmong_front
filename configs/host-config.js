@@ -23,3 +23,4 @@ export const API_BASE_URL = backendHostName;
 export const USER = "/user-service/user";
 export const FESTIVAL = "/festival-service";
 export const ABS = "/animalboard-service";
+export const BOARD = "/board-service/board";

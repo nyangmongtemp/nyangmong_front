@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,8 @@ const Sidebar = () => {
   const [nickname, setNickname] = useState("");
   const [profileImage, setProfileImage] = useState("");
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [popularPosts, setPopularPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,19 +41,6 @@ const Sidebar = () => {
   const adImages = [
     "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-  ];
-
-  const popularPosts = [
-    { id: 1, title: "강아지 건강 관리 완전 가이드", views: 1250 },
-    { id: 2, title: "고양이 행동 심리학", views: 980 },
-    { id: 3, title: "반려동물 응급처치 방법", views: 876 },
-    { id: 4, title: "펫 보험 비교 분석", views: 743 },
-    { id: 5, title: "강아지 훈련의 기초", views: 692 },
-    { id: 6, title: "고양이 사료 추천 리스트", views: 634 },
-    { id: 7, title: "반려동물과 함께하는 여행", views: 587 },
-    { id: 8, title: "펫샵 vs 분양 장단점", views: 523 },
-    { id: 9, title: "반려동물 건강검진 주기", views: 456 },
-    { id: 10, title: "강아지 산책 필수 용품", views: 398 },
   ];
 
   const handleLogin = async (e) => {
@@ -94,6 +83,43 @@ const Sidebar = () => {
   const isActiveRoute = (route) => {
     return location.pathname === route;
   };
+
+  // 인기 게시글 API 연동
+  useEffect(() => {
+    const fetchPopularPosts = async () => {
+      setLoading(true);
+      try {
+        const res = await axiosInstance.get(
+          "/board-service/board/information/popular"
+        );
+        console.log("인기 게시글 API 응답:", res.data);
+        const posts = res.data || [];
+        const mappedPosts = posts.map((item, index) => ({
+          id: item.postId, // 반드시 postId(PK)로!
+          title: item.title,
+          views: item.viewCount,
+          category: item.category,
+          author: item.nickname,
+        }));
+        setPopularPosts(mappedPosts);
+      } catch (error) {
+        console.error("인기 게시글 불러오기 실패:", error);
+        setPopularPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPopularPosts(); // 초기 로드
+
+    // 페이지 포커스 시 갱신 (새로고침, 탭 전환 등)
+    const handleFocus = () => {
+      fetchPopularPosts();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -173,7 +199,9 @@ const Sidebar = () => {
           ) : (
             <div>
               {showPasswordReset ? (
-                <PasswordResetForm onClose={() => setShowPasswordReset(false)} />
+                <PasswordResetForm
+                  onClose={() => setShowPasswordReset(false)}
+                />
               ) : (
                 <>
                   <form
@@ -196,7 +224,10 @@ const Sidebar = () => {
                           className="pl-10"
                           value={loginData.email}
                           onChange={(e) =>
-                            setLoginData({ ...loginData, email: e.target.value })
+                            setLoginData({
+                              ...loginData,
+                              email: e.target.value,
+                            })
                           }
                         />
                       </div>
@@ -215,7 +246,10 @@ const Sidebar = () => {
                           className="pl-10"
                           value={loginData.password}
                           onChange={(e) =>
-                            setLoginData({ ...loginData, password: e.target.value })
+                            setLoginData({
+                              ...loginData,
+                              password: e.target.value,
+                            })
                           }
                         />
                       </div>
@@ -239,7 +273,9 @@ const Sidebar = () => {
                   </form>
 
                   <div className="mt-4 space-y-2">
-                    <p className="text-sm text-gray-600 text-center">소셜 로그인</p>
+                    <p className="text-sm text-gray-600 text-center">
+                      소셜 로그인
+                    </p>
                     <div className="space-y-2">
                       <Button
                         variant="outline"
@@ -352,30 +388,57 @@ const Sidebar = () => {
         </CardHeader>
         <CardContent className="p-0">
           <div className="space-y-1">
-            {popularPosts.map((post, index) => (
-              <div
-                key={post.id}
-                className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
-              >
-                <div className="flex items-center space-x-2 mb-1">
-                  <span
-                    className={`text-xs font-bold px-2 py-1 rounded-full ${
-                      index < 3
-                        ? "bg-red-100 text-red-800"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
+            {loading ? (
+              <div className="p-4 text-center text-gray-500">로딩 중...</div>
+            ) : popularPosts.length > 0 ? (
+              popularPosts.map((post, index) => (
+                <div
+                  key={post.id}
+                  onClick={() => {
+                    let type = "free";
+                    if (post.category === "QUESTION") type = "question";
+                    else if (post.category === "REVIEW") type = "review";
+                    else if (post.category === "FREE") type = "free";
+                    navigate(`/post/${type}/${post.id}`);
+                  }}
+                  className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
+                >
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span
+                      className={`text-xs font-bold px-2 py-1 rounded-full ${
+                        index < 3
+                          ? "bg-red-100 text-red-800"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    {post.category && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                        {post.category === "QUESTION"
+                          ? "질문"
+                          : post.category === "REVIEW"
+                          ? "후기"
+                          : post.category === "FREE"
+                          ? "자유"
+                          : post.category}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="font-medium text-sm text-gray-900 mb-1 hover:text-orange-600 transition-colors line-clamp-2">
+                    {post.title}
+                  </h4>
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>by {post.author}</span>
+                    <span>조회 {post.views}</span>
+                  </div>
                 </div>
-                <h4 className="font-medium text-sm text-gray-900 mb-1 hover:text-orange-600 transition-colors line-clamp-2">
-                  {post.title}
-                </h4>
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>조회 {post.views}</span>
-                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-500">
+                인기 게시글이 없습니다.
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>

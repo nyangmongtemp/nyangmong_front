@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { ArrowLeft, Upload, X, Image } from "lucide-react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ImageCropModal from "@/components/ImageCropModal";
+import axiosInstance from "../../configs/axios-config";
 
 const CreatePost = () => {
   const { type } = useParams();
@@ -33,7 +33,13 @@ const CreatePost = () => {
     const file = e.target.files[0];
     if (file) {
       // 이미지 파일 형식 검증
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/bmp",
+        "image/gif",
+      ];
       if (!allowedTypes.includes(file.type)) {
         alert("이미지 파일(JPG, PNG, BMP, GIF)만 업로드 가능합니다.");
         return;
@@ -60,16 +66,47 @@ const CreatePost = () => {
     setOriginalImageSrc(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
       alert("제목과 내용을 입력해주세요.");
       return;
     }
 
-    // TODO: 실제 게시글 생성 로직
-    console.log("게시글 생성:", { title, content, image: selectedImage });
-    navigate(`/board/${type}`);
+    // 게시글 정보 context 객체
+    const context = {
+      category: type,
+      title,
+      content,
+    };
+
+    // form-data 생성
+    const formData = new FormData();
+    formData.append(
+      "context",
+      new Blob([JSON.stringify(context)], { type: "application/json" })
+    );
+    if (selectedImage) {
+      formData.append(
+        "thumbnailImage",
+        selectedImage,
+        selectedImage.name || "thumbnail.png"
+      );
+    }
+
+    try {
+      await axiosInstance.post(
+        "/board-service/board/information/create",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      alert("게시글이 등록되었습니다.");
+      navigate(`/board/${type}`);
+    } catch (err) {
+      alert("게시글 등록에 실패했습니다.");
+    }
   };
 
   const handleCancel = () => {
