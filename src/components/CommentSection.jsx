@@ -583,14 +583,14 @@ const CommentSection = ({
                             repliesByCommentId[comment.commentId].length > 0 &&
                             (!comment.hidden ||
                               revealedComments[comment.commentId]) && (
-                              <div className="pl-6 mt-3 flex flex-col w-full space-y-2">
+                              <div className="w-full mt-3 flex flex-col gap-2">
                                 {repliesByCommentId[comment.commentId].map(
                                   (reply) => (
                                     <div
                                       key={reply.replyId}
-                                      className="w-full bg-gray-50 py-2 px-3 border-b border-gray-200"
+                                      className="w-full flex items-center justify-between bg-gray-50 py-2 px-3 border-b border-gray-200"
                                     >
-                                      <div className="flex items-center gap-2 mb-1">
+                                      <div className="flex items-center gap-2 w-full">
                                         {reply.profileImage && (
                                           <img
                                             src={reply.profileImage}
@@ -606,12 +606,12 @@ const CommentSection = ({
                                             ? reply.createAt.slice(0, 10)
                                             : ""}
                                         </span>
-                                      </div>
-                                      <div className="text-gray-700 text-sm w-full text-left break-words whitespace-pre-line">
-                                        {reply.content}
+                                        <span className="text-gray-700 text-sm w-full text-left break-words whitespace-pre-line ml-2">
+                                          {reply.content}
+                                        </span>
                                       </div>
                                       {isLoggedIn && (
-                                        <div className="flex gap-2 mt-1">
+                                        <div className="flex gap-2 ml-2 shrink-0">
                                           <Button
                                             variant="ghost"
                                             size="sm"
