@@ -14,7 +14,11 @@ let backendHostName;
 if (clientHostName === "localhost" || clientHostName === "127.0.0.1") {
   // 개발 중 (로컬)
   backendHostName = "http://localhost:8000";
-} else if (clientHostName.includes("192.168.") || clientHostName.includes("10.") || clientHostName.includes("172.")) {
+} else if (
+  clientHostName.includes("192.168.") ||
+  clientHostName.includes("10.") ||
+  clientHostName.includes("172.")
+) {
   // 로컬 네트워크 (모바일 접속 시)
   // 같은 네트워크의 컴퓨터 IP로 백엔드 서버에 접근
   const currentHost = window.location.hostname;
@@ -28,3 +32,4 @@ export const API_BASE_URL = backendHostName;
 export const USER = "/user-service/user";
 export const FESTIVAL = "/festival-service";
 export const ABS = "/animalboard-service";
+export const MAIN = "/main-service/main";
