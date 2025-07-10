@@ -212,4 +212,18 @@ export const adoptionAPI = {
       }
     );
   },
+
+  // 예약상태 변경
+  updateReservationStatus: async (id, status, token) => {
+    return await apiUtils.patch(
+      `/animalboard-service/animal-board/reservation/${id}`,
+      { reservationStatus: status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  },
 }; 

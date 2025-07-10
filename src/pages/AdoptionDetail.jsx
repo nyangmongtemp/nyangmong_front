@@ -11,6 +11,7 @@ import { Heart, MapPin, Calendar, Eye, MessageCircle, ArrowLeft, User, Edit, Sen
 import { adoptionAPI } from '../../configs/api-utils.js';
 import { useAuth } from '@/context/UserContext';
 import AlertDialog from '@/components/ui/alert-dialog';
+import { toast } from "@/components/ui/sonner";
 
 const AdoptionDetail = () => {
   const navigate = useNavigate();
@@ -59,6 +60,12 @@ const AdoptionDetail = () => {
       replies: []
     }
   ]);
+
+  const reservationOptions = [
+    { label: "예약가능", value: "A" },
+    { label: "예약중", value: "R" },
+    { label: "분양완료", value: "C" },
+  ];
 
   console.log('AdoptionDetail 컴포넌트 로드됨, id:', id);
 
@@ -270,7 +277,33 @@ const AdoptionDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <Badge className="bg-orange-500">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</Badge>
+                  <div className="flex flex-col items-end">
+                    <Badge className="bg-orange-500">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</Badge>
+                    {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
+                    {isLoggedIn && post && email === post.authorEmail && (
+                      <div className="mt-2">
+                        <select
+                          className="border rounded px-2 py-1 text-sm"
+                          value={post.reservationStatus || "A"}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            try {
+                              const token = localStorage.getItem('token');
+                              await adoptionAPI.updateReservationStatus(id, newStatus, token);
+                              toast.success('예약상태 변경 성공!');
+                              setPost({ ...post, reservationStatus: newStatus });
+                            } catch (err) {
+                              toast.error('예약상태 변경 실패!');
+                            }
+                          }}
+                        >
+                          {reservationOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 이미지 갤러리 */}
