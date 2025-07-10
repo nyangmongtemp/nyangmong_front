@@ -389,7 +389,11 @@ const AdoptionDetail = () => {
                 {/* 게시물 수정 버튼 - 로그인한 사용자이면서 작성자인 경우에만 표시 */}
                 {isLoggedIn && post && email === post.authorEmail && (
                   <div className="mb-8 text-center">
-                    <Button variant="outline" className="mr-4">
+                    <Button 
+                      variant="outline" 
+                      className="mr-4"
+                      onClick={() => navigate(`/adoption/update/${id}`)}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       게시물 수정
                     </Button>

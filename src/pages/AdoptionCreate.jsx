@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,46 @@ import { useAuth } from "@/context/UserContext";
 import { adoptionAPI } from "../../configs/api-utils.js";
 import ImageCropModal from "@/components/ImageCropModal";
 
+// 기존 이미지 URL을 File로 변환하는 함수
+async function urlToFile(url, filename, mimeType) {
+  // 확장자 추출
+  const ext = filename.split('.').pop().toLowerCase();
+  let type = mimeType;
+  if (!type || type === "") {
+    if (ext === "jpg" || ext === "jpeg") type = "image/jpeg";
+    else if (ext === "png") type = "image/png";
+    else if (ext === "gif") type = "image/gif";
+    else if (ext === "bmp") type = "image/bmp";
+    else type = "application/octet-stream";
+  }
+  // fetch로 blob 받아오기
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error("이미지 파일을 불러올 수 없습니다. (fetch 실패)");
+  }
+  const blob = await res.blob();
+  // blob.type이 image/로 시작하지 않으면 강제로 type 지정
+  if (!blob.type.startsWith("image/")) {
+    return new File([blob], filename, { type });
+  }
+  // blob.type이 이미지면 그대로 사용
+  return new File([blob], filename, { type: blob.type });
+}
+
 const AdoptionCreate = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
   const [originalImageType, setOriginalImageType] = useState("image/jpeg");
+  const [originalImageName, setOriginalImageName] = useState("thumbnail.jpg");
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
 
   // 로그인 체크
   useEffect(() => {
@@ -36,6 +67,37 @@ const AdoptionCreate = () => {
       navigate("/adoption");
     }
   }, [isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if (isEdit) {
+      setFetchLoading(true);
+      adoptionAPI.getAdoptionDetail(id)
+        .then((data) => {
+          setFormData({
+            title: data.title || "",
+            content: data.content || "",
+            petCategory: data.petCategory || "",
+            petKind: data.petKind || "",
+            sex: data.sexCode || "",
+            age: data.age || "",
+            address: data.address || "",
+            neutered: data.neuterYn || "",
+            vaccinated: data.vaccine || "",
+            fee: data.fee || "",
+            imageUrl: data.imageUrl || ""
+          });
+          if (data.thumbnailImage || data.imageUrl) {
+            setImagePreview(data.thumbnailImage || data.imageUrl);
+            setSelectedImage(null); // 기존 이미지는 Blob이 아님
+          }
+          setFetchError(null);
+        })
+        .catch(() => {
+          setFetchError("게시글 정보를 불러오지 못했습니다.");
+        })
+        .finally(() => setFetchLoading(false));
+    }
+  }, [id]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -88,6 +150,7 @@ const AdoptionCreate = () => {
     const file = e.target.files[0];
     if (file) {
       setOriginalImageType(file.type || "image/jpeg");
+      setOriginalImageName(file.name || "thumbnail.jpg"); // 파일명 기억
       // 1. MIME 타입 체크
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
       // 2. 확장자 체크
@@ -112,10 +175,16 @@ const AdoptionCreate = () => {
   };
 
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
-    console.log('크롭된 이미지 타입:', croppedBlob.type);
-    console.log('크롭된 이미지 name:', croppedBlob.name);
+    // 원본 파일명과 타입을 사용해 File로 변환
+    const ext = originalImageType.split('/')[1] || 'jpg';
+    let fileName = originalImageName;
+    // 확장자가 없으면 붙여줌
+    if (fileName && !fileName.toLowerCase().endsWith('.' + ext)) {
+      fileName = fileName.replace(/\.[^/.]+$/, '') + '.' + ext;
+    }
+    const file = new File([croppedBlob], fileName, { type: originalImageType });
     setImagePreview(croppedImageUrl);
-    setSelectedImage(croppedBlob);
+    setSelectedImage(file);
     setShowCropModal(false);
   };
 
@@ -172,6 +241,17 @@ const AdoptionCreate = () => {
       return;
     }
 
+    // 이미지 파일 준비
+    let imageFile = selectedImage;
+    if (!imageFile && imagePreview && isEdit) {
+      // 기존 이미지 URL을 File로 변환 (확장자/type 강제 매칭 적용)
+      imageFile = await urlToFile(imagePreview, originalImageName, originalImageType);
+    }
+    if (!imageFile) {
+      alert("이미지는 필수입니다.");
+      return;
+    }
+
     // animalRequest 객체 생성
     const animalRequest = {
       title: formData.title,
@@ -189,13 +269,30 @@ const AdoptionCreate = () => {
     // FormData 구성
     const form = new FormData();
     form.append("animalRequest", new Blob([JSON.stringify(animalRequest)], { type: "application/json" }));
-    if (selectedImage) {
-      const ext = selectedImage.type.split('/')[1] || 'jpg';
-      form.append("thumbnailImage", selectedImage, `thumbnail.${ext}`);
-    }
+    form.append("thumbnailImage", imageFile, imageFile.name);
 
     setLoading(true);
     const token = localStorage.getItem("token");
+
+    if (isEdit) {
+      try {
+        const response = await adoptionAPI.updateAdoptionPost(id, form, token);
+        alert("분양글이 성공적으로 수정되었습니다.");
+        navigate("/adoption");
+      } catch (error) {
+        console.error('분양글 수정 실패:', error);
+        if (error.response) {
+          alert(`에러: ${error.response.status} - ${error.response.data?.message || '수정 실패'}`);
+        } else if (error.message) {
+          alert(`에러: ${error.message}`);
+        } else {
+          alert("분양글 수정에 실패했습니다. 다시 시도해주세요.");
+        }
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       const response = await adoptionAPI.createAdoptionPost(form, token);
@@ -215,6 +312,13 @@ const AdoptionCreate = () => {
       setLoading(false);
     }
   };
+
+  if (fetchLoading) {
+    return <div className="p-8 text-center">게시글 정보를 불러오는 중...</div>;
+  }
+  if (fetchError) {
+    return <div className="p-8 text-center text-red-500">{fetchError}</div>;
+  }
 
   // 로그인하지 않은 경우 로딩 화면 표시
   if (!isLoggedIn) {
@@ -253,10 +357,10 @@ const AdoptionCreate = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl font-bold text-gray-800">
-                  분양글 등록
+                  {isEdit ? "분양글 수정" : "분양글 등록"}
                 </CardTitle>
                 <p className="text-gray-600">
-                  새로운 가족을 기다리는 반려동물을 등록해주세요.
+                  {isEdit ? "기존 정보를 수정할 수 있습니다." : "새로운 가족을 기다리는 반려동물을 등록해주세요."}
                 </p>
               </CardHeader>
               <CardContent>
@@ -340,7 +444,7 @@ const AdoptionCreate = () => {
                         id="fee"
                         value={formData.fee}
                         onChange={(e) => handleInputChange("fee", e.target.value)}
-                        placeholder="예: 200000원"
+                        placeholder="예: 20만원"
                       />
                     </div>
 
@@ -480,10 +584,10 @@ const AdoptionCreate = () => {
                       {loading ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          등록 중...
+                          {isEdit ? "수정 중..." : "등록 중..."}
                         </>
                       ) : (
-                        "분양글 등록"
+                        isEdit ? "분양글 수정" : "분양글 등록"
                       )}
                     </Button>
                   </div>

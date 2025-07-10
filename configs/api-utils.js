@@ -186,4 +186,18 @@ export const adoptionAPI = {
   getAdoptionDetail: async (id) => {
     return await apiUtils.get(`/animalboard-service/animal-board/public/${id}`);
   },
+
+  // 분양글 수정 (PATCH)
+  updateAdoptionPost: async (id, formData, token) => {
+    return await apiUtils.patch(
+      `/animalboard-service/animal-board/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+          // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
+        }
+      }
+    );
+  },
 }; 
