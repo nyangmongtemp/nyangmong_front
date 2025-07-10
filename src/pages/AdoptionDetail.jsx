@@ -388,14 +388,30 @@ const AdoptionDetail = () => {
 
                 {/* 게시물 수정 버튼 - 로그인한 사용자이면서 작성자인 경우에만 표시 */}
                 {isLoggedIn && post && email === post.authorEmail && (
-                  <div className="mb-8 text-center">
+                  <div className="mb-8 text-center flex justify-center gap-2">
                     <Button 
                       variant="outline" 
-                      className="mr-4"
+                      className="mr-2"
                       onClick={() => navigate(`/adoption/update/${id}`)}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       게시물 수정
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={async () => {
+                        if (!window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
+                        try {
+                          const token = localStorage.getItem('token');
+                          await adoptionAPI.deleteAdoptionPost(id, token);
+                          alert('게시글이 성공적으로 삭제되었습니다.');
+                          navigate('/adoption');
+                        } catch (err) {
+                          alert('게시글 삭제에 실패했습니다.');
+                        }
+                      }}
+                    >
+                      삭제
                     </Button>
                   </div>
                 )}

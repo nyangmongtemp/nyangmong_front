@@ -200,4 +200,16 @@ export const adoptionAPI = {
       }
     );
   },
+
+  // 분양글 삭제
+  deleteAdoptionPost: async (id, token) => {
+    return await apiUtils.delete(
+      `/animalboard-service/animal-board/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  },
 }; 
