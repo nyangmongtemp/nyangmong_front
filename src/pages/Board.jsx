@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Edit,
 } from "lucide-react";
+import DatePickerInput from "@/components/DatePickerInput";
 
 const Board = () => {
   const { type } = useParams();
@@ -29,6 +30,8 @@ const Board = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [searchWord, setSearchWord] = useState("");
   const [searchWordInput, setSearchWordInput] = useState("");
+  const [parentSelectedDate, setParentSelectedDate] = useState(null);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -40,11 +43,21 @@ const Board = () => {
   // API 호출 및 데이터 매핑
   // 페이지나 type이 바뀔 때마다 API 호출
   useEffect(() => {
-    console.log("useEffect triggered:", { currentPage, type });
+    console.log("useEffect triggered:", {
+      currentPage,
+      type,
+      searchWord,
+      parentSelectedDate,
+    });
+
     if (type === "event") {
+      const searchDateParam = parentSelectedDate
+        ? `&searchDate=${parentSelectedDate.toLocaleDateString("sv-SE")}` // 'YYYY-MM-DD'
+        : "";
+
       axios
         .get(
-          `http://localhost:8000/festival-service/api/festivals?searchWord=${searchWord}&page=${currentPage}&size=${postsPerPage}`
+          `http://localhost:8000/festival-service/api/festivals?searchWord=${searchWord}${searchDateParam}&page=${currentPage}&size=${postsPerPage}`
         )
         .then((res) => {
           const festivals = res.data.content || [];
@@ -93,7 +106,6 @@ const Board = () => {
           });
 
           setApiPosts(mappedPosts);
-          console.log(" 매핑된 게시글:", mappedPosts);
           setTotalPages(res.data.totalPages || 1);
         })
         .catch((err) => {
@@ -101,8 +113,14 @@ const Board = () => {
           setApiPosts([]);
           setTotalPages(1);
         });
+      console.log("선택된 날짜:", parentSelectedDate?.toISOString());
     }
-  }, [type, currentPage, searchWord]);
+  }, [type, currentPage, searchWord, parentSelectedDate]);
+
+  const handleSelectedDateChange = (date) => {
+    setParentSelectedDate(date);
+    setCurrentPage(1); // 날짜 검색 시 페이지 초기화
+  };
 
   // 게시판 제목 매핑
   const boardTitles = {
@@ -899,6 +917,21 @@ const Board = () => {
                   </Button>
                 </div>
               )}
+              {type === "event" && (
+                <div className="relative flex items-center space-x-4 px-6 bottom-[20px]">
+                  <DatePickerInput
+                    selectDate={parentSelectedDate}
+                    onSelectedDateChange={handleSelectedDateChange}
+                  />
+                  <Button
+                    variant="outline"
+                    className="h-[40px] px-4 border border-orange-300 text-orange-600 hover:bg-orange-50 rounded-lg"
+                    onClick={() => handleSelectedDateChange(null)}
+                  >
+                    초기화
+                  </Button>
+                </div>
+              )}
               <CardContent className="p-6">
                 {/* 게시글 목록 */}
                 <div className="space-y-4 mb-8">
@@ -973,14 +1006,14 @@ const Board = () => {
                               요금정보: {post.money}
                             </p>
                           )}
-                          {/* 🎟 예매 기간 정보 */}
+                          {/* 예매 기간 정보 */}
                           {post.reservationDate &&
                             post.reservationDate.trim() !== "" && (
                               <p className="text-sm text-gray-700 mb-3">
                                 예매기간: {post.reservationDate}
                               </p>
                             )}
-                          {/* 행사 시간 추가 ✅ */}
+                          {/* 행사 시간 추가 */}
                           {post.time && post.time.trim() !== "" && (
                             <p className="text-sm text-gray-700 mb-3">
                               행사시간: {post.time}
@@ -1002,7 +1035,7 @@ const Board = () => {
                                 <span>{post.date}</span>
                               </div>
                             </div>
-                            {/* 🎯 조회수/좋아요/댓글 아이콘은 event 게시판에서만 숨기기 */}
+                            {/* 조회수/좋아요/댓글 아이콘은 event 게시판에서만 숨기기 */}
                             {type !== "event" && (
                               <div className="flex items-center space-x-4">
                                 <div className="flex items-center space-x-1">
