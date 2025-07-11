@@ -5,7 +5,6 @@ import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -18,6 +17,7 @@ import { ArrowLeft, Upload, Loader2, Image, X } from "lucide-react";
 import { useAuth } from "@/context/UserContext";
 import { adoptionAPI } from "../../configs/api-utils.js";
 import ImageCropModal from "@/components/ImageCropModal";
+import CKEditorWrapper from "@/components/CKEditorWrapper";
 
 // 기존 이미지 URL을 File로 변환하는 함수
 async function urlToFile(url, filename, mimeType) {
@@ -47,7 +47,7 @@ async function urlToFile(url, filename, mimeType) {
 
 const AdoptionCreate = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, nickname } = useAuth();
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
@@ -67,6 +67,14 @@ const AdoptionCreate = () => {
       navigate("/adoption");
     }
   }, [isLoggedIn, navigate]);
+
+  // nickname이 변경될 때 formData 업데이트
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      nickname: nickname || ""
+    }));
+  }, [nickname]);
 
   useEffect(() => {
     if (isEdit) {
@@ -110,7 +118,8 @@ const AdoptionCreate = () => {
     neutered: "",
     vaccinated: "",
     fee: "",
-    imageUrl: ""
+    imageUrl: "",
+    nickname: nickname
   });
 
   const categories = ["강아지", "고양이", "기타"];
@@ -263,7 +272,8 @@ const AdoptionCreate = () => {
       sexCode: formData.sex,
       neuterYn: formData.neutered,
       address: formData.address,
-      fee: formData.fee
+      fee: formData.fee,
+      nickname: formData.nickname
     };
 
     // FormData 구성
@@ -396,6 +406,16 @@ const AdoptionCreate = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="nickname">닉네임 *</Label>
+                      <Input
+                        id="nickname"
+                        value={formData.nickname}
+                        readOnly
+                        className="bg-gray-50 cursor-not-allowed"
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -557,14 +577,17 @@ const AdoptionCreate = () => {
                   {/* 상세 내용 */}
                   <div className="space-y-2">
                     <Label htmlFor="content">상세 내용 *</Label>
-                    <Textarea
-                      id="content"
-                      value={formData.content}
-                      onChange={(e) => handleInputChange("content", e.target.value)}
-                      placeholder="반려동물에 대한 상세한 설명을 입력하세요"
-                      rows={8}
-                      required
-                    />
+                    <div className="border border-gray-300 rounded-md">
+                      <CKEditorWrapper
+                        value={formData.content}
+                        onChange={(data) => handleInputChange("content", data)}
+                        boardType="animal"
+                        placeholder="반려동물에 대한 상세한 설명을 입력하세요..."
+                        minHeight={400}
+                        maxHeight={400}
+                        enableImageUpload={true}
+                      />
+                    </div>
                   </div>
 
                   {/* 제출 버튼 */}

@@ -398,9 +398,10 @@ const AdoptionDetail = () => {
                 {/* 상세 설명 */}
                 <div className="mb-8">
                   <h3 className="text-lg font-bold mb-4">상세 설명</h3>
-                  <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {post.content}
-                  </div>
+                  <div
+                    className="prose max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
                 </div>
 
                 {/* 연락처 정보 */}

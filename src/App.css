@@ -40,3 +40,64 @@
 .read-the-docs {
   color: #888;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@media print {
+	body {
+		margin: 0 !important;
+	}
+}
+
+:root {
+	--ck-content-font-family: 'Lato';
+}
+
+.main-container {
+	font-family: var(--ck-content-font-family);
+	width: fit-content;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.editor-container_classic-editor .editor-container__editor {
+	min-width: 795px;
+	max-width: 795px;
+}
+
+/* CKEditor 5 기본 스타일 */
+.ck-editor__editable {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ck-editor__editable img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* CKEditor Wrapper 스타일 */
+.ck-editor-wrapper .ck-editor__editable {
+  height: var(--min-height, 200px) !important;
+  min-height: var(--min-height, 200px) !important;
+  max-height: var(--max-height, 400px) !important;
+  overflow-y: auto !important;
+  resize: none !important;
+}
+
+/* CKEditor 높이 강제 고정 */
+.ck-editor-wrapper .ck.ck-editor__main {
+  height: var(--min-height, 200px) !important;
+}
+
+.ck-editor-wrapper .ck.ck-editor__main > .ck-editor__editable {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+}
+
+.ck-editor-wrapper .ck-editor__editable img {
+  max-width: 100% !important;
+  height: auto !important;
+}
