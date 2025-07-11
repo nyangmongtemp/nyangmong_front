@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
+import { useNavigate } from "react-router-dom";
 
 const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
   const [messages, setMessages] = useState([]);
@@ -12,6 +13,9 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
   const [loading, setLoading] = useState(true);
   const [receiverId, setReceiverId] = useState(null);
   const { token } = useAuth();
+  const messageContainerRef = useRef(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -41,6 +45,13 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
       fetchMessages();
     }
   }, [chatId, token]);
+
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -111,7 +122,10 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
       </div>
 
       {/* 메시지 목록 */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+      <div
+        ref={messageContainerRef}
+        className="flex-1 p-4 overflow-y-auto space-y-4"
+      >
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             아직 메시지가 없습니다. 첫 메시지를 보내보세요!

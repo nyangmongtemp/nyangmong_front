@@ -1,10 +1,12 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Lock } from "lucide-react";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, USER } from "../../configs/host-config";
+import { useNavigate } from "react-router-dom";
 
 const PasswordResetForm = ({ onClose }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ const PasswordResetForm = ({ onClose }) => {
   });
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +32,11 @@ const PasswordResetForm = ({ onClose }) => {
     }
 
     try {
-      // 이메일 인증 코드 발송 API 호출
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${USER}/forget/${formData.email}`
+      );
+      console.log(response);
+
       setIsEmailSent(true);
       alert("인증 코드가 이메일로 발송되었습니다.");
     } catch (error) {
@@ -39,9 +46,17 @@ const PasswordResetForm = ({ onClose }) => {
 
   const handleVerifyCode = async () => {
     try {
-      // 인증 코드 확인 API 호출
+      const response = await axiosInstance.post(
+        `${API_BASE_URL}${USER}/forget/auth`,
+        {
+          email: formData.email,
+          authCode: formData.verificationCode,
+        }
+      );
       setIsCodeVerified(true);
-      alert("인증이 완료되었습니다.");
+      console.log(response);
+
+      alert("임시비밀번호가 이메일로 전송되었습니다.");
     } catch (error) {
       console.error("인증 실패:", error);
     }
@@ -49,7 +64,7 @@ const PasswordResetForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isCodeVerified) {
       alert("이메일 인증을 완료해주세요.");
       return;
@@ -76,7 +91,10 @@ const PasswordResetForm = ({ onClose }) => {
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium flex items-center">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium flex items-center"
+            >
               <Mail className="w-4 h-4 mr-2" />
               이메일 주소
             </Label>
@@ -96,15 +114,15 @@ const PasswordResetForm = ({ onClose }) => {
               <Mail className="w-4 h-4 mr-2" />
               이메일 인증
             </Label>
-            <div className="flex space-x-2">
-              <Input
-                name="verificationCode"
-                value={formData.verificationCode}
-                onChange={handleInputChange}
-                placeholder="인증 코드 입력"
-                className="border-gray-300"
-                disabled={!isEmailSent}
-              />
+            <Input
+              name="verificationCode"
+              value={formData.verificationCode}
+              onChange={handleInputChange}
+              placeholder="인증 코드 입력"
+              className="border-gray-300"
+              disabled={!isEmailSent}
+            />
+            <div className="flex space-x-2 pt-2">
               <Button
                 type="button"
                 onClick={handleSendEmail}
@@ -125,7 +143,7 @@ const PasswordResetForm = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="flex space-x-2 pt-4">
+          {/* <div className="flex space-x-2 pt-4">
             <Button
               type="button"
               onClick={onClose}
@@ -141,7 +159,7 @@ const PasswordResetForm = ({ onClose }) => {
             >
               임시 비밀번호 발급
             </Button>
-          </div>
+          </div> */}
         </form>
       </CardContent>
     </Card>

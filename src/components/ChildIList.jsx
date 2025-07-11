@@ -1,67 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../configs/axios-config";
 
 const ChildIList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // 임시 데이터 - 실제로는 API에서 가져올 데이터
-  const pets = [
-    {
-      id: 1,
-      title: "우리 고양이 자랑하고 싶어요 ㅎㅎ",
-      content: "너무 귀여운 우리 고양이 사진 공유합니다~",
-      author: "냥이맘",
-      createdAt: "25분 전",
-      views: 156,
-      likes: 24,
-      comments: 12,
-      image:
-        "https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 2,
-      title: "집사님들의 고양이 자랑방 🐱",
-      content: "귀여운 고양이 사진 한 장 투척합니다!",
-      author: "고양이천국",
-      createdAt: "1시간 전",
-      views: 200,
-      likes: 35,
-      comments: 8,
-      image:
-        "https://images.unsplash.com/photo-1574158622682-e40e69881006?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 3,
-      title: "말랑말랑 냥이 발바닥 😻",
-      content: "저희 집 냥이 발바닥이 너무 귀여워서 공유해요~",
-      author: "냥발러버",
-      createdAt: "2시간 전",
-      views: 98,
-      likes: 14,
-      comments: 4,
-      image:
-        "https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 4,
-      title: "아기 고양이 분양받았어요!",
-      content: "태어난 지 한 달도 안 된 고양이에요. 너무 귀엽죠?",
-      author: "새집사",
-      createdAt: "3시간 전",
-      views: 300,
-      likes: 60,
-      comments: 20,
-      image:
-        "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    },
-  ];
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    axiosInstance
+      .get("/board-service/board/introduction/list", {
+        params: { page: 0, size: 20 },
+      })
+      .then((res) => {
+        const content = res.data.content || res.data;
+        const mapped = content.map((item, idx) => ({
+          id: item.id || item.boardId || item._id || idx,
+          title: item.title,
+          content: item.content,
+          author: item.nickname || item.author,
+          createdAt: item.createdAt || item.regDate,
+          views: item.views || 0,
+          likes: item.likes || 0,
+          comments: item.comments || 0,
+          image: item.thumbnailImageUrl || item.imageUrl || null,
+        }));
+        setPosts(mapped);
+      })
+      .catch((err) => {
+        setError("소개 게시판 불러오기 실패");
+        setPosts([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const filteredPets = pets.filter(
+  const filteredPets = posts.filter(
     (pet) =>
       pet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pet.content.toLowerCase().includes(searchTerm.toLowerCase())
@@ -113,6 +94,8 @@ const ChildIList = () => {
                   <div
                     key={pet.id}
                     className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+                    onClick={() => navigate(`/child/detail/${pet.id}`)}
+                    style={{ cursor: "pointer" }}
                   >
                     {/* 이미지 */}
                     <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
