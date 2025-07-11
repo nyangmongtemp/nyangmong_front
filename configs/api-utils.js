@@ -169,12 +169,61 @@ export const adoptionAPI = {
   },
 
   // 분양글 등록
-  createAdoptionPost: async (postData) => {
-    return await apiUtils.post('/animalboard-service/animal-board/create', postData);
+  createAdoptionPost: async (formData, token) => {
+    return await apiUtils.post(
+      '/animalboard-service/animal-board',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+          // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
+        }
+      }
+    );
   },
 
   // 분양 상세 조회 (별칭)
   getAdoptionDetail: async (id) => {
     return await apiUtils.get(`/animalboard-service/animal-board/public/${id}`);
+  },
+
+  // 분양글 수정 (PATCH)
+  updateAdoptionPost: async (id, formData, token) => {
+    return await apiUtils.patch(
+      `/animalboard-service/animal-board/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+          // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
+        }
+      }
+    );
+  },
+
+  // 분양글 삭제
+  deleteAdoptionPost: async (id, token) => {
+    return await apiUtils.delete(
+      `/animalboard-service/animal-board/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  },
+
+  // 예약상태 변경
+  updateReservationStatus: async (id, status, token) => {
+    return await apiUtils.patch(
+      `/animalboard-service/animal-board/reservation/${id}`,
+      { reservationStatus: status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   },
 }; 

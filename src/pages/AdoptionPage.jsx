@@ -404,7 +404,7 @@ const AdoptionPage = () => {
       location: post.address || "위치 정보 없음",
       age: post.age || "나이 정보 없음",
       gender: post.sexCode === "M" ? "수컷" : post.sexCode === "F" ? "암컷" : "성별 정보 없음",
-      price: post.fee || "가격 정보 없음",
+      price: post.fee === 0 || post.fee === "0" ? "무료분양" : `${Number(post.fee).toLocaleString()}원`,
       date: new Date().toISOString().split('T')[0], // 현재 날짜로 설정
       views: post.viewCount || 0,
       likes: 0, // API에 없으므로 기본값

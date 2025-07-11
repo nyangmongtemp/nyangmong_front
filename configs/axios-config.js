@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
   // 개발 환경에서는 프록시를 사용하므로 baseURL을 빈 문자열로 설정
   baseURL: process.env.NODE_ENV === 'development' ? '' : API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    // "Content-Type": "application/json",
   },
   timeout: 10000, // 10초 타임아웃 설정
 });

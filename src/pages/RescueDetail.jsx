@@ -204,15 +204,15 @@ const RescueDetail = () => {
               <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
                                       <div className="flex items-center space-x-4">
-                      <Button
+          <Button
                         variant="outline"
-                        onClick={() => navigate('/adoption')}
+            onClick={() => navigate('/adoption')}
                         className="flex items-center space-x-2"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
+          >
+            <ArrowLeft className="h-4 w-4" />
                         <span>목록으로</span>
-                      </Button>
-                      <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+          </Button>
+                      <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                         <span>유기동물분양게시판</span>
                         <span>{'>'}</span>
                         <span>{animal.kindNm || '유기동물'}</span>
@@ -233,8 +233,8 @@ const RescueDetail = () => {
                         <span>{animal.happenPlace || '발견 장소 정보 없음'}</span>
                       </div>
                     </div>
-                  </div>
-                </div>
+          </div>
+        </div>
 
                 {/* 첫 번째 행: 이미지 + 유기동물 정보 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -333,8 +333,8 @@ const RescueDetail = () => {
 
         {/* 두 번째 행: 특이사항 + 보호소 정보 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 특이사항 */}
-          {animal.specialMark && (
+            {/* 특이사항 */}
+            {animal.specialMark && (
             <div className="h-fit">
               <Card>
                 <CardHeader>
@@ -347,9 +347,9 @@ const RescueDetail = () => {
                 </CardContent>
               </Card>
             </div>
-          )}
+            )}
 
-          {/* 보호소 정보 */}
+            {/* 보호소 정보 */}
           <div className="h-fit">
             <Card>
               <CardHeader>
@@ -388,11 +388,11 @@ const RescueDetail = () => {
                         className="flex-1"
                       >
                         <Button className="w-full bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500">
-                          <Phone className="h-4 w-4 mr-2" />
-                          전화하기
-                        </Button>
+                    <Phone className="h-4 w-4 mr-2" />
+                    전화하기
+                  </Button>
                       </a>
-                    </div>
+                </div>
                   </>
                 )}
               </CardContent>
@@ -429,8 +429,8 @@ const RescueDetail = () => {
               )}
             </CardContent>
           </Card>
-                </div>
-              </div>
+        </div>
+      </div>
             </div>
           </div>
 

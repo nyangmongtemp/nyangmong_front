@@ -53,6 +53,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/adoption" element={<AdoptionPage />} />
             <Route path="/adoption/create" element={<AdoptionCreate />} />
+            <Route path="/adoption/update/:id" element={<AdoptionCreate />} />
             <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
             <Route path="/rescue-detail/:id" element={<RescueDetail />} />
             <Route path="/map" element={<MapPage />} />
