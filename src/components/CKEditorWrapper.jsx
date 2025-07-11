@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
 	ClassicEditor,
@@ -58,10 +58,47 @@ const CKEditorWrapper = ({
 	readOnly = false
 }) => {
 	const [isLayoutReady, setIsLayoutReady] = useState(false);
+	const wrapperRef = useRef(null);
+	const observerRef = useRef(null);
 
 	useEffect(() => {
 		setIsLayoutReady(true);
 		return () => setIsLayoutReady(false);
+	}, []);
+
+	// 에디터 높이 고정 함수 + MutationObserver
+	const applyFixedHeight = (editor) => {
+		const editable = editor.ui.getEditableElement();
+		if (editable) {
+			editable.style.height = `${minHeight}px`;
+			editable.style.minHeight = `${minHeight}px`;
+			editable.style.maxHeight = `${maxHeight}px`;
+			editable.style.overflowY = 'auto';
+			editable.style.resize = 'none';
+		}
+		const main = editable.closest('.ck-editor__main');
+		if (main) {
+			main.style.height = `${minHeight}px`;
+		}
+		// MutationObserver로 style 변경 감지 시 height 재적용
+		if (editable && !observerRef.current) {
+			observerRef.current = new MutationObserver(() => {
+				editable.style.height = `${minHeight}px`;
+				editable.style.minHeight = `${minHeight}px`;
+				editable.style.maxHeight = `${maxHeight}px`;
+			});
+			observerRef.current.observe(editable, { attributes: true, attributeFilter: ['style'] });
+		}
+	};
+
+	useEffect(() => {
+		// 언마운트 시 observer 해제
+		return () => {
+			if (observerRef.current) {
+				observerRef.current.disconnect();
+				observerRef.current = null;
+			}
+		};
 	}, []);
 
 	const { editorConfig } = useMemo(() => {
@@ -246,13 +283,9 @@ const CKEditorWrapper = ({
 	};
 
 	return (
-		<div 
+		<div
+			ref={wrapperRef}
 			className="ck-editor-wrapper"
-			style={{
-				'--min-height': `${minHeight}px`,
-				'--max-height': `${maxHeight}px`,
-				height: `${minHeight}px`
-			}}
 		>
 			{editorConfig && (
 				<CKEditor
@@ -268,6 +301,9 @@ const CKEditorWrapper = ({
 						]
 					}}
 					data={value}
+					onReady={editor => applyFixedHeight(editor)}
+					onFocus={(_, editor) => applyFixedHeight(editor)}
+					onBlur={(_, editor) => applyFixedHeight(editor)}
 					onChange={(event, editor) => {
 						const data = editor.getData();
 						onChange && onChange(data);

@@ -585,7 +585,6 @@ const AdoptionCreate = () => {
                         placeholder="반려동물에 대한 상세한 설명을 입력하세요..."
                         minHeight={400}
                         maxHeight={400}
-                        enableImageUpload={true}
                       />
                     </div>
                   </div>

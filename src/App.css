@@ -77,15 +77,6 @@
   height: auto;
 }
 
-/* CKEditor Wrapper 스타일 */
-.ck-editor-wrapper .ck-editor__editable {
-  height: var(--min-height, 200px) !important;
-  min-height: var(--min-height, 200px) !important;
-  max-height: var(--max-height, 400px) !important;
-  overflow-y: auto !important;
-  resize: none !important;
-}
-
 /* CKEditor 높이 강제 고정 */
 .ck-editor-wrapper .ck.ck-editor__main {
   height: var(--min-height, 200px) !important;
