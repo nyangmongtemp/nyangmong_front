@@ -28,7 +28,7 @@ const UserMyPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { token, email, isLoggedIn } = useAuth();
+  const { token, email, isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -136,7 +136,10 @@ const UserMyPage = () => {
       );
 
       console.log("회원 정보 수정 성공:", response);
-      alert("회원 정보가 성공적으로 수정되었습니다.");
+      alert(
+        "회원 정보가 성공적으로 수정되었습니다. 다시 로그인을 진행해주세요"
+      );
+      logout();
     } catch (error) {
       console.error("회원 정보 수정 실패:", error);
       alert("회원 정보 수정에 실패했습니다.");

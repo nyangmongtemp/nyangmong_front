@@ -16,8 +16,22 @@ import {
   deleteAdoptionComment,
 } from "../../configs/api-examples";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, MAIN } from "../../configs/host-config";
+import { API_BASE_URL, MAIN, USER } from "../../configs/host-config";
 import { Card as BorderCard } from "@/components/ui/card";
+import { AiFillHeart } from "react-icons/ai";
+
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  // ISO 8601: '2024-07-10T13:45:23.000Z' → '2024-07-10 13:45'
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
 
 const CommentSection = ({
   postId,
@@ -46,6 +60,7 @@ const CommentSection = ({
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const { isLoggedIn, user } = useAuth();
+  const [nowLoggedUserId, setNowLoggedUserId] = useState(null);
 
   // 댓글, 좋아요 개수 조회
   const fetchCommentLikeCount = async () => {
@@ -242,14 +257,56 @@ const CommentSection = ({
   };
 
   // 컴포넌트 마운트 시 댓글 조회
+  // 좋아요 여부 조회
+  const fetchIsLiked = async () => {
+    if (!isLoggedIn || !postId || !category) return;
+    try {
+      const response = await axiosInstance.post(
+        `${API_BASE_URL}${MAIN}/liked`,
+        {
+          category: category,
+          contentId: postId,
+        }
+      );
+      console.log(response);
+
+      // 백엔드에서 true/false 반환한다고 가정
+      setIsLiked(!!response.data?.result);
+    } catch (err) {
+      console.error("좋아요 여부 조회 실패:", err);
+    }
+  };
+
+  // 유저 ID 비동기 조회 함수 추가
+  const getNowLoggedUserId = async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
+      console.log(response);
+
+      setNowLoggedUserId(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("유저 ID 조회 실패:", err);
+      setNowLoggedUserId(null);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (postId && category) {
       setPage(1);
       setHasMore(true);
       fetchCommentLikeCount();
       fetchComments(1, false);
+      fetchIsLiked();
     }
-  }, [postId, category]);
+  }, [postId, category, isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      getNowLoggedUserId();
+    }
+  }, [isLoggedIn]);
 
   const handleReplyClick = (commentId) => {
     if (replyTo === commentId) {
@@ -275,6 +332,7 @@ const CommentSection = ({
   const handleRevealHiddenComment = async (commentId) => {
     if (!isLoggedIn) {
       alert("비공개 댓글을 열람할 권한이 없습니다.");
+      return;
     }
 
     try {
@@ -351,7 +409,10 @@ const CommentSection = ({
       console.log(response);
       alert("대댓글이 생성되었습니다.");
       setReplyInputs((prev) => ({ ...prev, [parentCommentId]: "" }));
-      fetchComments(page, false); // 대댓글 생성 후 새로고침
+      // 컴포넌트 전체 데이터 새로고침
+      fetchComments(page, false);
+      fetchCommentLikeCount();
+      fetchIsLiked();
     } catch (err) {
       alert("대댓글 작성에 실패했습니다.");
     }
@@ -361,28 +422,36 @@ const CommentSection = ({
     if (!replyEditText.trim()) return;
     try {
       const response = await axiosInstance.patch(
-        `${API_BASE_URL}${MAIN}/comment/reply/modify`,
+        `${API_BASE_URL}${MAIN}/reply/modify`,
         {
           replyId,
           content: replyEditText,
         }
       );
+      console.log(response);
       setReplyEdit((prev) => ({ ...prev, [replyId]: false }));
       setReplyEditText("");
+      // 컴포넌트 전체 데이터 새로고침
       fetchComments(page, false);
+      fetchCommentLikeCount();
+      fetchIsLiked();
     } catch (err) {
       alert("대댓글 수정에 실패했습니다.");
     }
   };
   // 대댓글 삭제
-  const handleReplyDelete = async (replyId) => {
+  const handleReplyDelete = async (replyId, parentCommentId) => {
     if (!window.confirm("대댓글을 삭제하시겠습니까?")) return;
     try {
       const response = await axiosInstance.delete(
-        `${API_BASE_URL}${MAIN}/comment/reply/delete/${replyId}`
+        `${API_BASE_URL}${MAIN}/reply/delete/${replyId}`
       );
+      console.log(response);
       alert("대댓글 삭제가 완료되었습니다.");
+      // 컴포넌트 전체 데이터 새로고침
       fetchComments(page, false);
+      fetchCommentLikeCount();
+      fetchIsLiked();
     } catch (err) {
       alert("대댓글 삭제에 실패했습니다.");
     }
@@ -391,28 +460,20 @@ const CommentSection = ({
   return (
     <Card className={`border-orange-200 shadow-sm ${className}`}>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <MessageCircle className="w-5 h-5 mr-2" />
-            댓글 {commentCount}개
-          </h3>
-
-          {/* 좋아요 버튼 */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLikeToggle}
-              className={`flex items-center gap-1 ${
-                isLiked
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-gray-500 hover:text-red-500"
-              }`}
-            >
-              <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-              <span className="text-sm font-medium">{likeCount}</span>
-            </Button>
-          </div>
+        <div className="flex flex-col items-center justify-center py-2">
+          <button
+            onClick={handleLikeToggle}
+            className={`transition-all duration-200 focus:outline-none ${
+              isLiked
+                ? "text-red-500 scale-110"
+                : "text-gray-300 hover:text-red-400"
+            }`}
+          >
+            <AiFillHeart className="w-12 h-12" />
+          </button>
+          <span className="mt-1 text-xl font-bold text-gray-700">
+            {likeCount}
+          </span>
         </div>
       </CardHeader>
       <CardContent>
@@ -498,7 +559,7 @@ const CommentSection = ({
                         </div>
                         <span className="text-xs text-gray-500">
                           {comment.createAt
-                            ? comment.createAt.slice(0, 10)
+                            ? formatDateTime(comment.createAt)
                             : ""}
                         </span>
                       </div>
@@ -555,23 +616,7 @@ const CommentSection = ({
                         <>
                           {/* 댓글 본문 */}
                           <div className="w-full">
-                            <div className="flex items-center gap-2 mb-1">
-                              {comment.profileImage && (
-                                <img
-                                  src={comment.profileImage}
-                                  alt={comment.nickname}
-                                  className="w-8 h-8 rounded-full"
-                                />
-                              )}
-                              <span className="font-medium text-sm text-gray-800">
-                                {comment.nickname}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {comment.createAt
-                                  ? comment.createAt.slice(0, 10)
-                                  : ""}
-                              </span>
-                            </div>
+                            {/* 중복 닉네임/날짜 라인 제거 */}
                             <div className="text-gray-800 text-sm w-full text-left break-words whitespace-pre-line">
                               {comment.content}
                             </div>
@@ -585,7 +630,8 @@ const CommentSection = ({
                   {/* 댓글 액션 버튼들 */}
                   {isLoggedIn && (
                     <div className="flex gap-2">
-                      {
+                      {/* 수정/삭제 버튼: 본인만 */}
+                      {nowLoggedUserId === comment.userId && (
                         <>
                           <Button
                             variant="ghost"
@@ -609,26 +655,56 @@ const CommentSection = ({
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </>
-                      }
-
-                      {/* 답글 버튼 */}
-                      {showReplies && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            setReplyTo(
-                              replyTo === comment.commentId
-                                ? null
-                                : comment.commentId
-                            )
-                          }
-                          className="text-orange-600 hover:bg-orange-50"
-                        >
-                          <Reply className="w-4 h-4 mr-1" />
-                          답글
-                        </Button>
                       )}
+                      {/* 답글 버튼: 로그인 시 항상, 단 비공개 댓글 미열람 시 숨김 */}
+                      {showReplies &&
+                        !(
+                          comment.hidden && !revealedComments[comment.commentId]
+                        ) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setReplyTo(
+                                replyTo === comment.commentId
+                                  ? null
+                                  : comment.commentId
+                              )
+                            }
+                            className="text-orange-600 hover:bg-orange-50"
+                          >
+                            <Reply className="w-4 h-4 mr-1" />
+                            답글
+                          </Button>
+                        )}
+                    </div>
+                  )}
+                  {/* 답글 입력창: replyTo가 현재 commentId일 때만 노출 */}
+                  {replyTo === comment.commentId && (
+                    <div className="mt-3">
+                      <Textarea
+                        placeholder="답글을 입력하세요..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        onKeyPress={(e) =>
+                          handleKeyPress(e, () =>
+                            handleReplySubmit(comment.commentId)
+                          )
+                        }
+                        className="resize-none border-orange-200 focus:border-orange-400"
+                        rows={2}
+                      />
+                      <div className="flex justify-end mt-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleReplySubmit(comment.commentId)}
+                          disabled={!replyText.trim()}
+                          className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
+                        >
+                          <Send className="w-4 h-4 mr-1" />
+                          답글 작성
+                        </Button>
+                      </div>
                     </div>
                   )}
                   {/* 대댓글 더보기 버튼 */}
@@ -677,42 +753,87 @@ const CommentSection = ({
                                       </span>
                                       <span className="text-xs text-gray-400">
                                         {reply.createAt
-                                          ? reply.createAt.slice(0, 10)
+                                          ? formatDateTime(reply.createAt)
                                           : ""}
                                       </span>
                                     </div>
-                                    <div className="text-gray-700 text-sm break-words whitespace-pre-line">
-                                      {reply.content}
-                                    </div>
+                                    {/* 답글 수정 모드 */}
+                                    {replyEdit[reply.replyId] ? (
+                                      <>
+                                        <Textarea
+                                          value={replyEditText}
+                                          onChange={(e) =>
+                                            setReplyEditText(e.target.value)
+                                          }
+                                          className="resize-none"
+                                          rows={2}
+                                        />
+                                        <div className="flex gap-2 mt-2">
+                                          <Button
+                                            size="sm"
+                                            onClick={() =>
+                                              handleReplyEditSubmit(
+                                                reply.replyId,
+                                                comment.commentId
+                                              )
+                                            }
+                                            className="bg-orange-500 hover:bg-orange-600"
+                                          >
+                                            수정 완료
+                                          </Button>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                              setReplyEdit((prev) => ({
+                                                ...prev,
+                                                [reply.replyId]: false,
+                                              }));
+                                              setReplyEditText("");
+                                            }}
+                                          >
+                                            취소
+                                          </Button>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                                        {reply.content}
+                                      </div>
+                                    )}
                                   </div>
-                                  {isLoggedIn && (
-                                    <div className="flex gap-1 ml-2 shrink-0">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          setReplyEdit((prev) => ({
-                                            ...prev,
-                                            [reply.replyId]: true,
-                                          }));
-                                          setReplyEditText(reply.content);
-                                        }}
-                                        className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
-                                      >
-                                        <Edit className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                          handleReplyDelete(reply.replyId)
-                                        }
-                                        className="text-red-600 hover:bg-red-50 p-1 h-auto"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                  )}
+                                  {isLoggedIn &&
+                                    nowLoggedUserId === reply.userId && (
+                                      <div className="flex gap-1 ml-2 shrink-0">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setReplyEdit((prev) => ({
+                                              ...prev,
+                                              [reply.replyId]: true,
+                                            }));
+                                            setReplyEditText(reply.content);
+                                          }}
+                                          className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
+                                        >
+                                          <Edit className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() =>
+                                            handleReplyDelete(
+                                              reply.replyId,
+                                              comment.commentId
+                                            )
+                                          }
+                                          className="text-red-600 hover:bg-red-50 p-1 h-auto"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    )}
                                 </div>
                               </div>
                             )
@@ -720,9 +841,6 @@ const CommentSection = ({
                         </div>
                       </div>
                     )}
-                  {index < comments.length - 1 && (
-                    <Separator className="mt-4" />
-                  )}
                 </BorderCard>
               ))}
           </div>
