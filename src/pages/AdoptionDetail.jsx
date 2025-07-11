@@ -265,8 +265,8 @@ const AdoptionDetail = () => {
                   <div>
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">{post.title}</h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>작성자: {post.authorName || post.writerName}</span>
-                      <span>작성일: {new Date(post.createdAt || post.createdDate).toLocaleDateString('ko-KR')}</span>
+                      <span>작성자: {post.nickName}</span>
+                      <span>작성일: {new Date(post.createAt).toLocaleDateString('ko-KR')}</span>
                       <div className="flex items-center space-x-2">
                         <Eye className="h-4 w-4" />
                         <span>{post.viewCount || post.views}</span>
@@ -278,7 +278,7 @@ const AdoptionDetail = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-end">
-                    <Badge className="bg-orange-500">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</Badge>
+                    <Badge className="bg-orange-500">{post.fee === 0 ? '무료분양' : `${post.fee.toLocaleString()}원`}</Badge>
                     {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
                     {isLoggedIn && post && email === post.authorEmail && (
                       <div className="mt-2">
@@ -389,7 +389,7 @@ const AdoptionDetail = () => {
                       </div>
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
-                        <p className="font-medium text-orange-600">{post.fee === null || post.fee === undefined || post.fee === '' ? '무료분양' : post.fee}</p>
+                        <p className="font-medium text-orange-600">{post.fee === 0 ? '무료분양' : `${post.fee.toLocaleString()}원`}</p>
                       </div>
                     </div>
                   </CardContent>
