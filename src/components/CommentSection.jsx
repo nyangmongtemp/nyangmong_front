@@ -409,6 +409,8 @@ const CommentSection = ({
       console.log(response);
       alert("대댓글이 생성되었습니다.");
       setReplyInputs((prev) => ({ ...prev, [parentCommentId]: "" }));
+      // 대댓글 목록 새로고침
+      fetchReplies(parentCommentId);
       // 컴포넌트 전체 데이터 새로고침
       fetchComments(page, false);
       fetchCommentLikeCount();
@@ -431,6 +433,8 @@ const CommentSection = ({
       console.log(response);
       setReplyEdit((prev) => ({ ...prev, [replyId]: false }));
       setReplyEditText("");
+      // 대댓글 목록 새로고침
+      fetchReplies(parentCommentId);
       // 컴포넌트 전체 데이터 새로고침
       fetchComments(page, false);
       fetchCommentLikeCount();
@@ -448,6 +452,8 @@ const CommentSection = ({
       );
       console.log(response);
       alert("대댓글 삭제가 완료되었습니다.");
+      // 대댓글 목록 새로고침
+      fetchReplies(parentCommentId);
       // 컴포넌트 전체 데이터 새로고침
       fetchComments(page, false);
       fetchCommentLikeCount();
@@ -542,91 +548,31 @@ const CommentSection = ({
                   key={comment.commentId}
                   className="border border-orange-100 shadow-none p-4 mb-2"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2 justify-between">
-                        <div className="flex items-center gap-2">
-                          {comment.profileImage && (
-                            <img
-                              src={comment.profileImage}
-                              alt={comment.nickname}
-                              className="w-8 h-8 rounded-full"
-                            />
-                          )}
-                          <span className="font-medium text-sm text-gray-800">
-                            {comment.nickname}
-                          </span>
-                        </div>
+                  {/* 프로필 이미지 + 닉네임/날짜/내용 세로 정렬 */}
+                  <div className="flex items-start gap-3 mb-2">
+                    {comment.profileImage && (
+                      <img
+                        src={comment.profileImage}
+                        alt={comment.nickname}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-base text-gray-800">
+                          {comment.nickname}
+                        </span>
                         <span className="text-xs text-gray-500">
                           {comment.createAt
                             ? formatDateTime(comment.createAt)
                             : ""}
                         </span>
                       </div>
-
-                      {/* 댓글 수정 모드 */}
-                      {editingComment === comment.commentId ? (
-                        <div className="space-y-2">
-                          <Textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            className="resize-none"
-                            rows={2}
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleCommentEdit(comment.commentId)
-                              }
-                              className="bg-orange-500 hover:bg-orange-600"
-                            >
-                              수정 완료
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingComment(null);
-                                setEditText("");
-                              }}
-                            >
-                              취소
-                            </Button>
-                          </div>
-                        </div>
-                      ) : comment.hidden &&
-                        !revealedComments[comment.commentId] ? (
-                        <div className="flex items-center gap-2">
-                          <span className="italic text-gray-400">
-                            비공개 댓글입니다.
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-orange-300 text-orange-600 hover:bg-orange-50 ml-2"
-                            onClick={() =>
-                              handleRevealHiddenComment(comment.commentId)
-                            }
-                          >
-                            비공개 댓글 확인하기
-                          </Button>
-                        </div>
-                      ) : (
-                        <>
-                          {/* 댓글 본문 */}
-                          <div className="w-full">
-                            {/* 중복 닉네임/날짜 라인 제거 */}
-                            <div className="text-gray-800 text-sm w-full text-left break-words whitespace-pre-line">
-                              {comment.content}
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>{" "}
-                    {/* flex-1 닫힘 */}
-                  </div>{" "}
-                  {/* flex justify-between items-start 닫힘 */}
+                      <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                        {comment.content}
+                      </div>
+                    </div>
+                  </div>
                   {/* 댓글 액션 버튼들 */}
                   {isLoggedIn && (
                     <div className="flex gap-2">

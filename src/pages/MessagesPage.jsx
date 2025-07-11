@@ -85,19 +85,12 @@ const MessagesPage = () => {
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
 
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString("ko-KR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } else if (diffInHours < 24 * 7) {
-      return date.toLocaleDateString("ko-KR", { weekday: "short" });
-    } else {
-      return date.toLocaleDateString("ko-KR", {
-        month: "short",
-        day: "numeric",
-      });
-    }
+    // 항상 월/일 시:분 형식으로 출력
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+    return `${month}/${day} ${hour}:${minute}`;
   };
 
   // 메시지 보낸 사람의 닉네임을 찾는 함수
@@ -239,7 +232,9 @@ const MessagesPage = () => {
                                     {otherNickname}
                                   </h3>
                                   <span className="text-xs text-gray-500">
-                                    {formatDate(chat.updateAt)}
+                                    {formatDate(
+                                      chat.message?.createAt || chat.updateAt
+                                    )}
                                   </span>
                                 </div>
                                 <div className="flex items-center space-x-2 mb-2">

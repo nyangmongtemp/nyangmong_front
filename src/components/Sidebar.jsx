@@ -80,7 +80,6 @@ const Sidebar = () => {
           event.data.provider
         );
       }
-      console.log(event);
     };
 
     window.addEventListener("message", handleKakaoMessage);

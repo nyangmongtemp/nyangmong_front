@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       setNickname(nickname);
       setProfileImage(profileImage);
       setIsLoggedIn(true);
+      setIsSocial(false);
     } catch (e) {
       console.error("Encryption error during login:", e);
     }

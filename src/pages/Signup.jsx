@@ -196,8 +196,11 @@ const Signup = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* 이름 */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  이름
+                <Label
+                  htmlFor="name"
+                  className="text-sm font-medium flex items-center gap-1"
+                >
+                  이름 <span className="text-xs text-red-500">(필수)</span>
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -215,9 +218,14 @@ const Signup = () => {
 
               {/* 닉네임 */}
               <div className="space-y-2">
-                <Label htmlFor="nickname" className="text-sm font-medium">
-                  닉네임
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="nickname" className="text-sm font-medium">
+                    닉네임
+                  </Label>
+                  <span className="text-xs text-gray-400">
+                    기재를 안하시면 이름이 닉네임이 됩니다
+                  </span>
+                </div>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   <Input
@@ -266,8 +274,11 @@ const Signup = () => {
 
               {/* 이메일 */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  이메일
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium flex items-center gap-1"
+                >
+                  이메일 <span className="text-xs text-red-500">(필수)</span>
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -366,8 +377,11 @@ const Signup = () => {
 
               {/* 비밀번호 */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  비밀번호
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium flex items-center gap-1"
+                >
+                  비밀번호 <span className="text-xs text-red-500">(필수)</span>
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -388,9 +402,10 @@ const Signup = () => {
               <div className="space-y-2">
                 <Label
                   htmlFor="confirmPassword"
-                  className="text-sm font-medium"
+                  className="text-sm font-medium flex items-center gap-1"
                 >
-                  비밀번호 확인
+                  비밀번호 확인{" "}
+                  <span className="text-xs text-red-500">(필수)</span>
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -476,41 +491,6 @@ const Signup = () => {
                 회원가입
               </Button>
             </form>
-
-            {/* 소셜 회원가입 */}
-            <div className="mt-6 space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">
-                    또는 소셜 계정으로 가입
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
-                >
-                  카카오로 시작하기
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500"
-                >
-                  네이버로 시작하기
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-300 hover:bg-gray-50"
-                >
-                  구글로 시작하기
-                </Button>
-              </div>
-            </div>
 
             {/* 로그인 링크 */}
             <div className="mt-6 text-center">

@@ -28,11 +28,10 @@ const UserMyPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { token, email, isLoggedIn, logout } = useAuth();
+  const { token, email, isLoggedIn, logout, isSocial } = useAuth();
 
   useEffect(() => {
     if (!isLoggedIn) {
-      alert("로그인이 필요합니다.");
       navigate("/");
     }
   }, [isLoggedIn, navigate]);
@@ -200,8 +199,12 @@ const UserMyPage = () => {
             handleSubmit={handleSubmit}
             handleProfileImageChange={handleProfileImageChange}
           />
-          <PasswordChangeForm />
-          <EmailChangeForm currentEmail={formData.email} />
+          {!isSocial && (
+            <>
+              <PasswordChangeForm />
+              <EmailChangeForm currentEmail={formData.email} />
+            </>
+          )}
         </div>
       );
     }
