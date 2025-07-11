@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import CommentSection from "@/components/CommentSection";
 import axiosInstance from "../../configs/axios-config";
 
 const PostDetail = () => {
@@ -50,12 +51,6 @@ const PostDetail = () => {
       })
       .finally(() => setLoading(false));
   }, [type, id]);
-
-  const handleCommentSubmit = () => {
-    if (newComment.trim()) {
-      setNewComment("");
-    }
-  };
 
   const handleLike = () => {
     // TODO: 좋아요 기능
@@ -175,73 +170,7 @@ const PostDetail = () => {
             </Card>
 
             {/* 댓글 섹션 */}
-            <Card className="border-orange-200 shadow-sm">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  댓글 {comments.length}개
-                </h3>
-              </CardHeader>
-              <CardContent>
-                {/* 댓글 작성 */}
-                <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-pink-50 rounded-lg border border-orange-100">
-                  <Textarea
-                    placeholder="댓글을 입력하세요..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="mb-3 resize-none border-orange-200 focus:border-orange-400"
-                    rows={3}
-                  />
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleCommentSubmit}
-                      disabled={!newComment.trim()}
-                      className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
-                    >
-                      댓글 작성
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 댓글 목록 */}
-                <div className="space-y-4">
-                  {comments.map((comment, index) => (
-                    <div key={comment.id}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-sm text-gray-800">
-                              {comment.author}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {comment.createdAt}
-                            </span>
-                          </div>
-                          <p className="text-gray-700">{comment.content}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-orange-600 hover:bg-orange-50"
-                          >
-                            답글
-                          </Button>
-                        </div>
-                      </div>
-                      {index < comments.length - 1 && (
-                        <Separator className="mt-4" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {comments.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    첫 번째 댓글을 작성해보세요!
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <CommentSection postId={id} category={type} showReplies={true} />
           </div>
 
           {/* 사이드바 영역 */}

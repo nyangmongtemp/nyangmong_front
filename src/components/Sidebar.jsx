@@ -19,9 +19,19 @@ import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
 
+const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
+const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+
 const Sidebar = () => {
-  const { token, isLoggedIn, login, logout, nickname, profileImage, email } =
-    useAuth();
+  const {
+    isLoggedIn,
+    login,
+    logout,
+    nickname,
+    profileImage,
+    isSocial,
+    kakaoLogin,
+  } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
@@ -41,6 +51,40 @@ const Sidebar = () => {
     "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
   ];
+
+  const handleKakaoLogin = () => {
+    console.log("카카오 로그인 버튼 클릭!");
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&prompt=login`;
+
+    window.open(
+      kakaoAuthUrl,
+      "kakao-login",
+      "width=500,height=600,scrollbars=yes,resizable=yes"
+    );
+  };
+
+  // ✅ 카카오 로그인 메시지 수신 처리
+  useEffect(() => {
+    const handleKakaoMessage = (event) => {
+      if (
+        event.data.type === "OAUTH_SUCCESS" &&
+        event.data.provider === "KAKAO"
+      ) {
+        console.log("✅ 카카오 로그인 성공!");
+        console.log(event);
+        kakaoLogin(
+          event.data.token,
+          event.data.email,
+          event.data.nickname,
+          event.data.profileImage,
+          event.data.provider
+        );
+      }
+    };
+
+    window.addEventListener("message", handleKakaoMessage);
+    return () => window.removeEventListener("message", handleKakaoMessage);
+  }, [login, navigate]);
 
   const handleLogin = async (e) => {
     try {
@@ -285,6 +329,7 @@ const Sidebar = () => {
                       <Button
                         variant="outline"
                         className="w-full bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
+                        onClick={handleKakaoLogin}
                       >
                         카카오 로그인
                       </Button>

@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [profileImage, setProfileImage] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isSocial, setIsSocial] = useState(!!localStorage.getItem("social"));
 
   useEffect(() => {
     const loadDecryptedUser = async () => {
@@ -60,6 +61,32 @@ export const AuthProvider = ({ children }) => {
       setNickname(nickname);
       setProfileImage(profileImage);
       setIsLoggedIn(true);
+      setIsSocial(false);
+    } catch (e) {
+      console.error("Encryption error during login:", e);
+    }
+  };
+
+  const kakaoLogin = async (
+    token,
+    email,
+    nickname,
+    profileImage,
+    socialProvider
+  ) => {
+    try {
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", await encrypt(email));
+      localStorage.setItem("nickname", await encrypt(nickname));
+      localStorage.setItem("profileImage", await encrypt(profileImage));
+      localStorage.setItem("social", socialProvider);
+
+      setToken(token);
+      setEmail(email);
+      setNickname(nickname);
+      setProfileImage(profileImage);
+      setIsSocial(true);
+      setIsLoggedIn(true);
     } catch (e) {
       console.error("Encryption error during login:", e);
     }
@@ -70,6 +97,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("email");
     localStorage.removeItem("nickname");
     localStorage.removeItem("profileImage");
+    if (isSocial) {
+      localStorage.removeItem("social");
+      setIsSocial(false);
+    }
 
     setToken("");
     setEmail("");
@@ -84,8 +115,10 @@ export const AuthProvider = ({ children }) => {
         token,
         email,
         isLoggedIn,
+        isSocial,
         login,
         logout,
+        kakaoLogin,
         nickname,
         profileImage,
       }}
