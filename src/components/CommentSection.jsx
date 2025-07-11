@@ -423,10 +423,13 @@ const CommentSection = ({
   const handleReplyEditSubmit = async (replyId, parentCommentId) => {
     if (!replyEditText.trim()) return;
     try {
+      console.log(replyId);
+      console.log(replyEditText);
+
       const response = await axiosInstance.patch(
         `${API_BASE_URL}${MAIN}/reply/modify`,
         {
-          replyId,
+          replyId: replyId,
           content: replyEditText,
         }
       );
@@ -440,6 +443,8 @@ const CommentSection = ({
       fetchCommentLikeCount();
       fetchIsLiked();
     } catch (err) {
+      console.log(err);
+
       alert("대댓글 수정에 실패했습니다.");
     }
   };
@@ -568,9 +573,60 @@ const CommentSection = ({
                             : ""}
                         </span>
                       </div>
-                      <div className="text-gray-700 text-sm break-words whitespace-pre-line">
-                        {comment.content}
-                      </div>
+                      {editingComment === comment.commentId ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="resize-none"
+                            rows={2}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleCommentEdit(comment.commentId)
+                              }
+                              className="bg-orange-500 hover:bg-orange-600"
+                            >
+                              수정 완료
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingComment(null);
+                                setEditText("");
+                              }}
+                            >
+                              취소
+                            </Button>
+                          </div>
+                        </div>
+                      ) : comment.hidden &&
+                        !revealedComments[comment.commentId] ? (
+                        <div className="flex items-center gap-2">
+                          <span className="italic text-gray-400">
+                            비공개 댓글입니다.
+                          </span>
+                          {isLoggedIn && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-orange-300 text-orange-600 hover:bg-orange-50 ml-2"
+                              onClick={() =>
+                                handleRevealHiddenComment(comment.commentId)
+                              }
+                            >
+                              비공개 댓글 확인하기
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                          {comment.content}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {/* 댓글 액션 버튼들 */}
