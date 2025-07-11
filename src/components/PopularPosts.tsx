@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, MessageCircle, Eye } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heart, MessageCircle, Eye } from "lucide-react";
 
 const PopularPosts = () => {
   const posts = [
@@ -11,7 +10,7 @@ const PopularPosts = () => {
       author: "펫러버123",
       likes: 42,
       comments: 15,
-      views: 230
+      views: 230,
     },
     {
       id: 2,
@@ -19,7 +18,7 @@ const PopularPosts = () => {
       author: "냥냥이맘",
       likes: 38,
       comments: 22,
-      views: 180
+      views: 180,
     },
     {
       id: 3,
@@ -27,7 +26,7 @@ const PopularPosts = () => {
       author: "멍멍아빠",
       likes: 35,
       comments: 18,
-      views: 156
+      views: 156,
     },
     {
       id: 4,
@@ -35,8 +34,8 @@ const PopularPosts = () => {
       author: "초보집사",
       likes: 28,
       comments: 31,
-      views: 145
-    }
+      views: 145,
+    },
   ];
 
   return (

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,17 +11,25 @@ import Sidebar from "@/components/Sidebar";
 import ImageCropModal from "@/components/ImageCropModal";
 import axiosInstance from "../../configs/axios-config";
 import { useAuth } from "../context/UserContext";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
 const CreatePost = () => {
-  const { type } = useParams();
+  const { type, id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
-
+  //const isEdit = location.pathname.startsWith("/update-post");
+  let isEdit;
+  if (id) {
+    isEdit = true;
+  } else {
+    isEdit = false;
+  }
   // 게시판 제목 매핑
   const boardTitles = {
     free: "자유게시판",
@@ -29,6 +37,31 @@ const CreatePost = () => {
     review: "후기게시판",
     notice: "공지사항",
   };
+
+  // 동적 페이지 타이틀
+  const pageTitle = isEdit
+    ? `${boardTitles[type] || "게시판"} 게시물 수정`
+    : `${boardTitles[type] || "게시판"} 글쓰기`;
+
+  const { isLoggedIn, token, nickname, profileImage } = useAuth();
+
+  useEffect(() => {
+    if (isEdit && id) {
+      axiosInstance
+        .get(`${API_BASE_URL}${BOARD}/detail/${type}/${id}`)
+        .then((res) => {
+          let data = res.data.result || res.data.data || res.data;
+          if (Array.isArray(data)) data = data[0];
+          setTitle(data.title);
+          setContent(data.content);
+          // 이미지 등도 필요시 세팅
+          if (data.thumbnailImage || data.thumbnailimage) {
+            setImagePreview(data.thumbnailImage || data.thumbnailimage);
+            // 실제 파일 객체는 없으므로, 수정 시 새 파일 업로드 필요
+          }
+        });
+    }
+  }, [isEdit, type, id]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -69,44 +102,100 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!title.trim() || !content.trim()) {
       alert("제목과 내용을 입력해주세요.");
       return;
     }
 
-    // 게시글 정보 context 객체
-    const context = {
-      category: type,
-      title,
-      content,
+    // 로그인 상태 확인 (임시로 주석 처리)
+    // if (!isLoggedIn || !token) {
+    //   alert("로그인이 필요합니다.");
+    //   navigate("/login");
+    //   return;
+    // }
+
+    // 카테고리 매핑 (소문자 → 대문자)
+    const categoryMap = {
+      free: "FREE",
+      question: "QUESTION",
+      review: "REVIEW",
     };
 
-    // form-data 생성
+    // FormData 생성
     const formData = new FormData();
     formData.append(
       "context",
-      new Blob([JSON.stringify(context)], { type: "application/json" })
+      new Blob(
+        [
+          JSON.stringify({
+            category: categoryMap[type],
+            title,
+            content,
+          }),
+        ],
+        { type: "application/json" }
+      )
     );
+
     if (selectedImage) {
-      formData.append(
-        "thumbnailImage",
-        selectedImage,
-        selectedImage.name || "thumbnail.png"
-      );
+      formData.append("thumbnailImage", selectedImage);
+    } else {
+      // 이미지가 없으면 빈 Blob을 추가 (null 대신)
+      formData.append("thumbnailImage", new Blob([]), "empty.jpg");
     }
 
     try {
-      await axiosInstance.post(
-        "/board-service/board/information/create",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      alert("게시글이 등록되었습니다.");
-      navigate(`/board/${type}`);
+      // 토큰 확인
+      const storedToken = localStorage.getItem("token");
+      console.log("저장된 토큰:", storedToken ? "있음" : "없음");
+      console.log("useAuth 토큰:", token ? "있음" : "없음");
+      console.log("로그인 상태:", isLoggedIn);
+      console.log("실제 토큰 값:", token);
+
+      console.log(id);
+      console.log(type);
+      console.log(isEdit);
+      console.log(formData);
+
+      // 게이트웨이를 통해 board-service로 요청
+      console.log("게이트웨이를 통해 board-service로 요청");
+
+      if (isEdit) {
+        const response = await axiosInstance.put(
+          `${API_BASE_URL}${BOARD}/${type}/modify/${id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log(response);
+
+        alert("게시글이 수정되었습니다.");
+        navigate(`/board/${type}`);
+      } else {
+        // 실제 게시글 생성 요청 - 토큰을 여러 방식으로 전송
+        const response = await axiosInstance.post(
+          `${API_BASE_URL}${BOARD}/information/create`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("게시글 생성 응답:", response.data);
+        alert("게시글이 등록되었습니다.");
+        navigate(`/board/${type}`);
+      }
     } catch (err) {
-      alert("게시글 등록에 실패했습니다.");
+      console.error("게시글 생성 에러:", err);
+      alert(
+        isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다."
+      );
     }
   };
 
@@ -137,7 +226,9 @@ const CreatePost = () => {
             <Card className="border-orange-200 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-orange-100 to-pink-100 border-b border-orange-200">
                 <CardTitle className="text-2xl font-bold text-gray-800">
-                  {boardTitles[type] || "게시판"} 글쓰기
+                  {isEdit
+                    ? `${boardTitles[type] || "게시판"} 게시물 수정`
+                    : `${boardTitles[type] || "게시판"} 글쓰기`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -249,7 +340,7 @@ const CreatePost = () => {
                       type="submit"
                       className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white"
                     >
-                      게시글 작성
+                      {isEdit ? "수정 완료" : "게시글 작성"}
                     </Button>
                   </div>
                 </form>

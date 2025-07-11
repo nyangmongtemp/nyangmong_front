@@ -16,6 +16,7 @@ import {
   Edit,
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
 const Board = () => {
   const { type } = useParams();
@@ -38,12 +39,15 @@ const Board = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 행사 게시판일 때 API 호출
+  // 게시판별 API 호출
   useEffect(() => {
-    if (type === "event") {
-      axiosInstance
-        .get("http://localhost:8000/festival-service/api/festivals")
-        .then((res) => {
+    const fetchBoardPosts = async () => {
+      try {
+        if (type === "event") {
+          // 행사 게시판
+          const res = await axiosInstance.get(
+            "http://localhost:8000/festival-service/api/festivals"
+          );
           const mappedPosts = res.data.map((festival) => {
             let imageUrl = null;
             if (festival.imagePath) {
@@ -90,15 +94,56 @@ const Board = () => {
               time: festival.festivalTime, //행사진행시간
             };
           });
-
           setApiPosts(mappedPosts);
-          setCurrentPage(1); // 페이지 초기화
-        })
-        .catch((err) => {
-          console.error("행사 게시글 불러오기 실패", err);
-          setApiPosts([]); // 에러 시 빈 배열
-        });
-    }
+        } else {
+          // review, question, free 게시판
+          const categoryMap = {
+            review: "REVIEW",
+            question: "QUESTION",
+            free: "FREE",
+          };
+
+          const category = categoryMap[type];
+          if (category) {
+            const res = await axiosInstance.get(
+              `${API_BASE_URL}${BOARD}/information/list`,
+              {
+                params: { category, page: 0, size: 100 },
+              }
+            );
+
+            const content = res.data.content || res.data;
+            const mappedPosts = content.map((item) => ({
+              id: item.postId,
+              title: item.title,
+              content: item.content,
+              author: item.nickname,
+              createdAt: item.createAt,
+              views: item.viewCount,
+              likes: 0, // 백엔드에서 제공하지 않는 경우 기본값
+              comments: 0, // 백엔드에서 제공하지 않는 경우 기본값
+              category: boardTitles[type],
+              // 목록 조회에서는 이미지 제거
+            }));
+
+            // 최신순 정렬 (작성시간 기준)
+            mappedPosts.sort((a, b) => {
+              const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+              const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+              return dateB - dateA; // 최신순(내림차순)
+            });
+
+            setApiPosts(mappedPosts);
+          }
+        }
+        setCurrentPage(1); // 페이지 초기화
+      } catch (err) {
+        console.error(`${type} 게시글 불러오기 실패`, err);
+        setApiPosts([]); // 에러 시 빈 배열
+      }
+    };
+
+    fetchBoardPosts();
   }, [type]);
 
   // 게시판 제목 매핑
@@ -109,62 +154,9 @@ const Board = () => {
     event: "행사게시판",
   };
 
-  // 더미 데이터 및 API 데이터 분기 처리
+  // API 데이터 사용
   const getBoardSpecificPosts = (boardType) => {
-    if (boardType === "event") {
-      return apiPosts;
-    }
-    // 기존 더미 데이터 (생략 없이 그대로 넣으세요)
-    const basePosts = {
-      free: [
-        // {
-        //   id: 1,
-        //   title: "우리 고양이 자랑하고 싶어요 ㅎㅎ",
-        //   content:
-        //     "너무 귀여운 우리 고양이 사진 공유합니다~ 오늘 새로운 장난감 사줬더니 정말 좋아해요!",
-        //   author: "냥이맘",
-        //   createdAt: "10분 전",
-        //   views: 234,
-        //   likes: 24,
-        //   comments: 12,
-        //   category: "자유",
-        //   isHot: true,
-        // },
-      ],
-      question: [
-        // {
-        //   id: 1,
-        //   title: "강아지 산책 시 주의사항이 궁금해요",
-        //   content:
-        //     "처음으로 강아지를 키우게 되었는데, 산책할 때 어떤 점들을 주의해야 할까요? 목줄은 어떤 걸 사용하는 게 좋을까요?",
-        //   author: "초보집사",
-        //   createdAt: "5분 전",
-        //   views: 89,
-        //   likes: 7,
-        //   comments: 15,
-        //   category: "질문",
-        //   isHot: true,
-        // },
-      ],
-      review: [
-        // {
-        //   id: 1,
-        //   title: "○○병원 진료 후기 - 정말 친절하세요!",
-        //   content:
-        //     "우리 강아지 중성화 수술을 위해 방문했는데, 의료진분들이 정말 친절하고 꼼꼼하게 봐주셨어요. 적극 추천합니다!",
-        //   author: "만족한견주",
-        //   createdAt: "2시간 전",
-        //   views: 345,
-        //   likes: 28,
-        //   comments: 16,
-        //   category: "후기",
-        //   isHot: true,
-        // },
-      ],
-    };
-    // 추가 더미 데이터 생성 로직도 기존 그대로 유지
-    // 예시: 단순 return 기존 더미 (필요시 추가 더미도 넣으세요)
-    return basePosts[boardType] || basePosts.free;
+    return apiPosts;
   };
 
   const allPosts = getBoardSpecificPosts(type);
@@ -180,7 +172,7 @@ const Board = () => {
       window.open(post.url, "_blank");
     } else {
       // 일반 게시판일 경우 상세 페이지로 이동
-      navigate(`/post/${type}/${post.id}`);
+      navigate(`/detail/${type}/${post.id}`);
     }
   };
 

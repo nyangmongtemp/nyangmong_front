@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Eye, Clock } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
 const RecentPosts = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const RecentPosts = () => {
       const fetchCategory = async (category, label, color) => {
         try {
           const res = await axiosInstance.get(
-            "/board-service/board/information/list",
+            `${API_BASE_URL}${BOARD}/information/list`,
             {
               params: { category, page: 0, size: 30 },
             }
@@ -47,6 +48,21 @@ const RecentPosts = () => {
             imageUrl: item.thumbnailImage || null,
           }));
         } catch (err) {
+          console.error(`${category} 게시판 API 에러:`, err);
+          console.error("에러 상세:", {
+            status: err.response?.status,
+            statusText: err.response?.statusText,
+            data: err.response?.data,
+            url: err.config?.url,
+          });
+
+          // 404 에러일 때 더 명확한 메시지
+          if (err.response?.status === 404) {
+            console.warn(
+              `${category} 게시판 API가 백엔드에서 구현되지 않았습니다.`
+            );
+          }
+
           return [];
         }
       };
@@ -98,7 +114,7 @@ const RecentPosts = () => {
                   if (post.category === "질문게시판") type = "question";
                   else if (post.category === "후기게시판") type = "review";
                   else if (post.category === "자유게시판") type = "free";
-                  navigate(`/post/${type}/${post.id}`);
+                  navigate(`/detail/${type}/${post.id}`);
                 }}
                 className="p-4 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
               >

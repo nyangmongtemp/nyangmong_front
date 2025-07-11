@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "../../configs/axios-config";
+import { useAuth } from "@/context/UserContext";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
 const ChildDetail = () => {
   const { id } = useParams();
@@ -12,20 +14,43 @@ const ChildDetail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { nickname: userNickname } = useAuth();
+
+  const IMAGE_BASE_URL = "http://localhost:8000/path/to/image/dir/"; // 실제 이미지 경로로 수정
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
     axiosInstance
-      .get(`/board-service/board/introduction/detail/${id}`)
+      .get(`${API_BASE_URL}${BOARD}/detail/introduction/${id}`)
       .then((res) => {
         let data = res.data.result || res.data.data || res.data;
         if (Array.isArray(data)) data = data[0];
-        setPost(data);
+        setPost({
+          id: data.postid || data.postId,
+          userId: data.userid || data.userId,
+          title: data.title,
+          content: data.content,
+          nickname: data.nickname,
+          createdAt: data.createdAt || data.createAt,
+          updatedAt: data.updatedAt || data.updateAt,
+          viewCount: data.viewCount,
+          // 이미지 파일명만 내려올 경우 실제 URL로 변환
+          thumbnailImage:
+            data.thumbnailImage || data.thumbnailimage
+              ? (data.thumbnailImage || data.thumbnailimage).startsWith("http")
+                ? data.thumbnailImage || data.thumbnailimage
+                : IMAGE_BASE_URL + (data.thumbnailImage || data.thumbnailimage)
+              : null,
+        });
       })
-      .catch(() => {
-        setError("상세 정보를 불러오지 못했습니다.");
+      .catch((err) => {
+        if (err.response?.status === 404) {
+          setError("해당 게시글을 찾을 수 없습니다.");
+        } else {
+          setError("상세 정보를 불러오지 못했습니다.");
+        }
         setPost(null);
       })
       .finally(() => setLoading(false));
@@ -35,6 +60,22 @@ const ChildDetail = () => {
     return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!post) return null;
+
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await axiosInstance.delete(
+        BOARD_ENDPOINTS.INTRODUCTION.DELETE(post.id || post.postId)
+      );
+      alert("게시글이 삭제되었습니다.");
+      navigate("/child/list");
+    } catch (err) {
+      alert("게시글 삭제에 실패했습니다.");
+    }
+  };
+
+  // 썸네일 이미지 필드명 대응
+  const thumbnail = post.thumbnailImage || post.thumbnailimage;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,12 +91,34 @@ const ChildDetail = () => {
                 <h1 className="text-2xl font-bold text-gray-800">
                   우리 아이 소개 상세
                 </h1>
+                {/* 작성자만 수정/삭제 버튼 노출 */}
+                {post.nickname &&
+                  userNickname &&
+                  post.nickname === userNickname && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate(`/child/edit/${post.id || post.postId}`)
+                        }
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={handleDelete}
+                        style={{ marginLeft: 8 }}
+                      >
+                        삭제
+                      </Button>
+                    </>
+                  )}
               </CardHeader>
               <CardContent>
-                {post.thumbnailimage && (
+                {thumbnail && (
                   <div className="mb-6 flex justify-center">
                     <img
-                      src={post.thumbnailimage}
+                      src={thumbnail}
                       alt={post.title}
                       className="max-h-80 rounded-lg object-contain"
                     />
