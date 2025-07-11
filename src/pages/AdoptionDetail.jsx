@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Heart,
   MapPin,
@@ -18,10 +18,12 @@ import {
   Edit,
   Send,
 } from "lucide-react";
-import { adoptionAPI } from "../../configs/api-utils.js";
-import { useAuth } from "@/context/UserContext";
-import AlertDialog from "@/components/ui/alert-dialog";
+import { Heart, MapPin, Calendar, Eye, MessageCircle, ArrowLeft, User, Edit, Send } from 'lucide-react';
+import { adoptionAPI } from '../../configs/api-utils.js';
+import { useAuth } from '@/context/UserContext';
+import AlertDialog from '@/components/ui/alert-dialog';
 import CommentSection from "@/components/CommentSection";
+import { toast } from "@/components/ui/sonner";
 
 const AdoptionDetail = () => {
   const navigate = useNavigate();
@@ -40,7 +42,13 @@ const AdoptionDetail = () => {
     type: "info",
   });
 
-  console.log("AdoptionDetail 컴포넌트 로드됨, id:", id);
+  const reservationOptions = [
+    { label: "예약가능", value: "A" },
+    { label: "예약중", value: "R" },
+    { label: "분양완료", value: "C" },
+  ];
+
+  console.log('AdoptionDetail 컴포넌트 로드됨, id:', id);
 
   useEffect(() => {
     const fetchAdoptionDetail = async () => {
@@ -57,47 +65,8 @@ const AdoptionDetail = () => {
         setPost(response);
         console.log("post 상태 설정 완료:", response);
       } catch (err) {
-        console.error("분양 상세 조회 실패:", err);
-        setError("분양글을 불러오는데 실패했습니다.");
-
-        // API 실패 시 더미 데이터로 표시
-        setPost({
-          id: id,
-          postId: id,
-          title: "골든리트리버 분양합니다",
-          content:
-            "건강하고 활발한 골든리트리버 남아입니다. 엄마, 아빠 모두 혈통서가 있는 순혈이며, 1차 예방접종까지 완료된 상태입니다. 현재 이유식을 잘 먹고 있으며, 배변 훈련도 어느 정도 되어 있습니다. 좋은 가정에서 평생 함께할 가족을 찾고 있습니다.",
-          petCategory: "강아지",
-          petKind: "골든리트리버",
-          age: "2개월",
-          sexCode: "M",
-          neuterYn: "N",
-          vaccine: "1차 완료",
-          fee: "책임비 50만원",
-          price: "책임비 50만원",
-          address: "서울 강남구",
-          location: "서울 강남구",
-          thumbnailImage:
-            "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          image:
-            "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          images: [
-            "https://images.unsplash.com/photo-1582562124811-c09040d0a901?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          ],
-          viewCount: 125,
-          views: 125,
-          likes: 15,
-          createdAt: "2024-06-20T10:30:00Z",
-          createdDate: "2024-06-20T10:30:00Z",
-          authorName: "사랑이맘",
-          writerName: "사랑이맘",
-          phone: "010-1234-5678",
-          breed: "골든리트리버",
-          gender: "수컷",
-          vaccination: "1차 완료",
-          neutering: "미완료",
-        });
+        console.error('분양 상세 조회 실패:', err);
+        setError('분양글을 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
@@ -200,7 +169,7 @@ const AdoptionDetail = () => {
                       <ArrowLeft className="h-4 w-4" />
                       <span>목록으로</span>
                     </Button>
-                    <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                       <span>분양게시판</span>
                       <span>{">"}</span>
                       <span>{post.title}</span>
@@ -231,13 +200,8 @@ const AdoptionDetail = () => {
                       {post.title}
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>작성자: {post.authorName || post.writerName}</span>
-                      <span>
-                        작성일:{" "}
-                        {new Date(
-                          post.createdAt || post.createdDate
-                        ).toLocaleDateString("ko-KR")}
-                      </span>
+                      <span>작성자: {post.nickName}</span>
+                      <span>작성일: {new Date(post.createAt).toLocaleDateString('ko-KR')}</span>
                       <div className="flex items-center space-x-2">
                         <Eye className="h-4 w-4" />
                         <span>{post.viewCount || post.views}</span>
@@ -248,9 +212,33 @@ const AdoptionDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <Badge className="bg-orange-500">
-                    {post.fee || post.price}
-                  </Badge>
+                  <div className="flex flex-col items-end">
+                    <Badge className="bg-orange-500">{post.fee === 0 ? '무료분양' : `${post.fee.toLocaleString()}원`}</Badge>
+                    {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
+                    {isLoggedIn && post && email === post.authorEmail && (
+                      <div className="mt-2">
+                        <select
+                          className="border rounded px-2 py-1 text-sm"
+                          value={post.reservationStatus || "A"}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            try {
+                              const token = localStorage.getItem('token');
+                              await adoptionAPI.updateReservationStatus(id, newStatus, token);
+                              toast.success('예약상태 변경 성공!');
+                              setPost({ ...post, reservationStatus: newStatus });
+                            } catch (err) {
+                              toast.error('예약상태 변경 실패!');
+                            }
+                          }}
+                        >
+                          {reservationOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 이미지 갤러리 */}
@@ -365,9 +353,7 @@ const AdoptionDetail = () => {
                       </div>
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
-                        <p className="font-medium text-orange-600">
-                          {post.fee || post.price}
-                        </p>
+                        <p className="font-medium text-orange-600">{post.fee === 0 ? '무료분양' : `${post.fee.toLocaleString()}원`}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -376,9 +362,10 @@ const AdoptionDetail = () => {
                 {/* 상세 설명 */}
                 <div className="mb-8">
                   <h3 className="text-lg font-bold mb-4">상세 설명</h3>
-                  <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {post.content}
-                  </div>
+                  <div
+                    className="prose max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
                 </div>
 
                 {/* 연락처 정보 */}
@@ -401,10 +388,30 @@ const AdoptionDetail = () => {
 
                 {/* 게시물 수정 버튼 - 로그인한 사용자이면서 작성자인 경우에만 표시 */}
                 {isLoggedIn && post && email === post.authorEmail && (
-                  <div className="mb-8 text-center">
-                    <Button variant="outline" className="mr-4">
+                  <div className="mb-8 text-center flex justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="mr-2"
+                      onClick={() => navigate(`/adoption/update/${id}`)}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       게시물 수정
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={async () => {
+                        if (!window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
+                        try {
+                          const token = localStorage.getItem('token');
+                          await adoptionAPI.deleteAdoptionPost(id, token);
+                          alert('게시글이 성공적으로 삭제되었습니다.');
+                          navigate('/adoption');
+                        } catch (err) {
+                          alert('게시글 삭제에 실패했습니다.');
+                        }
+                      }}
+                    >
+                      삭제
                     </Button>
                   </div>
                 )}

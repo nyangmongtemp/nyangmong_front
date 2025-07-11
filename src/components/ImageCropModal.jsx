@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Crop, X } from "lucide-react";
 
-const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete }) => {
+const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete, outputType = "image/jpeg" }) => {
   const [crop, setCrop] = useState({
     unit: "%",
     width: 50,
@@ -55,7 +55,7 @@ const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete }) => {
         onCropComplete(croppedImageUrl, blob);
         onClose();
       }
-    }, "image/jpeg", 0.8);
+    }, outputType, 0.8);
   };
 
   return (

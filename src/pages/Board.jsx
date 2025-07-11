@@ -16,15 +16,12 @@ import {
   Edit,
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
-import axios from "axios";
 
 const Board = () => {
   const { type } = useParams();
   const navigate = useNavigate();
-  // API에서 받아온 게시글 저장
+  // API에서 받아온 행사 게시글 저장
   const [apiPosts, setApiPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
@@ -32,6 +29,8 @@ const Board = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
+    console.log(type);
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -39,7 +38,7 @@ const Board = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 행사 게시판 전용 useEffect (기존 코드 100% 복원)
+  // 행사 게시판일 때 API 호출
   useEffect(() => {
     if (type === "event") {
       axiosInstance
@@ -54,10 +53,12 @@ const Board = () => {
                 imageUrl = decodeURIComponent(match[1]);
               }
             }
+
             // festivalDate 예: "2025.07.04. (금) ~ 2025.07.06. (일)"
             // 시작일과 종료일만 추출
             const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
             const dates = festival.festivalDate.match(datePattern);
+
             let category = "행사"; // 기본값
             if (dates && dates.length === 2) {
               const [startStr, endStr] = dates;
@@ -65,6 +66,7 @@ const Board = () => {
               const startDate = new Date(startStr.replace(/\./g, "-"));
               const endDate = new Date(endStr.replace(/\./g, "-"));
               const now = new Date();
+
               if (now < startDate) {
                 category = "진행예정";
               } else if (now >= startDate && now <= endDate) {
@@ -73,6 +75,7 @@ const Board = () => {
                 category = "종료";
               }
             }
+
             return {
               id: festival.festivalId,
               title: festival.title,
@@ -87,6 +90,7 @@ const Board = () => {
               time: festival.festivalTime, //행사진행시간
             };
           });
+
           setApiPosts(mappedPosts);
           setCurrentPage(1); // 페이지 초기화
         })
@@ -97,70 +101,6 @@ const Board = () => {
     }
   }, [type]);
 
-  // 자유/후기 게시판 전용 useEffect (board-service 연동)
-  useEffect(() => {
-    if (type === "free" || type === "review" || type === "question") {
-      const fetchBoardPosts = async () => {
-        setLoading(true);
-        setError(null);
-        let category = "";
-        if (type === "free") category = "FREE";
-        if (type === "review") category = "REVIEW";
-        if (type === "question") category = "QUESTION";
-
-        console.log(type);
-
-        try {
-          const res = await axiosInstance.get(
-            "/board-service/board/information/list",
-            {
-              params: { category, page: currentPage - 1, size: postsPerPage },
-            }
-          );
-          console.log(`${category} 게시판 API 응답:`, res.data);
-          const content = res.data.content || res.data;
-          let mapped = content.map((item, idx) => {
-            return {
-              id: item.postId,
-              title: item.title,
-              content: item.content,
-              author: item.nickname,
-              createdAt: item.createAt, // 작성시간
-              views: item.viewCount,
-              likes: item.likes || 0,
-              comments: item.comments || 0,
-              category: category,
-              isHot: false,
-              imageUrl: item.thumbnailImage || null,
-            };
-          });
-          // 최신순 정렬 (작성시간 기준 내림차순)
-          mapped.sort((a, b) => {
-            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
-            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
-            return dateB - dateA;
-          });
-          setApiPosts(mapped);
-        } catch (err) {
-          setError("게시판 불러오기 실패");
-          setApiPosts([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchBoardPosts(); // 초기 로드
-
-      // 페이지 포커스 시 갱신 (새로고침, 탭 전환 등)
-      const handleFocus = () => {
-        fetchBoardPosts();
-      };
-
-      window.addEventListener("focus", handleFocus);
-      return () => window.removeEventListener("focus", handleFocus);
-    }
-  }, [type, currentPage]);
-
   // 게시판 제목 매핑
   const boardTitles = {
     free: "자유게시판",
@@ -169,9 +109,62 @@ const Board = () => {
     event: "행사게시판",
   };
 
-  // 게시글 목록 데이터 분기 처리 함수 수정
+  // 더미 데이터 및 API 데이터 분기 처리
   const getBoardSpecificPosts = (boardType) => {
-    return apiPosts;
+    if (boardType === "event") {
+      return apiPosts;
+    }
+    // 기존 더미 데이터 (생략 없이 그대로 넣으세요)
+    const basePosts = {
+      free: [
+        // {
+        //   id: 1,
+        //   title: "우리 고양이 자랑하고 싶어요 ㅎㅎ",
+        //   content:
+        //     "너무 귀여운 우리 고양이 사진 공유합니다~ 오늘 새로운 장난감 사줬더니 정말 좋아해요!",
+        //   author: "냥이맘",
+        //   createdAt: "10분 전",
+        //   views: 234,
+        //   likes: 24,
+        //   comments: 12,
+        //   category: "자유",
+        //   isHot: true,
+        // },
+      ],
+      question: [
+        // {
+        //   id: 1,
+        //   title: "강아지 산책 시 주의사항이 궁금해요",
+        //   content:
+        //     "처음으로 강아지를 키우게 되었는데, 산책할 때 어떤 점들을 주의해야 할까요? 목줄은 어떤 걸 사용하는 게 좋을까요?",
+        //   author: "초보집사",
+        //   createdAt: "5분 전",
+        //   views: 89,
+        //   likes: 7,
+        //   comments: 15,
+        //   category: "질문",
+        //   isHot: true,
+        // },
+      ],
+      review: [
+        // {
+        //   id: 1,
+        //   title: "○○병원 진료 후기 - 정말 친절하세요!",
+        //   content:
+        //     "우리 강아지 중성화 수술을 위해 방문했는데, 의료진분들이 정말 친절하고 꼼꼼하게 봐주셨어요. 적극 추천합니다!",
+        //   author: "만족한견주",
+        //   createdAt: "2시간 전",
+        //   views: 345,
+        //   likes: 28,
+        //   comments: 16,
+        //   category: "후기",
+        //   isHot: true,
+        // },
+      ],
+    };
+    // 추가 더미 데이터 생성 로직도 기존 그대로 유지
+    // 예시: 단순 return 기존 더미 (필요시 추가 더미도 넣으세요)
+    return basePosts[boardType] || basePosts.free;
   };
 
   const allPosts = getBoardSpecificPosts(type);
@@ -183,9 +176,11 @@ const Board = () => {
 
   const handlePostClick = (post) => {
     if (type === "event" && post.url) {
+      // 새 탭에서 해당 행사 URL로 이동
       window.open(post.url, "_blank");
     } else {
-      navigate(`/post/${type}/${post.id}`); // post.id는 postId(PK)
+      // 일반 게시판일 경우 상세 페이지로 이동
+      navigate(`/post/${type}/${post.id}`);
     }
   };
 
@@ -281,9 +276,9 @@ const Board = () => {
                       </Button>
                     )}
                   </div>
-                  {currentPosts.map((post, idx) => (
+                  {currentPosts.map((post) => (
                     <div
-                      key={post.id || `${type}-${idx}`}
+                      key={post.id}
                       onClick={() => handlePostClick(post)}
                       className="p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-orange-300 transition-all cursor-pointer bg-white"
                     >
@@ -388,6 +383,15 @@ const Board = () => {
                         </div>
 
                         {/* 이미지 영역 */}
+
+                        {post.imageUrl && (
+                          <img
+                            src={post.imageUrl}
+                            alt={post.title}
+                            className="w-28 h-36 object-cover rounded-md ml-6 shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        )}
                       </div>
                     </div>
                   ))}
