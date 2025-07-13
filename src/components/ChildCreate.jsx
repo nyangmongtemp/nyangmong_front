@@ -16,8 +16,10 @@ const ChildCreate = () => {
   const isEdit = !!id;
 
   // 동적 페이지 타이틀
-  const pageTitle = isEdit ? "소개 게시판 게시물 수정" : "소개 게시판 글쓰기";
-  const buttonText = isEdit ? "수정 완료" : "게시글 작성";
+  const pageTitle = isEdit
+    ? "우리 아이 소개 게시판 수정"
+    : "우리 아이 소개 게시판 글쓰기";
+  const buttonText = isEdit ? "수정 완료" : "작성 완료";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -123,7 +125,10 @@ const ChildCreate = () => {
           }
         );
         alert("게시글이 수정되었습니다.");
-        navigate("/child/list?page=1");
+        // 강제 새로고침을 위해 replace: false로 설정하고 페이지 새로고침
+        navigate("/child/list?page=1", { replace: false });
+        // 페이지 새로고침으로 최신 데이터 확보
+        window.location.reload();
       } else {
         await axiosInstance.post(
           `${API_BASE_URL}${BOARD}/introduction/create`,
@@ -135,7 +140,10 @@ const ChildCreate = () => {
           }
         );
         alert("게시글이 등록되었습니다.");
-        navigate("/child/list?page=1");
+        // 강제 새로고침을 위해 replace: false로 설정하고 페이지 새로고침
+        navigate("/child/list?page=1", { replace: false });
+        // 페이지 새로고침으로 최신 데이터 확보
+        window.location.reload();
       }
     } catch (err) {
       alert(
@@ -268,7 +276,7 @@ const ChildCreate = () => {
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                {isEdit ? "수정 완료" : "작성 완료"}
+                {buttonText}
               </Button>
             </div>
           </form>

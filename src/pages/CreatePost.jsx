@@ -43,6 +43,8 @@ const CreatePost = () => {
     ? `${boardTitles[type] || "게시판"} 게시물 수정`
     : `${boardTitles[type] || "게시판"} 글쓰기`;
 
+  const buttonText = isEdit ? "수정 완료" : "작성 완료";
+
   const { isLoggedIn, token, nickname, profileImage } = useAuth();
 
   useEffect(() => {
@@ -220,7 +222,9 @@ const CreatePost = () => {
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              <h1 className="text-lg font-semibold text-gray-800">뒤로 가기</h1>
+              <h1 className="text-lg font-semibold text-gray-800">
+                {pageTitle}
+              </h1>
             </div>
 
             <Card className="border-orange-200 shadow-sm">
@@ -340,7 +344,7 @@ const CreatePost = () => {
                       type="submit"
                       className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500 text-white"
                     >
-                      {isEdit ? "수정 완료" : "게시글 작성"}
+                      {buttonText}
                     </Button>
                   </div>
                 </form>

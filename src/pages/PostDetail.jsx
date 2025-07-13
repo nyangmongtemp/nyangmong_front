@@ -217,7 +217,7 @@ const PostDetail = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/update-post/${type}/${id}`)}
+                          onClick={() => navigate(`/edit/${type}/${id}`)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
