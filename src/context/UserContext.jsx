@@ -93,6 +93,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // 현재 토큰으로 저장된 알림 데이터 삭제
+    if (token) {
+      localStorage.removeItem(`notifications_${token}`);
+      console.log("🗑️ 로그아웃 시 알림 데이터 삭제 완료");
+    }
+
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     localStorage.removeItem("nickname");

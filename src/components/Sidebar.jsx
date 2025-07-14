@@ -55,6 +55,81 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // localStorage에서 알림 상태 복원
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      const savedNotifications = localStorage.getItem(`notifications_${token}`);
+      if (savedNotifications) {
+        try {
+          const parsedNotifications = JSON.parse(savedNotifications);
+          setNotifications(parsedNotifications);
+          setNotificationCount(parsedNotifications.length);
+          setHasNotifications(parsedNotifications.length > 0);
+          console.log(
+            "📱 알림 상태 복원 완료:",
+            parsedNotifications.length,
+            "개"
+          );
+        } catch (error) {
+          console.error("❌ 알림 상태 복원 실패:", error);
+          // 잘못된 데이터인 경우 제거
+          localStorage.removeItem(`notifications_${token}`);
+        }
+      } else {
+        // 저장된 알림이 없으면 상태 초기화
+        setNotifications([]);
+        setNotificationCount(0);
+        setHasNotifications(false);
+      }
+    } else if (!isLoggedIn) {
+      // 로그아웃 시 알림 상태 초기화
+      setNotifications([]);
+      setNotificationCount(0);
+      setHasNotifications(false);
+    }
+  }, [isLoggedIn, token]);
+
+  // 페이지 떠날 때 알림 상태 저장
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isLoggedIn && token && notifications.length > 0) {
+        saveNotificationsToStorage(notifications);
+        console.log(
+          "💾 페이지 떠날 때 알림 상태 저장:",
+          notifications.length,
+          "개"
+        );
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isLoggedIn, token, notifications]);
+
+  // 알림 상태가 변경될 때마다 자동 저장
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      saveNotificationsToStorage(notifications);
+    }
+  }, [notifications, isLoggedIn, token]);
+
+  // 알림 상태를 localStorage에 저장
+  const saveNotificationsToStorage = (newNotifications) => {
+    if (isLoggedIn && token) {
+      localStorage.setItem(
+        `notifications_${token}`,
+        JSON.stringify(newNotifications)
+      );
+    }
+  };
+
+  // 알림 상태를 localStorage에서 제거
+  const clearNotificationsFromStorage = () => {
+    if (isLoggedIn && token) {
+      localStorage.removeItem(`notifications_${token}`);
+    }
+  };
+
   const eventImages = [
     "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
     "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
@@ -134,6 +209,11 @@ const Sidebar = () => {
   };
 
   const handleMessagesClick = () => {
+    // 메시지 페이지 이동 시 알림 지우기
+    setHasNotifications(false);
+    setNotificationCount(0);
+    setNotifications([]);
+    clearNotificationsFromStorage();
     navigate("/messages");
   };
 
@@ -188,19 +268,22 @@ const Sidebar = () => {
 
     console.log("🔔 SSE 알림 연결 시작 - 로그인 상태:", isLoggedIn);
 
-    // EventSourcePolyfill을 사용한 커스텀 SSE 연결
+    let eventSource = null;
+    let healthCheckInterval = null;
+
     const createEventSource = () => {
-      // EventSourcePolyfill로 헤더 설정 가능
-      const eventSource = new EventSourcePolyfill(
-        `${API_BASE_URL}${SSE}/subscribe`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // 인증 토큰만 설정
-          },
-          heartbeatTimeout: 0, // 하트비트 비활성화 (백엔드에서 하트비트를 보내지 않으므로)
-          timeout: 60000, // 60초 연결 타임아웃
-        }
-      );
+      // 기존 연결이 있으면 정리
+      if (eventSource) {
+        eventSource.close();
+      }
+
+      eventSource = new EventSourcePolyfill(`${API_BASE_URL}${SSE}/subscribe`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // 인증 토큰만 설정
+        },
+        heartbeatTimeout: 30000, // 30초로 늘림 (기본값 1000ms)
+        timeout: 60000, // 60초 연결 타임아웃
+      });
 
       // 연결 성공 이벤트
       eventSource.addEventListener("connect", (event) => {
@@ -211,6 +294,7 @@ const Sidebar = () => {
       eventSource.addEventListener("message", (event) => {
         try {
           console.log("📨 SSE 메시지 수신:", event.data);
+
           const message = JSON.parse(event.data);
 
           // 메시지 데이터가 있는 경우 알림 처리
@@ -247,50 +331,89 @@ const Sidebar = () => {
             });
           }
         } catch (error) {
-          console.error("❌ SSE 메시지 파싱 오류:", error);
+          console.error(" SSE 메시지 파싱 오류:", error);
         }
       });
 
       // 하트비트 이벤트 (연결 상태 확인)
       eventSource.addEventListener("heartbeat", (event) => {
-        console.log("💓 하트비트 수신:", event.data);
+        console.log(" 하트비트 수신:", event.data);
       });
 
-      // 에러 처리
+      // 에러 처리 - 연결 상태만 로깅
       eventSource.addEventListener("error", (event) => {
-        console.error("❌ SSE 연결 오류:", event);
-
-        // 하트비트 타임아웃은 정상적인 상황 (백엔드에서 주기적으로 데이터를 보내지 않음)
+        // 하트비트 타임아웃은 정상적인 상황이므로 무시
         if (
           event.error &&
           event.error.message &&
           event.error.message.includes("No activity within")
         ) {
-          console.log("💓 하트비트 타임아웃 - 정상적인 상황입니다");
-          console.log("🔄 자동 재연결 중...");
-          return; // 자동 재연결을 기다림
+          console.log(" 하트비트 타임아웃 - 정상적인 상황입니다");
+          return; // EventSourcePolyfill이 자동으로 재연결
         }
 
-        // 토큰 만료 시 재연결 시도
-        if (event.target.readyState === EventSourcePolyfill.CLOSED) {
-          console.log("🔄 SSE 연결 재시도 중...");
-          setTimeout(() => {
-            createEventSource();
-          }, 5000);
-        }
+        // 실제 연결 오류인 경우
+        console.error(" SSE 연결 오류:", event);
       });
 
       return eventSource;
     };
 
-    const eventSource = createEventSource();
+    // 초기 연결 생성
+    eventSource = createEventSource();
+
+    // SSE emitter 건강상태 확인 (30초마다)
+    healthCheckInterval = setInterval(async () => {
+      if (!isLoggedIn) return;
+
+      try {
+        const healthResponse = await axiosInstance.get(
+          `${API_BASE_URL}${SSE}/health-check`
+        );
+        const healthStatus = healthResponse.data;
+
+        if (healthStatus === "disconnected") {
+          console.log(
+            "⚠️ SSE emitter 연결이 끊어졌습니다. 재연결을 시도합니다."
+          );
+          eventSource = createEventSource();
+        } else if (healthStatus === "connected") {
+          console.log("✅ SSE emitter 연결 상태 정상");
+        }
+      } catch (error) {
+        console.error("❌ SSE emitter 건강상태 확인 실패:", error);
+        // 에러 발생 시 재연결 시도
+        console.log("🔄 에러로 인한 SSE 재연결 시도");
+        eventSource = createEventSource();
+      }
+    }, 30000); // 30초마다 체크
+
+    // 페이지 포커스 시 연결 상태 확인
+    const handleFocus = () => {
+      if (
+        isLoggedIn &&
+        eventSource &&
+        eventSource.readyState === EventSourcePolyfill.CLOSED
+      ) {
+        console.log("🔄 페이지 포커스 시 연결 복구 시도");
+        eventSource = createEventSource();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
 
     // 연결 해제 시 정리
     return () => {
       console.log("🔌 SSE 연결 해제");
-      eventSource.close();
+      window.removeEventListener("focus", handleFocus);
+      if (healthCheckInterval) {
+        clearInterval(healthCheckInterval);
+      }
+      if (eventSource) {
+        eventSource.close();
+      }
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, token]); // token 의존성 추가
 
   const handleNotificationClick = () => {
     // 알림이 있을 때만 모달 표시
@@ -305,13 +428,7 @@ const Sidebar = () => {
     setHasNotifications(false);
     setNotificationCount(0);
     setNotifications([]);
-  };
-
-  // 테스트용: 알림 상태 강제 설정
-  const testNotification = () => {
-    console.log("🧪 테스트 알림 설정");
-    setHasNotifications(true);
-    setNotificationCount((prev) => prev + 1);
+    clearNotificationsFromStorage(); // 모달 닫을 때 알림 상태 저장소에서 제거
   };
 
   return (
@@ -348,7 +465,15 @@ const Sidebar = () => {
             ))}
             <div className="flex space-x-2">
               <Button
-                onClick={() => navigate("/messages")}
+                onClick={() => {
+                  // 메시지 페이지 이동 시 알림 지우기
+                  setHasNotifications(false);
+                  setNotificationCount(0);
+                  setNotifications([]);
+                  clearNotificationsFromStorage();
+                  setShowNotificationModal(false);
+                  navigate("/messages");
+                }}
                 className="flex-1 bg-orange-500 hover:bg-orange-600"
               >
                 메시지 확인하기
@@ -446,13 +571,6 @@ const Sidebar = () => {
                 >
                   <HelpCircle className="h-4 w-4 mr-2" />
                   고객센터
-                </Button>
-                <Button
-                  onClick={testNotification}
-                  variant="outline"
-                  className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
-                >
-                  🧪 알림 테스트
                 </Button>
               </div>
               <Button
