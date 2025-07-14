@@ -93,14 +93,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // 현재 토큰으로 저장된 알림 데이터 삭제
-    if (token) {
-      localStorage.removeItem(`notifications_${token}`);
-      console.log("🗑️ 로그아웃 시 알림 데이터 삭제 완료");
+    // 현재 사용자의 알림 데이터 삭제 (email 상태 사용)
+    if (email) {
+      localStorage.removeItem(`notifications_${email}`);
+      console.log("🗑️ 로그아웃 시 알림 데이터 삭제 완료:", email);
     }
 
+    // 기타 사용자 데이터 삭제
     localStorage.removeItem("token");
-    localStorage.removeItem("email");
     localStorage.removeItem("nickname");
     localStorage.removeItem("profileImage");
     if (isSocial) {
@@ -108,6 +108,10 @@ export const AuthProvider = ({ children }) => {
       setIsSocial(false);
     }
 
+    // email은 마지막에 삭제 (알림 데이터 삭제 후)
+    localStorage.removeItem("email");
+
+    // 상태 초기화
     setToken("");
     setEmail("");
     setNickname(null);

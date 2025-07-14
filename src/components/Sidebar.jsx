@@ -41,6 +41,7 @@ const Sidebar = () => {
     isSocial,
     kakaoLogin,
     token,
+    email,
   } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
@@ -57,8 +58,8 @@ const Sidebar = () => {
 
   // localStorage에서 알림 상태 복원
   useEffect(() => {
-    if (isLoggedIn && token) {
-      const savedNotifications = localStorage.getItem(`notifications_${token}`);
+    if (isLoggedIn && email) {
+      const savedNotifications = localStorage.getItem(`notifications_${email}`);
       if (savedNotifications) {
         try {
           const parsedNotifications = JSON.parse(savedNotifications);
@@ -73,7 +74,7 @@ const Sidebar = () => {
         } catch (error) {
           console.error("❌ 알림 상태 복원 실패:", error);
           // 잘못된 데이터인 경우 제거
-          localStorage.removeItem(`notifications_${token}`);
+          localStorage.removeItem(`notifications_${email}`);
         }
       } else {
         // 저장된 알림이 없으면 상태 초기화
@@ -87,12 +88,12 @@ const Sidebar = () => {
       setNotificationCount(0);
       setHasNotifications(false);
     }
-  }, [isLoggedIn, token]);
+  }, [isLoggedIn, email]);
 
   // 페이지 떠날 때 알림 상태 저장
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (isLoggedIn && token && notifications.length > 0) {
+      if (isLoggedIn && email && notifications.length > 0) {
         saveNotificationsToStorage(notifications);
         console.log(
           "💾 페이지 떠날 때 알림 상태 저장:",
@@ -104,20 +105,20 @@ const Sidebar = () => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isLoggedIn, token, notifications]);
+  }, [isLoggedIn, email, notifications]);
 
   // 알림 상태가 변경될 때마다 자동 저장
   useEffect(() => {
-    if (isLoggedIn && token) {
+    if (isLoggedIn && email) {
       saveNotificationsToStorage(notifications);
     }
-  }, [notifications, isLoggedIn, token]);
+  }, [notifications, isLoggedIn, email]);
 
   // 알림 상태를 localStorage에 저장
   const saveNotificationsToStorage = (newNotifications) => {
-    if (isLoggedIn && token) {
+    if (isLoggedIn && email) {
       localStorage.setItem(
-        `notifications_${token}`,
+        `notifications_${email}`,
         JSON.stringify(newNotifications)
       );
     }
@@ -125,8 +126,8 @@ const Sidebar = () => {
 
   // 알림 상태를 localStorage에서 제거
   const clearNotificationsFromStorage = () => {
-    if (isLoggedIn && token) {
-      localStorage.removeItem(`notifications_${token}`);
+    if (isLoggedIn && email) {
+      localStorage.removeItem(`notifications_${email}`);
     }
   };
 
@@ -191,7 +192,14 @@ const Sidebar = () => {
       );
       setNickname(res.data.result.nickname);
       setProfileImage(res.data.result.profileImage);
-    } catch (error) {}
+    } catch (error) {
+      if (
+        error.status === 401 &&
+        error.message === "아이디 혹은 패스워드를 다시 확인해 주세요."
+      ) {
+        alert("아이디 혹은 패스워드를 다시 확인해 주세요.");
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -669,18 +677,6 @@ const Sidebar = () => {
                         onClick={handleKakaoLogin}
                       >
                         카카오 로그인
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full bg-green-500 hover:bg-green-600 text-white border-green-500"
-                      >
-                        네이버 로그인
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full border-gray-300 hover:bg-gray-50"
-                      >
-                        구글 로그인
                       </Button>
                       <Button
                         type="button"

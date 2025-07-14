@@ -23,6 +23,8 @@ import { useAuth } from "@/context/UserContext";
 import AlertDialog from "@/components/ui/alert-dialog";
 import CommentSection from "@/components/CommentSection";
 import { toast } from "@/components/ui/sonner";
+import { API_BASE_URL, USER } from "../../configs/host-config.js";
+import axiosInstance from "../../configs/axios-config.js";
 
 const AdoptionDetail = () => {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ const AdoptionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [nowLoggedUserId, setNowLoggedUserId] = useState(null);
 
   // Alert 다이얼로그 상태
   const [alertDialog, setAlertDialog] = useState({
@@ -46,6 +49,21 @@ const AdoptionDetail = () => {
     { label: "예약중", value: "R" },
     { label: "분양완료", value: "C" },
   ];
+
+  // 유저 ID 비동기 조회 함수 추가
+  const getNowLoggedUserId = async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
+      console.log(response);
+
+      setNowLoggedUserId(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("유저 ID 조회 실패:", err);
+      setNowLoggedUserId(null);
+      return null;
+    }
+  };
 
   console.log("AdoptionDetail 컴포넌트 로드됨, id:", id);
 
@@ -62,6 +80,7 @@ const AdoptionDetail = () => {
         console.log("응답 타입:", typeof response);
         console.log("응답 키들:", Object.keys(response || {}));
         setPost(response);
+        getNowLoggedUserId();
         console.log("post 상태 설정 완료:", response);
       } catch (err) {
         console.error("분양 상세 조회 실패:", err);
@@ -221,7 +240,7 @@ const AdoptionDetail = () => {
                         : `${post.fee.toLocaleString()}원`}
                     </Badge>
                     {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
-                    {isLoggedIn && post && email === post.authorEmail && (
+                    {isLoggedIn && post && nowLoggedUserId === post.userId && (
                       <div className="mt-2">
                         <select
                           className="border rounded px-2 py-1 text-sm"
@@ -406,7 +425,7 @@ const AdoptionDetail = () => {
                 )}
 
                 {/* 게시물 수정 버튼 - 로그인한 사용자이면서 작성자인 경우에만 표시 */}
-                {isLoggedIn && post && email === post.authorEmail && (
+                {isLoggedIn && post && nowLoggedUserId === post.userId && (
                   <div className="mb-8 text-center flex justify-center gap-2">
                     <Button
                       variant="outline"

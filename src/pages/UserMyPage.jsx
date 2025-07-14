@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -9,6 +9,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProfileForm from "@/components/ProfileForm";
@@ -148,6 +157,8 @@ const UserMyPage = () => {
   const [myPosts, setMyPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getDisplayData = () => {
     let data = [];
@@ -185,6 +196,34 @@ const UserMyPage = () => {
         totalItems = 0;
     }
     return Math.ceil(totalItems / itemsPerPage);
+  };
+
+  // 회원 탈퇴 처리
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await axiosInstance.delete(
+        `${API_BASE_URL}${USER}/resign`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("회원 탈퇴 성공:", response);
+      alert("회원 탈퇴가 완료되었습니다.");
+
+      // 로그아웃 처리 (알림 데이터도 함께 삭제됨)
+      logout();
+      navigate("/");
+    } catch (error) {
+      console.error("회원 탈퇴 실패:", error);
+      alert("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   const renderTabContent = () => {
@@ -258,6 +297,31 @@ const UserMyPage = () => {
             {/* 탭 내용 */}
             {renderTabContent()}
 
+            {/* 회원 탈퇴 버튼 (프로필 탭에서만 표시) */}
+            {activeTab === "profile" && (
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                    <h3 className="text-lg font-semibold text-red-800">
+                      회원 탈퇴
+                    </h3>
+                  </div>
+                  <p className="text-red-700 mb-4">
+                    회원 탈퇴 시 모든 개인정보와 활동 내역이 영구적으로
+                    삭제되며, 복구할 수 없습니다. 신중하게 결정해주세요.
+                  </p>
+                  <Button
+                    onClick={() => setShowDeleteModal(true)}
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    회원 탈퇴
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* 페이지네이션 (프로필 탭이 아닐 때만 표시) */}
             {activeTab !== "profile" && getTotalPages() > 1 && (
               <div className="mt-8 flex justify-center">
@@ -327,6 +391,51 @@ const UserMyPage = () => {
           <Sidebar />
         </div>
       </div>
+
+      {/* 회원 탈퇴 확인 모달 */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              <span>회원 탈퇴 확인</span>
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              정말로 회원 탈퇴를 진행하시겠습니까?
+              <br />
+              <br />
+              <strong className="text-red-600">
+                ⚠️ 이 작업은 되돌릴 수 없습니다.
+              </strong>
+              <br />
+              <br />
+              • 모든 개인정보 삭제
+              <br />
+              • 작성한 게시글 및 댓글 삭제
+              <br />
+              • 좋아요 및 북마크 삭제
+              <br />• 메시지 내역 삭제
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={isDeleting}
+            >
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "처리 중..." : "회원 탈퇴"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

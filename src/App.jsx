@@ -12,7 +12,7 @@ import Signup from "./pages/Signup";
 import AdoptionPage from "./pages/AdoptionPage.jsx";
 import AdoptionCreate from "./pages/AdoptionCreate";
 import AdoptionBoard from "./components/AdoptionBoard";
-import AdoptionDetail from "./pages/AdoptionDetail.jsx";
+import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
 import MapPage from "./pages/MapPage";
 import ChildCreate from "./components/ChildCreate";
