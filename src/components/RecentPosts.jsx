@@ -6,6 +6,18 @@ import axiosInstance from "../../configs/axios-config";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
+
 const RecentPosts = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -36,14 +48,17 @@ const RecentPosts = () => {
           );
           const content = res.data.content || res.data;
           return content.map((item, idx) => ({
-            id: item.postId, // PK
+            id: item.postid, // PK
+            userId: item.userid,
             title: item.title,
             category: label,
             author: item.nickname, // 작성자
             replies: item.comments || 0,
-            views: item.viewCount, // 조회수
-            time: item.createAt, // 작성시간
-            updateTime: item.updateAt, // 수정시간
+            views: item.viewcount, // 조회수
+            time: item.createdat, // 작성시간
+            updateTime: item.updatedat, // 수정시간
+            likes: item.likeCount,
+            comments: item.commentCount,
             categoryColor: color,
             imageUrl: item.thumbnailImage || null,
           }));
@@ -136,7 +151,7 @@ const RecentPosts = () => {
                       <div className="flex items-center space-x-3">
                         <div className="flex items-center space-x-1">
                           <MessageCircle className="h-3 w-3" />
-                          <span>{post.replies}</span>
+                          <span>{post.comments}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Eye className="h-3 w-3" />
@@ -144,7 +159,7 @@ const RecentPosts = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
-                          <span>{post.time}</span>
+                          <span>{formatDateTime(post.time)}</span>
                         </div>
                       </div>
                     </div>

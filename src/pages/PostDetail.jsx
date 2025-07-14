@@ -22,6 +22,18 @@ import axios from "axios";
 import { useAuth } from "../context/UserContext";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
+
 const PostDetail = () => {
   const { type, id } = useParams();
   const navigate = useNavigate();
@@ -79,6 +91,7 @@ const PostDetail = () => {
           title: data.title,
           content: data.content,
           author: data.nickname,
+          userId: data.userid,
           createdAt: data.createdat
             ? new Date(data.createdat).toLocaleDateString("ko-KR", {
                 year: "numeric",
@@ -187,7 +200,7 @@ const PostDetail = () => {
                       </span>
                       <span className="text-sm text-gray-400">•</span>
                       <span className="text-sm text-gray-500">
-                        {post.createdAt}
+                        {formatDateTime(post.createdAt)}
                       </span>
                     </div>
                     <h1 className="text-2xl font-bold mb-4 text-gray-900">
@@ -245,9 +258,10 @@ const PostDetail = () => {
                   </div>
                 )}
                 <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6">
-                    {post.content}
-                  </div>
+                  <div
+                    className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -265,7 +279,12 @@ const PostDetail = () => {
             </Card>
 
             {/* 댓글 섹션 */}
-            <CommentSection postId={id} category={type} showReplies={true} />
+            <CommentSection
+              postId={id}
+              category={type}
+              showReplies={true}
+              userId={post.userId}
+            />
           </div>
 
           {/* 사이드바 영역 */}

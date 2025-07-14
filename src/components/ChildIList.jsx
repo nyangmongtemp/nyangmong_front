@@ -7,6 +7,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
+
 const ChildIList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -199,18 +211,22 @@ const ChildIList = () => {
                           <h2 className="text-lg font-semibold text-gray-800">
                             {pet.title}
                           </h2>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {pet.content}
-                          </p>
+                          <p
+                            className="text-sm text-gray-600 line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: pet.content }}
+                          />
                           <div className="flex justify-between text-sm text-gray-500">
                             <span>{pet.nickname || pet.author}</span>
                             <span>
-                              작성일자: {pet.createAt || pet.createdAt}
+                              작성일자:{" "}
+                              {formatDateTime(pet.createAt || pet.createdAt)}
                             </span>
                           </div>
                           <div className="flex justify-between text-sm text-gray-500">
                             <span>조회수: {pet.viewCount || pet.views}</span>
-                            <span>댓글: {pet.comments}</span>
+                            <span>
+                              댓글: {pet.comments || pet.commentCount}
+                            </span>
                           </div>
                           <div className="flex justify-between mt-3">
                             <Button

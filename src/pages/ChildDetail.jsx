@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import axiosInstance from "../../configs/axios-config";
 import { useAuth } from "@/context/UserContext";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import CommentSection from "@/components/CommentSection";
 
 const ChildDetail = () => {
   const { id } = useParams();
@@ -17,6 +18,18 @@ const ChildDetail = () => {
   const { nickname: userNickname } = useAuth();
 
   const IMAGE_BASE_URL = "http://localhost:8000/path/to/image/dir/"; // 실제 이미지 경로로 수정
+
+  // 날짜 포맷 함수 추가
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +49,8 @@ const ChildDetail = () => {
           createdAt: data.createdAt || data.createAt,
           updatedAt: data.updatedAt || data.updateAt,
           viewCount: data.viewCount,
+          likes: data.likeCount,
+          comments: data.commentCount,
           // 이미지 파일명만 내려올 경우 실제 URL로 변환
           thumbnailImage:
             data.thumbnailImage || data.thumbnailimage
@@ -78,11 +93,12 @@ const ChildDetail = () => {
   const thumbnail = post.thumbnailImage || post.thumbnailimage;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          <div className="flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* 메인 컨텐츠 영역 */}
+          <div className="lg:col-span-3 space-y-6">
             <Card className="border-blue-200 shadow-sm">
               <CardHeader className="pb-4 flex flex-row items-center justify-between">
                 <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -125,20 +141,32 @@ const ChildDetail = () => {
                   </div>
                 )}
                 <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
-                <div className="text-gray-700 mb-4 whitespace-pre-line">
-                  {post.content}
-                </div>
+                <div
+                  className="text-gray-700 mb-4 whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
                 <div className="flex justify-between text-sm text-gray-500 mb-2">
                   <span>작성자: {post.nickname}</span>
-                  <span>작성일: {post.createAt}</span>
+                  <span>
+                    작성일: {formatDateTime(post.createdAt || post.createAt)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>조회수: {post.viewCount}</span>
                 </div>
               </CardContent>
             </Card>
+            {/* 댓글 섹션 */}
+            <CommentSection
+              postId={post.id}
+              userId={post.userId}
+              category="introduction"
+              showReplies={true}
+              className="border-t pt-8"
+            />
           </div>
-          <div className="w-80">
+          {/* 사이드바 영역 */}
+          <div className="hidden lg:block lg:col-span-1">
             <Sidebar />
           </div>
         </div>

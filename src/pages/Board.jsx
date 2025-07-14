@@ -18,6 +18,18 @@ import {
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
 
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
+
 const Board = () => {
   const { type } = useParams();
   const navigate = useNavigate();
@@ -111,18 +123,21 @@ const Board = () => {
                 params: { category, page: 0, size: 100 },
               }
             );
+            console.log(res);
 
             const content = res.data.content || res.data;
+
             const mappedPosts = content.map((item) => ({
-              id: item.postId,
+              id: item.postid,
               title: item.title,
               content: item.content,
               author: item.nickname,
-              createdAt: item.createAt,
-              views: item.viewCount,
-              likes: 0, // 백엔드에서 제공하지 않는 경우 기본값
-              comments: 0, // 백엔드에서 제공하지 않는 경우 기본값
+              createdAt: item.createdat,
+              views: item.viewcount,
+              likes: item.likeCount,
+              comments: item.commentCount,
               category: boardTitles[type],
+              userId: item.userid,
               // 목록 조회에서는 이미지 제거
             }));
 
@@ -309,9 +324,10 @@ const Board = () => {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                            {post.content}
-                          </p>
+                          <div
+                            className="text-gray-600 text-sm mb-3 line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                          />
 
                           {/* 행사 설명 */}
                           {post.description && (
@@ -350,7 +366,7 @@ const Board = () => {
                               )}
                               <div className="flex items-center space-x-1">
                                 <Clock className="h-4 w-4" />
-                                <span>{post.createdAt}</span>
+                                <span>{formatDateTime(post.createdAt)}</span>
                                 <span>{post.date}</span>
                               </div>
                             </div>

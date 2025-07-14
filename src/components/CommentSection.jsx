@@ -548,303 +548,306 @@ const CommentSection = ({
         ) : (
           <div className="space-y-4">
             {Array.isArray(comments) &&
-              comments.map((comment, index) => (
-                <BorderCard
-                  key={comment.commentId}
-                  className="border border-orange-100 shadow-none p-4 mb-2"
-                >
-                  {/* 프로필 이미지 + 닉네임/날짜/내용 세로 정렬 */}
-                  <div className="flex items-start gap-3 mb-2">
-                    {comment.profileImage && (
-                      <img
-                        src={comment.profileImage}
-                        alt={comment.nickname}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-base text-gray-800">
-                          {comment.nickname}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {comment.createAt
-                            ? formatDateTime(comment.createAt)
-                            : ""}
-                        </span>
+              [...comments]
+                .sort((a, b) => new Date(b.createAt) - new Date(a.createAt))
+                .map((comment, index) => (
+                  <BorderCard
+                    key={comment.commentId}
+                    className="border border-orange-100 shadow-none p-4 mb-2"
+                  >
+                    {/* 프로필 이미지 + 닉네임/날짜/내용 세로 정렬 */}
+                    <div className="flex items-start gap-3 mb-2">
+                      {comment.profileImage && (
+                        <img
+                          src={comment.profileImage}
+                          alt={comment.nickname}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-base text-gray-800">
+                            {comment.nickname}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {comment.createAt
+                              ? formatDateTime(comment.createAt)
+                              : ""}
+                          </span>
+                        </div>
+                        {editingComment === comment.commentId ? (
+                          <div className="space-y-2">
+                            <Textarea
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="resize-none"
+                              rows={2}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleCommentEdit(comment.commentId)
+                                }
+                                className="bg-orange-500 hover:bg-orange-600"
+                              >
+                                수정 완료
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingComment(null);
+                                  setEditText("");
+                                }}
+                              >
+                                취소
+                              </Button>
+                            </div>
+                          </div>
+                        ) : comment.hidden &&
+                          !revealedComments[comment.commentId] ? (
+                          <div className="flex items-center gap-2">
+                            <span className="italic text-gray-400">
+                              비공개 댓글입니다.
+                            </span>
+                            {isLoggedIn && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-orange-300 text-orange-600 hover:bg-orange-50 ml-2"
+                                onClick={() =>
+                                  handleRevealHiddenComment(comment.commentId)
+                                }
+                              >
+                                비공개 댓글 확인하기
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                            {comment.content}
+                          </div>
+                        )}
                       </div>
-                      {editingComment === comment.commentId ? (
-                        <div className="space-y-2">
-                          <Textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            className="resize-none"
-                            rows={2}
-                          />
-                          <div className="flex gap-2">
+                    </div>
+                    {/* 댓글 액션 버튼들 */}
+                    {isLoggedIn && (
+                      <div className="flex gap-2">
+                        {/* 수정/삭제 버튼: 본인만 */}
+                        {nowLoggedUserId === comment.userId && (
+                          <>
                             <Button
-                              size="sm"
-                              onClick={() =>
-                                handleCommentEdit(comment.commentId)
-                              }
-                              className="bg-orange-500 hover:bg-orange-600"
-                            >
-                              수정 완료
-                            </Button>
-                            <Button
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
-                                setEditingComment(null);
-                                setEditText("");
+                                setEditingComment(comment.commentId);
+                                setEditText(comment.content);
                               }}
+                              className="text-blue-600 hover:bg-blue-50"
                             >
-                              취소
+                              <Edit className="w-4 h-4" />
                             </Button>
-                          </div>
-                        </div>
-                      ) : comment.hidden &&
-                        !revealedComments[comment.commentId] ? (
-                        <div className="flex items-center gap-2">
-                          <span className="italic text-gray-400">
-                            비공개 댓글입니다.
-                          </span>
-                          {isLoggedIn && (
                             <Button
+                              variant="ghost"
                               size="sm"
-                              variant="outline"
-                              className="border-orange-300 text-orange-600 hover:bg-orange-50 ml-2"
                               onClick={() =>
-                                handleRevealHiddenComment(comment.commentId)
+                                handleCommentDelete(comment.commentId)
                               }
+                              className="text-red-600 hover:bg-red-50"
                             >
-                              비공개 댓글 확인하기
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                        {/* 답글 버튼: 로그인 시 항상, 단 비공개 댓글 미열람 시 숨김 */}
+                        {showReplies &&
+                          !(
+                            comment.hidden &&
+                            !revealedComments[comment.commentId]
+                          ) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setReplyTo(
+                                  replyTo === comment.commentId
+                                    ? null
+                                    : comment.commentId
+                                )
+                              }
+                              className="text-orange-600 hover:bg-orange-50"
+                            >
+                              <Reply className="w-4 h-4 mr-1" />
+                              답글
                             </Button>
                           )}
-                        </div>
-                      ) : (
-                        <div className="text-gray-700 text-sm break-words whitespace-pre-line">
-                          {comment.content}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {/* 댓글 액션 버튼들 */}
-                  {isLoggedIn && (
-                    <div className="flex gap-2">
-                      {/* 수정/삭제 버튼: 본인만 */}
-                      {nowLoggedUserId === comment.userId && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setEditingComment(comment.commentId);
-                              setEditText(comment.content);
-                            }}
-                            className="text-blue-600 hover:bg-blue-50"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleCommentDelete(comment.commentId)
-                            }
-                            className="text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </>
-                      )}
-                      {/* 답글 버튼: 로그인 시 항상, 단 비공개 댓글 미열람 시 숨김 */}
-                      {showReplies &&
-                        !(
-                          comment.hidden && !revealedComments[comment.commentId]
-                        ) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              setReplyTo(
-                                replyTo === comment.commentId
-                                  ? null
-                                  : comment.commentId
-                              )
-                            }
-                            className="text-orange-600 hover:bg-orange-50"
-                          >
-                            <Reply className="w-4 h-4 mr-1" />
-                            답글
-                          </Button>
-                        )}
-                    </div>
-                  )}
-                  {/* 답글 입력창: replyTo가 현재 commentId일 때만 노출 */}
-                  {replyTo === comment.commentId && (
-                    <div className="mt-3">
-                      <Textarea
-                        placeholder="답글을 입력하세요..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        onKeyPress={(e) =>
-                          handleKeyPress(e, () =>
-                            handleReplySubmit(comment.commentId)
-                          )
-                        }
-                        className="resize-none border-orange-200 focus:border-orange-400"
-                        rows={2}
-                      />
-                      <div className="flex justify-end mt-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleReplySubmit(comment.commentId)}
-                          disabled={!replyText.trim()}
-                          className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
-                        >
-                          <Send className="w-4 h-4 mr-1" />
-                          답글 작성
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {/* 대댓글 더보기 버튼 */}
-                  {comment.reply &&
-                    (!comment.hidden ||
-                      revealedComments[comment.commentId]) && (
-                      <div className="w-full mt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
-                          onClick={() => handleReplyToggle(comment.commentId)}
-                        >
-                          {replyOpen[comment.commentId]
-                            ? "대댓글 숨기기"
-                            : "대댓글 더보기"}
-                        </Button>
                       </div>
                     )}
-                  {/* 대댓글 목록 - 댓글과 같은 너비로 표시 */}
-                  {replyOpen[comment.commentId] &&
-                    repliesByCommentId[comment.commentId] &&
-                    repliesByCommentId[comment.commentId].length > 0 &&
-                    (!comment.hidden ||
-                      revealedComments[comment.commentId]) && (
-                      <div className="w-full mt-3">
-                        <div className="border-l-2 border-orange-200 pl-4 space-y-2">
-                          {repliesByCommentId[comment.commentId].map(
-                            (reply) => (
-                              <div
-                                key={reply.replyId}
-                                className="w-full bg-gray-50 p-3 rounded-lg border border-gray-200"
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      {reply.profileImage && (
-                                        <img
-                                          src={reply.profileImage}
-                                          alt={reply.nickname}
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                      )}
-                                      <span className="font-medium text-xs text-gray-800">
-                                        {reply.nickname}
-                                      </span>
-                                      <span className="text-xs text-gray-400">
-                                        {reply.createAt
-                                          ? formatDateTime(reply.createAt)
-                                          : ""}
-                                      </span>
-                                    </div>
-                                    {/* 답글 수정 모드 */}
-                                    {replyEdit[reply.replyId] ? (
-                                      <>
-                                        <Textarea
-                                          value={replyEditText}
-                                          onChange={(e) =>
-                                            setReplyEditText(e.target.value)
-                                          }
-                                          className="resize-none"
-                                          rows={2}
-                                        />
-                                        <div className="flex gap-2 mt-2">
-                                          <Button
-                                            size="sm"
-                                            onClick={() =>
-                                              handleReplyEditSubmit(
-                                                reply.replyId,
-                                                comment.commentId
-                                              )
+                    {/* 답글 입력창: replyTo가 현재 commentId일 때만 노출 */}
+                    {replyTo === comment.commentId && (
+                      <div className="mt-3">
+                        <Textarea
+                          placeholder="답글을 입력하세요..."
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          onKeyPress={(e) =>
+                            handleKeyPress(e, () =>
+                              handleReplySubmit(comment.commentId)
+                            )
+                          }
+                          className="resize-none border-orange-200 focus:border-orange-400"
+                          rows={2}
+                        />
+                        <div className="flex justify-end mt-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleReplySubmit(comment.commentId)}
+                            disabled={!replyText.trim()}
+                            className="bg-gradient-to-r from-orange-400 to-pink-400 hover:from-orange-500 hover:to-pink-500"
+                          >
+                            <Send className="w-4 h-4 mr-1" />
+                            답글 작성
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {/* 대댓글 더보기 버튼 */}
+                    {comment.reply &&
+                      (!comment.hidden ||
+                        revealedComments[comment.commentId]) && (
+                        <div className="w-full mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
+                            onClick={() => handleReplyToggle(comment.commentId)}
+                          >
+                            {replyOpen[comment.commentId]
+                              ? "대댓글 숨기기"
+                              : "대댓글 더보기"}
+                          </Button>
+                        </div>
+                      )}
+                    {/* 대댓글 목록 - 댓글과 같은 너비로 표시 */}
+                    {replyOpen[comment.commentId] &&
+                      repliesByCommentId[comment.commentId] &&
+                      repliesByCommentId[comment.commentId].length > 0 &&
+                      (!comment.hidden ||
+                        revealedComments[comment.commentId]) && (
+                        <div className="w-full mt-3">
+                          <div className="border-l-2 border-orange-200 pl-4 space-y-2">
+                            {repliesByCommentId[comment.commentId].map(
+                              (reply) => (
+                                <div
+                                  key={reply.replyId}
+                                  className="w-full bg-gray-50 p-3 rounded-lg border border-gray-200"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        {reply.profileImage && (
+                                          <img
+                                            src={reply.profileImage}
+                                            alt={reply.nickname}
+                                            className="w-6 h-6 rounded-full"
+                                          />
+                                        )}
+                                        <span className="font-medium text-xs text-gray-800">
+                                          {reply.nickname}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                          {reply.createAt
+                                            ? formatDateTime(reply.createAt)
+                                            : ""}
+                                        </span>
+                                      </div>
+                                      {/* 답글 수정 모드 */}
+                                      {replyEdit[reply.replyId] ? (
+                                        <>
+                                          <Textarea
+                                            value={replyEditText}
+                                            onChange={(e) =>
+                                              setReplyEditText(e.target.value)
                                             }
-                                            className="bg-orange-500 hover:bg-orange-600"
-                                          >
-                                            수정 완료
-                                          </Button>
+                                            className="resize-none"
+                                            rows={2}
+                                          />
+                                          <div className="flex gap-2 mt-2">
+                                            <Button
+                                              size="sm"
+                                              onClick={() =>
+                                                handleReplyEditSubmit(
+                                                  reply.replyId,
+                                                  comment.commentId
+                                                )
+                                              }
+                                              className="bg-orange-500 hover:bg-orange-600"
+                                            >
+                                              수정 완료
+                                            </Button>
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() => {
+                                                setReplyEdit((prev) => ({
+                                                  ...prev,
+                                                  [reply.replyId]: false,
+                                                }));
+                                                setReplyEditText("");
+                                              }}
+                                            >
+                                              취소
+                                            </Button>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className="text-gray-700 text-sm break-words whitespace-pre-line">
+                                          {reply.content}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {isLoggedIn &&
+                                      nowLoggedUserId === reply.userId && (
+                                        <div className="flex gap-1 ml-2 shrink-0">
                                           <Button
-                                            variant="outline"
+                                            variant="ghost"
                                             size="sm"
                                             onClick={() => {
                                               setReplyEdit((prev) => ({
                                                 ...prev,
-                                                [reply.replyId]: false,
+                                                [reply.replyId]: true,
                                               }));
-                                              setReplyEditText("");
+                                              setReplyEditText(reply.content);
                                             }}
+                                            className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
                                           >
-                                            취소
+                                            <Edit className="w-3 h-3" />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                              handleReplyDelete(
+                                                reply.replyId,
+                                                comment.commentId
+                                              )
+                                            }
+                                            className="text-red-600 hover:bg-red-50 p-1 h-auto"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
                                           </Button>
                                         </div>
-                                      </>
-                                    ) : (
-                                      <div className="text-gray-700 text-sm break-words whitespace-pre-line">
-                                        {reply.content}
-                                      </div>
-                                    )}
+                                      )}
                                   </div>
-                                  {isLoggedIn &&
-                                    nowLoggedUserId === reply.userId && (
-                                      <div className="flex gap-1 ml-2 shrink-0">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setReplyEdit((prev) => ({
-                                              ...prev,
-                                              [reply.replyId]: true,
-                                            }));
-                                            setReplyEditText(reply.content);
-                                          }}
-                                          className="text-blue-600 hover:bg-blue-50 p-1 h-auto"
-                                        >
-                                          <Edit className="w-3 h-3" />
-                                        </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() =>
-                                            handleReplyDelete(
-                                              reply.replyId,
-                                              comment.commentId
-                                            )
-                                          }
-                                          className="text-red-600 hover:bg-red-50 p-1 h-auto"
-                                        >
-                                          <Trash2 className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    )}
                                 </div>
-                              </div>
-                            )
-                          )}
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                </BorderCard>
-              ))}
+                      )}
+                  </BorderCard>
+                ))}
           </div>
         )}
 
