@@ -898,18 +898,24 @@ const Board = () => {
                 </CardTitle>
               </CardHeader>
               {type === "event" && (
-                <div className="p-6 mt-4 mb-4 flex space-x-2 ">
+                <div className="p-6 mt-4 mb-4 flex space-x-2">
                   <input
                     type="text"
                     placeholder="행사 제목으로 검색하세요"
                     value={searchWordInput}
                     onChange={(e) => setSearchWordInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setSearchWord(searchWordInput);
+                        setCurrentPage(1); // 엔터 입력 시 페이지 초기화
+                      }
+                    }}
                     className="flex-1 px-4 py-2 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
                   />
                   <Button
                     onClick={() => {
-                      setSearchWord(searchWordInput); // 실제 검색어 상태 변경
-                      setCurrentPage(1); // 검색 시 페이지 초기화
+                      setSearchWord(searchWordInput);
+                      setCurrentPage(1); // 버튼 클릭 시 페이지 초기화
                     }}
                     className="bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600"
                   >
