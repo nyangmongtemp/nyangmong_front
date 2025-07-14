@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   User,
   Mail,
   Lock,
@@ -12,12 +18,15 @@ import {
   LogOut,
   MessageCircle,
   HelpCircle,
+  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, USER } from "../../configs/host-config";
+import { API_BASE_URL, SSE, USER } from "../../configs/host-config";
+import { API_ENDPOINTS } from "../../configs/api-endpoints";
 import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID;
 const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
@@ -31,6 +40,7 @@ const Sidebar = () => {
     profileImage,
     isSocial,
     kakaoLogin,
+    token,
   } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
@@ -38,6 +48,10 @@ const Sidebar = () => {
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [popularPosts, setPopularPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasNotifications, setHasNotifications] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState([]); // 알림 목록 저장
+  const [showNotificationModal, setShowNotificationModal] = useState(false); // 알림 모달 표시
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -109,8 +123,6 @@ const Sidebar = () => {
     navigate("/");
     logout();
     setLoginData({ email: "", password: "" });
-    setNickname("");
-    setProfileImage("");
   };
 
   const handleSignupClick = () => {
@@ -141,7 +153,7 @@ const Sidebar = () => {
         const res = await axiosInstance.get(
           "/board-service/board/information/popular"
         );
-        console.log("인기 게시글 API 응답:", res.data);
+        //console.log("인기 게시글 API 응답:", res.data);
         const posts = res.data || [];
         const mappedPosts = posts.map((item, index) => ({
           id: item.postId, // 반드시 postId(PK)로!
@@ -170,13 +182,213 @@ const Sidebar = () => {
     return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
+  // SSE 알림 연결
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    console.log("🔔 SSE 알림 연결 시작 - 로그인 상태:", isLoggedIn);
+
+    // EventSourcePolyfill을 사용한 커스텀 SSE 연결
+    const createEventSource = () => {
+      // EventSourcePolyfill로 헤더 설정 가능
+      const eventSource = new EventSourcePolyfill(
+        `${API_BASE_URL}${SSE}/subscribe`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 인증 토큰만 설정
+          },
+          heartbeatTimeout: 0, // 하트비트 비활성화 (백엔드에서 하트비트를 보내지 않으므로)
+          timeout: 60000, // 60초 연결 타임아웃
+        }
+      );
+
+      // 연결 성공 이벤트
+      eventSource.addEventListener("connect", (event) => {
+        console.log("✅ SSE 연결 성공:", event.data);
+      });
+
+      // 새로운 메시지 알림 이벤트
+      eventSource.addEventListener("message", (event) => {
+        try {
+          console.log("📨 SSE 메시지 수신:", event.data);
+          const message = JSON.parse(event.data);
+
+          // 메시지 데이터가 있는 경우 알림 처리
+          if (message.senderNickname && message.senderId) {
+            console.log("🎉 새로운 메시지 알림 감지!");
+
+            // 알림 데이터 생성
+            const notification = {
+              id: Date.now(), // 고유 ID
+              senderNickname: message.senderNickname,
+              senderId: message.senderId,
+              sendTime: message.sendTime || new Date().toISOString(),
+              message: `${message.senderNickname}님이 쪽지를 보냈습니다.`,
+            };
+
+            // 알림 상태 업데이트 (같은 senderId가 있으면 최신 것만 유지)
+            setNotifications((prev) => {
+              // 같은 senderId의 기존 알림 제거
+              const filteredNotifications = prev.filter(
+                (existing) => existing.senderId !== message.senderId
+              );
+
+              // 새로운 알림을 맨 앞에 추가
+              const updatedNotifications = [
+                notification,
+                ...filteredNotifications,
+              ];
+
+              // 알림 개수 업데이트 (고유한 senderId 개수)
+              setNotificationCount(updatedNotifications.length);
+              setHasNotifications(updatedNotifications.length > 0);
+
+              return updatedNotifications;
+            });
+          }
+        } catch (error) {
+          console.error("❌ SSE 메시지 파싱 오류:", error);
+        }
+      });
+
+      // 하트비트 이벤트 (연결 상태 확인)
+      eventSource.addEventListener("heartbeat", (event) => {
+        console.log("💓 하트비트 수신:", event.data);
+      });
+
+      // 에러 처리
+      eventSource.addEventListener("error", (event) => {
+        console.error("❌ SSE 연결 오류:", event);
+
+        // 하트비트 타임아웃은 정상적인 상황 (백엔드에서 주기적으로 데이터를 보내지 않음)
+        if (
+          event.error &&
+          event.error.message &&
+          event.error.message.includes("No activity within")
+        ) {
+          console.log("💓 하트비트 타임아웃 - 정상적인 상황입니다");
+          console.log("🔄 자동 재연결 중...");
+          return; // 자동 재연결을 기다림
+        }
+
+        // 토큰 만료 시 재연결 시도
+        if (event.target.readyState === EventSourcePolyfill.CLOSED) {
+          console.log("🔄 SSE 연결 재시도 중...");
+          setTimeout(() => {
+            createEventSource();
+          }, 5000);
+        }
+      });
+
+      return eventSource;
+    };
+
+    const eventSource = createEventSource();
+
+    // 연결 해제 시 정리
+    return () => {
+      console.log("🔌 SSE 연결 해제");
+      eventSource.close();
+    };
+  }, [isLoggedIn]);
+
+  const handleNotificationClick = () => {
+    // 알림이 있을 때만 모달 표시
+    if (notifications.length > 0) {
+      setShowNotificationModal(true);
+    }
+  };
+
+  const handleCloseNotificationModal = () => {
+    setShowNotificationModal(false);
+    // 모달 닫을 때 알림 상태 초기화
+    setHasNotifications(false);
+    setNotificationCount(0);
+    setNotifications([]);
+  };
+
+  // 테스트용: 알림 상태 강제 설정
+  const testNotification = () => {
+    console.log("🧪 테스트 알림 설정");
+    setHasNotifications(true);
+    setNotificationCount((prev) => prev + 1);
+  };
+
   return (
     <div className="space-y-6">
+      {/* 알림 모달 */}
+      <Dialog
+        open={showNotificationModal}
+        onOpenChange={setShowNotificationModal}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">새로운 쪽지 알림</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className="p-4 bg-orange-50 border border-orange-200 rounded-lg"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      {notification.message}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(notification.sendTime).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => navigate("/messages")}
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+              >
+                메시지 확인하기
+              </Button>
+              <Button
+                onClick={handleCloseNotificationModal}
+                variant="outline"
+                className="flex-1"
+              >
+                닫기
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* 로그인/프로필 카드 */}
       <Card className="border-orange-200">
         <CardHeader className="bg-gradient-to-r from-yellow-50 to-pink-50">
-          <CardTitle className="text-center text-gray-800">
-            {isLoggedIn ? "내 정보" : "로그인"}
+          <CardTitle className="text-center text-gray-800 flex items-center justify-center">
+            {isLoggedIn ? (
+              <>
+                내 정보
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNotificationClick}
+                  className="ml-2 p-1 h-8 w-8 relative"
+                >
+                  <Bell className="h-5 w-5 text-gray-600" />
+                  {hasNotifications && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {notificationCount > 9 ? "9+" : notificationCount}
+                    </div>
+                  )}
+                </Button>
+              </>
+            ) : (
+              "로그인"
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
@@ -234,6 +446,13 @@ const Sidebar = () => {
                 >
                   <HelpCircle className="h-4 w-4 mr-2" />
                   고객센터
+                </Button>
+                <Button
+                  onClick={testNotification}
+                  variant="outline"
+                  className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
+                >
+                  🧪 알림 테스트
                 </Button>
               </div>
               <Button

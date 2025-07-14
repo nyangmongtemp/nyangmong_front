@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: "/user-service/user/change-password",
     RESET_PASSWORD: "/user-service/user/reset-password",
   },
-  
+
   // 게시판 관련
   BOARD: {
     // 커뮤니티 게시판
@@ -23,7 +23,7 @@ export const API_ENDPOINTS = {
       LIKE: (id) => `/board-service/community/${id}/like`,
       COMMENT: (id) => `/board-service/community/${id}/comments`,
     },
-    
+
     // 입양 게시판
     ADOPTION: {
       LIST: "/animalboard-service/animal-board/list",
@@ -33,7 +33,7 @@ export const API_ENDPOINTS = {
       DELETE: (id) => `/animalboard-service/animal-board/${id}`,
       LIKE: (id) => `/animalboard-service/animal-board/${id}/like`,
     },
-    
+
     // 구조 게시판
     RESCUE: {
       LIST: "/board-service/rescue",
@@ -43,7 +43,7 @@ export const API_ENDPOINTS = {
       DELETE: (id) => `/board-service/rescue/${id}`,
     },
   },
-  
+
   // 유기동물 관련
   STRAY_ANIMAL: {
     LIST: "/animalboard-service/stray-animal-board/list",
@@ -52,7 +52,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/animalboard-service/stray-animal-board/${id}`,
     DELETE: (id) => `/animalboard-service/stray-animal-board/${id}`,
   },
-  
+
   // 채팅 관련
   CHAT: {
     ROOMS: "/chat-service/rooms",
@@ -60,7 +60,7 @@ export const API_ENDPOINTS = {
     SEND_MESSAGE: (roomId) => `/chat-service/rooms/${roomId}/messages`,
     CREATE_ROOM: "/chat-service/rooms/create",
   },
-  
+
   // 관리자 관련
   ADMIN: {
     USERS: "/admin-service/users",
@@ -71,7 +71,7 @@ export const API_ENDPOINTS = {
     POLICIES: "/admin-service/policies",
     LOGS: "/admin-service/logs",
   },
-  
+
   // 고객 지원
   SUPPORT: {
     INQUIRY: "/support-service/inquiry",
@@ -79,7 +79,7 @@ export const API_ENDPOINTS = {
     TERMS: "/support-service/terms",
     PRIVACY: "/support-service/privacy",
   },
-  
+
   // 파일 업로드
   UPLOAD: {
     IMAGE: "/upload-service/image",
@@ -88,7 +88,7 @@ export const API_ENDPOINTS = {
 };
 
 // API 호출 헬퍼 함수
-export const createApiCall = (endpoint, method = 'GET', data = null) => {
+export const createApiCall = (endpoint, method = "GET", data = null) => {
   return {
     url: endpoint,
     method,
@@ -98,7 +98,8 @@ export const createApiCall = (endpoint, method = 'GET', data = null) => {
 
 // 동적 엔드포인트 생성 헬퍼
 export const createDynamicEndpoint = (baseEndpoint, ...params) => {
-  return params.reduce((endpoint, param) => 
-    endpoint.replace(/\{[^}]+\}/, param), baseEndpoint
+  return params.reduce(
+    (endpoint, param) => endpoint.replace(/\{[^}]+\}/, param),
+    baseEndpoint
   );
-}; 
+};
