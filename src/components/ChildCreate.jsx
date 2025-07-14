@@ -9,6 +9,7 @@ import { Upload, X, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import CKEditorWrapper from "@/components/CKEditorWrapper";
 
 const ChildCreate = () => {
   const navigate = useNavigate();
@@ -253,15 +254,13 @@ const ChildCreate = () => {
               >
                 상세 내용 <span className="text-red-500">*</span>
               </Label>
-              <Textarea
-                id="description"
+              <CKEditorWrapper
                 value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                placeholder="내용을 입력하세요..."
-                className="min-h-[200px] border-orange-200 focus:border-orange-400 focus:ring-orange-400 resize-none"
-                required
+                onChange={(data) => handleInputChange("description", data)}
+                boardType="introduction"
+                placeholder="반려동물에 대한 상세한 설명을 입력하세요..."
+                minHeight={400}
+                maxHeight={400}
               />
             </div>
             <div className="flex justify-center space-x-4 pt-4">

@@ -12,6 +12,7 @@ import ImageCropModal from "@/components/ImageCropModal";
 import axiosInstance from "../../configs/axios-config";
 import { useAuth } from "../context/UserContext";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import CKEditorWrapper from "@/components/CKEditorWrapper";
 
 const CreatePost = () => {
   const { type, id } = useParams();
@@ -320,13 +321,19 @@ const CreatePost = () => {
                     >
                       내용 <span className="text-red-500">*</span>
                     </Label>
-                    <Textarea
-                      id="content"
+                    <CKEditorWrapper
                       value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="내용을 입력하세요"
-                      className="border-orange-200 focus:border-orange-400 focus:ring-orange-400 min-h-[300px] resize-none"
-                      required
+                      onChange={(data) => setContent(data)}
+                      boardType={
+                        type === "free"
+                          ? "free"
+                          : type === "question"
+                          ? "question"
+                          : "review"
+                      }
+                      placeholder="게시물 내용을 입력해주세요"
+                      minHeight={400}
+                      maxHeight={400}
                     />
                   </div>
 
