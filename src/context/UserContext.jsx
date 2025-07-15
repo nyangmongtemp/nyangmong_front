@@ -49,6 +49,22 @@ export const AuthProvider = ({ children }) => {
     loadDecryptedUser();
   }, []);
 
+  // 토큰만 갱신하는 메소드
+  const updateToken = (newToken) => {
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
+  };
+
+  // window 커스텀 이벤트 리스너 등록
+  useEffect(() => {
+    const handleTokenRefresh = (e) => {
+      updateToken(e.detail.token);
+    };
+    window.addEventListener("tokenRefreshed", handleTokenRefresh);
+    return () =>
+      window.removeEventListener("tokenRefreshed", handleTokenRefresh);
+  }, []);
+
   const login = async (token, email, nickname, profileImage) => {
     try {
       localStorage.setItem("token", token);
@@ -131,6 +147,7 @@ export const AuthProvider = ({ children }) => {
         kakaoLogin,
         nickname,
         profileImage,
+        updateToken,
       }}
     >
       {children}

@@ -45,6 +45,7 @@ axiosInstance.interceptors.response.use(
   },
   async (error) => {
     console.log("Response Interceptor Triggered!");
+    console.log(error);
 
     const originalRequest = error.config;
 
@@ -66,7 +67,8 @@ axiosInstance.interceptors.response.use(
     // 401 Unauthorized 에러일 경우 (토큰 만료)
     if (
       error.response?.status === 401 &&
-      error.response?.data?.msg === "EXPIRED_TOKEN" &&
+      (error.response?.data?.msg === "EXPIRED_TOKEN" ||
+        error.response?.msg === "EXPIRED_TOKEN") &&
       !originalRequest._retry
     ) {
       console.log("401 Unauthorized — trying token refresh...");
@@ -77,6 +79,7 @@ axiosInstance.interceptors.response.use(
         if (!email) {
           throw new Error("No email in localStorage");
         }
+        console.log("리스페시발동");
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
@@ -85,6 +88,11 @@ axiosInstance.interceptors.response.use(
 
         const newToken = res.data.result.token;
         localStorage.setItem("token", newToken);
+
+        // 커스텀 이벤트 발생 (UserContext에서 토큰 상태 갱신)
+        window.dispatchEvent(
+          new CustomEvent("tokenRefreshed", { detail: { token: newToken } })
+        );
 
         // 새 토큰으로 Authorization 헤더 갱신
         originalRequest.headers.Authorization = `Bearer ${newToken}`;

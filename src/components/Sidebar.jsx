@@ -401,6 +401,10 @@ const Sidebar = () => {
           console.log("✅ SSE emitter 연결 상태 정상");
         }
       } catch (error) {
+        if (error.status === 401 || error.response?.status === 401) {
+          console.log("이거는 로그가 나와야 함.");
+        }
+
         console.error("❌ SSE emitter 건강상태 확인 실패:", error);
         // 에러 발생 시 재연결 시도
         console.log("🔄 에러로 인한 SSE 재연결 시도");
