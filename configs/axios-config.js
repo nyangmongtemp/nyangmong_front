@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       (error.response?.data?.msg === "EXPIRED_TOKEN" ||
-        error.response?.msg === "EXPIRED_TOKEN") &&
+        error.response?.data === "EXPIRED_TOKEN") &&
       !originalRequest._retry
     ) {
       console.log("401 Unauthorized — trying token refresh...");
@@ -79,12 +79,14 @@ axiosInstance.interceptors.response.use(
         if (!email) {
           throw new Error("No email in localStorage");
         }
-        console.log("리스페시발동");
+        console.log("리프레시발동");
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
           userEmail: email,
         });
+
+        console.log(res);
 
         const newToken = res.data.result.token;
         localStorage.setItem("token", newToken);
