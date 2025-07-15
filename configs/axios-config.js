@@ -66,8 +66,7 @@ axiosInstance.interceptors.response.use(
     // 401 Unauthorized 에러일 경우 (토큰 만료)
     if (
       error.response?.status === 401 &&
-      (error.response?.data?.msg === "EXPIRED_TOKEN" ||
-        error.response?.data?.message === "INVALID_TOKEN") &&
+      error.response?.data?.msg === "EXPIRED_TOKEN" &&
       !originalRequest._retry
     ) {
       console.log("401 Unauthorized — trying token refresh...");

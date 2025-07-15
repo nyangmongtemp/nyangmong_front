@@ -30,7 +30,7 @@ import TabNavigation from "@/components/TabNavigation";
 import { useUserPageData } from "@/hooks/useUserPageData";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, USER } from "../../configs/host-config";
+import { API_BASE_URL, USER, MAIN } from "../../configs/host-config";
 
 const UserMyPage = () => {
   const navigate = useNavigate();
@@ -159,6 +159,7 @@ const UserMyPage = () => {
   const [likedPosts, setLikedPosts] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
 
   const getDisplayData = () => {
     let data = [];
@@ -197,6 +198,58 @@ const UserMyPage = () => {
     }
     return Math.ceil(totalItems / itemsPerPage);
   };
+
+  // 댓글 데이터 가져오기
+  const fetchMyComments = async (page = 0) => {
+    if (!token) return;
+
+    setIsLoadingComments(true);
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${MAIN}/comment/mypage`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page: page,
+            size: itemsPerPage,
+          },
+        }
+      );
+      console.log(response);
+
+      console.log("내 댓글 데이터:", response.data.result);
+
+      if (response.data.result) {
+        setMyComments(response.data.result || []);
+      }
+    } catch (error) {
+      console.error("댓글 데이터 가져오기 실패:", error);
+      setMyComments([]);
+    } finally {
+      setIsLoadingComments(false);
+    }
+  };
+
+  // activeTab이 변경될 때마다 해당하는 데이터 가져오기
+  useEffect(() => {
+    if (!token) return;
+
+    switch (activeTab) {
+      case "comments":
+        fetchMyComments(currentPage - 1); // Spring Boot는 0-based pagination
+        break;
+      case "posts":
+        // TODO: 내 게시글 데이터 가져오기
+        break;
+      case "likes":
+        // TODO: 좋아요한 게시글 데이터 가져오기
+        break;
+      default:
+        break;
+    }
+  }, [activeTab, currentPage, token]);
 
   // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
@@ -253,7 +306,9 @@ const UserMyPage = () => {
     }
 
     if (activeTab === "comments") {
-      return <CommentsList comments={displayData} />;
+      return (
+        <CommentsList comments={displayData} isLoading={isLoadingComments} />
+      );
     }
 
     if (activeTab === "likes") {

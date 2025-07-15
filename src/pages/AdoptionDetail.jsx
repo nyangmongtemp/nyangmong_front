@@ -29,7 +29,7 @@ import axiosInstance from "../../configs/axios-config.js";
 const AdoptionDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { email, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
