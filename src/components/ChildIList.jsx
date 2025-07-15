@@ -58,7 +58,25 @@ const ChildIList = () => {
             new Date(b.createAt || b.createdAt) -
             new Date(a.createAt || a.createdAt)
         );
-        setAllPosts(content);
+        // Board.jsx와 동일하게 likes/comments/postId 필드 매핑
+        const mappedPosts = content.map((item) => ({
+          ...item,
+          postId: item.postid,
+          createdAt: item.createdat,
+          likes: item.likeCount,
+          comments: item.commentCount,
+        }));
+        // 최신순 정렬 (작성일 또는 postId 기준 내림차순)
+        mappedPosts.sort((a, b) => {
+          // createAt/createdAt이 있으면 날짜 기준, 없으면 postId 기준
+          const dateA = new Date(a.createAt || a.createdAt || 0);
+          const dateB = new Date(b.createAt || b.createdAt || 0);
+          if (!isNaN(dateA) && !isNaN(dateB)) {
+            return dateB - dateA;
+          }
+          return (b.postId || 0) - (a.postId || 0);
+        });
+        setAllPosts(mappedPosts);
       })
       .catch(() => setError("소개 게시판 불러오기 실패"))
       .finally(() => setLoading(false));
@@ -193,7 +211,7 @@ const ChildIList = () => {
                   ) : (
                     filteredPets.map((pet) => (
                       <div
-                        key={pet.postId || pet.id}
+                        key={pet.postId}
                         className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                         onClick={() =>
                           navigate(
