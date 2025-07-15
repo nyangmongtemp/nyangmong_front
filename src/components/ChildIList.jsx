@@ -49,6 +49,8 @@ const ChildIList = () => {
         params: { page: 0, size: 1000 }, // 충분히 크게!
       })
       .then((res) => {
+        console.log(res);
+
         const content = res.data.content || [];
         // 최신순 정렬(내림차순)
         content.sort(
@@ -195,7 +197,7 @@ const ChildIList = () => {
                         className="border border-gray-300 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                         onClick={() =>
                           navigate(
-                            `/detail/introduction/${pet.postId || pet.id}`
+                            `/detail/introduction/${pet.postid || pet.id}`
                           )
                         }
                         style={{ cursor: "pointer" }}

@@ -33,6 +33,7 @@ const CommentsList = ({ comments, isLoading }) => {
   // 댓글 클릭 핸들러
   const handleCommentClick = (comment) => {
     const { category, contentId } = comment;
+    console.log(comment);
 
     if (category === "ADOPT") {
       navigate(`/adoption-detail/${contentId}`);
