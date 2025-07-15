@@ -4,7 +4,7 @@ import { API_BASE_URL, USER } from "./host-config";
 // ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
   // 개발 환경에서는 프록시를 사용하므로 baseURL을 빈 문자열로 설정
-  baseURL: process.env.NODE_ENV === 'development' ? '' : API_BASE_URL,
+  baseURL: process.env.NODE_ENV === "development" ? "" : API_BASE_URL,
   headers: {
     // "Content-Type": "application/json",
   },
@@ -18,12 +18,14 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // 요청 로깅 (개발 환경에서만)
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`
+      );
     }
-    
+
     return config;
   },
   (error) => {
@@ -36,13 +38,14 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // 응답 로깅 (개발 환경에서만)
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.log(`✅ API Response: ${response.status} ${response.config.url}`);
     }
     return response;
   },
   async (error) => {
     console.log("Response Interceptor Triggered!");
+    console.log(error);
 
     const originalRequest = error.config;
 
@@ -51,7 +54,7 @@ axiosInstance.interceptors.response.use(
       console.error("Network Error:", error.message);
       return Promise.reject({
         ...error,
-        message: "네트워크 연결을 확인해주세요."
+        message: "네트워크 연결을 확인해주세요.",
       });
     }
 
@@ -64,8 +67,8 @@ axiosInstance.interceptors.response.use(
     // 401 Unauthorized 에러일 경우 (토큰 만료)
     if (
       error.response?.status === 401 &&
-      (error.response?.data?.msg === "Invalid token" || 
-       error.response?.data?.message === "Expired_rt") &&
+      (error.response?.data?.msg === "EXPIRED_TOKEN" ||
+        error.response?.msg === "EXPIRED_TOKEN") &&
       !originalRequest._retry
     ) {
       console.log("401 Unauthorized — trying token refresh...");
@@ -76,6 +79,7 @@ axiosInstance.interceptors.response.use(
         if (!email) {
           throw new Error("No email in localStorage");
         }
+        console.log("리스페시발동");
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
@@ -85,26 +89,31 @@ axiosInstance.interceptors.response.use(
         const newToken = res.data.result.token;
         localStorage.setItem("token", newToken);
 
+        // 커스텀 이벤트 발생 (UserContext에서 토큰 상태 갱신)
+        window.dispatchEvent(
+          new CustomEvent("tokenRefreshed", { detail: { token: newToken } })
+        );
+
         // 새 토큰으로 Authorization 헤더 갱신
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         axiosInstance.defaults.headers.Authorization = `Bearer ${newToken}`;
 
         console.log("Token refreshed successfully");
-        
+
         // 재요청
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
-        
+
         // 토큰 갱신 실패 시 로그아웃 처리
         localStorage.clear();
-        
+
         // 사용자에게 알림
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
-          window.location.href = '/';
+          window.location.href = "/";
         }
-        
+
         return Promise.reject(refreshError);
       }
     }
@@ -113,7 +122,7 @@ axiosInstance.interceptors.response.use(
     console.error("API Error:", {
       status: error.response?.status,
       message: error.response?.data?.message,
-      url: error.config?.url
+      url: error.config?.url,
     });
 
     return Promise.reject(error);

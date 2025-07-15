@@ -123,7 +123,9 @@ const NewChatModal = ({ onSuccess }) => {
                     </div>
                     <div>
                       <div className="font-medium">{user.nickname}</div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
+                      <div className="text-sm text-gray-500">
+                        이름: {user.username}
+                      </div>
                     </div>
                   </div>
                 </div>

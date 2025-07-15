@@ -250,6 +250,14 @@ const CommentSection = ({
       );
       setReplyText("");
       setReplyTo(null);
+
+      // 답글 생성 후 해당 댓글의 답글 목록을 다시 조회
+      fetchReplies(commentId);
+
+      // 댓글 개수 업데이트
+      fetchCommentLikeCount();
+
+      alert("답글이 생성되었습니다.");
     } catch (err) {
       console.error("답글 작성 실패:", err);
       alert("답글 작성에 실패했습니다.");
@@ -742,18 +750,20 @@ const CommentSection = ({
                               >
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      {reply.profileImage && (
-                                        <img
-                                          src={reply.profileImage}
-                                          alt={reply.nickname}
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                      )}
-                                      <span className="font-medium text-xs text-gray-800">
-                                        {reply.nickname}
-                                      </span>
-                                      <span className="text-xs text-gray-400">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        {reply.profileImage && (
+                                          <img
+                                            src={reply.profileImage}
+                                            alt={reply.nickname}
+                                            className="w-6 h-6 rounded-full"
+                                          />
+                                        )}
+                                        <span className="font-medium text-xs text-gray-800">
+                                          {reply.nickname}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
                                         {reply.createAt
                                           ? formatDateTime(reply.createAt)
                                           : ""}

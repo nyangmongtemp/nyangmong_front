@@ -12,7 +12,7 @@ import Signup from "./pages/Signup";
 import AdoptionPage from "./pages/AdoptionPage.jsx";
 import AdoptionCreate from "./pages/AdoptionCreate";
 import AdoptionBoard from "./components/AdoptionBoard";
-import AdoptionDetail from "./pages/AdoptionDetail.jsx";
+import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
 import MapPage from "./pages/MapPage";
 import ChildCreate from "./components/ChildCreate";
@@ -32,6 +32,7 @@ import AdminPolicyCreate from "./pages/AdminPolicyCreate";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
+import ChildDetail from "./pages/ChildDetail";
 
 const queryClient = new QueryClient();
 
@@ -46,10 +47,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/board/:type" element={<Board />} />
             <Route path="/post/:type/:id" element={<PostDetail />} />
+            <Route path="/detail/:type/:id" element={<PostDetail />} />
             <Route path="/create-post/:type" element={<CreatePost />} />
+            <Route path="/edit/:type/:id" element={<CreatePost />} />
             <Route path="/child/create" element={<ChildCreate />} />
             <Route path="/child/list" element={<ChildIList />} />
             <Route path="/board/introduction" element={<ChildIList />} />
+            <Route path="/detail/introduction/:id" element={<ChildDetail />} />
+            <Route path="/child/edit/:id" element={<ChildCreate />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/adoption" element={<AdoptionPage />} />
             <Route path="/adoption/create" element={<AdoptionCreate />} />

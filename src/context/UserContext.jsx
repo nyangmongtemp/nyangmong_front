@@ -49,6 +49,22 @@ export const AuthProvider = ({ children }) => {
     loadDecryptedUser();
   }, []);
 
+  // 토큰만 갱신하는 메소드
+  const updateToken = (newToken) => {
+    localStorage.setItem("token", newToken);
+    setToken(newToken);
+  };
+
+  // window 커스텀 이벤트 리스너 등록
+  useEffect(() => {
+    const handleTokenRefresh = (e) => {
+      updateToken(e.detail.token);
+    };
+    window.addEventListener("tokenRefreshed", handleTokenRefresh);
+    return () =>
+      window.removeEventListener("tokenRefreshed", handleTokenRefresh);
+  }, []);
+
   const login = async (token, email, nickname, profileImage) => {
     try {
       localStorage.setItem("token", token);
@@ -93,8 +109,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // 현재 사용자의 알림 데이터 삭제 (email 상태 사용)
+    if (email) {
+      localStorage.removeItem(`notifications_${email}`);
+      console.log("🗑️ 로그아웃 시 알림 데이터 삭제 완료:", email);
+    }
+
+    // 기타 사용자 데이터 삭제
     localStorage.removeItem("token");
-    localStorage.removeItem("email");
     localStorage.removeItem("nickname");
     localStorage.removeItem("profileImage");
     if (isSocial) {
@@ -102,6 +124,10 @@ export const AuthProvider = ({ children }) => {
       setIsSocial(false);
     }
 
+    // email은 마지막에 삭제 (알림 데이터 삭제 후)
+    localStorage.removeItem("email");
+
+    // 상태 초기화
     setToken("");
     setEmail("");
     setNickname(null);
@@ -121,6 +147,7 @@ export const AuthProvider = ({ children }) => {
         kakaoLogin,
         nickname,
         profileImage,
+        updateToken,
       }}
     >
       {children}

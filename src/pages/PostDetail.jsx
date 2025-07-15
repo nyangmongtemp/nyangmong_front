@@ -18,6 +18,21 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import CommentSection from "@/components/CommentSection";
 import axiosInstance from "../../configs/axios-config";
+import axios from "axios";
+import { useAuth } from "../context/UserContext";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
+
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
 
 const PostDetail = () => {
   const { type, id } = useParams();
@@ -29,23 +44,77 @@ const PostDetail = () => {
 
   // 댓글도 실제 데이터로 연동하려면 별도 상태 필요
   const [comments, setComments] = useState([]);
+  const { nickname: userNickname } = useAuth();
 
   useEffect(() => {
-    if (!type || !id) return;
+    if (!type || !id) {
+      setError("잘못된 접근입니다. (type 또는 id 없음)");
+      setPost(null);
+      return;
+    }
     setLoading(true);
     setError(null);
+
+    // 카테고리 매핑
+    const categoryMap = {
+      free: "FREE",
+      question: "QUESTION",
+      review: "REVIEW",
+    };
+    const category = categoryMap[type] || type.toUpperCase();
+
     axiosInstance
-      .get(`/board-service/board/detail/${type.toUpperCase()}/${id}`)
+      .get(`${API_BASE_URL}${BOARD}/detail/${category}/${id}`, {
+        headers: {
+          Authorization: undefined,
+        },
+      })
       .then((res) => {
+        console.log("전체 API 응답:", res);
+        console.log("응답 데이터:", res.data);
+
         // 응답 구조에 따라 데이터 파싱
         let data = res.data.result || res.data.data || res.data;
         if (Array.isArray(data)) data = data[0]; // result가 배열이면 첫 번째 요소만 사용
-        console.log("상세 post 데이터:", data); // 콘솔 출력 추가
-        setPost(data);
+        console.log("파싱된 데이터:", data); // 콘솔 출력 추가
+
+        // 데이터가 없거나 필수 필드가 없는 경우 처리
+        if (!data) {
+          console.error("데이터가 없습니다");
+          setError("게시글 데이터를 찾을 수 없습니다.");
+          return;
+        }
+
+        // 백엔드 필드명을 프론트엔드 필드명으로 매핑
+        const mappedData = {
+          id: data.postid,
+          title: data.title,
+          content: data.content,
+          author: data.nickname,
+          userId: data.userid,
+          createdAt: data.createdat
+            ? new Date(data.createdat).toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "날짜 정보 없음",
+          views: data.viewcount,
+          likes: 0, // 백엔드에 likes 필드가 없으므로 기본값 0
+          thumbnailimage: data.thumbnailimage,
+          category: data.category,
+        };
+
+        console.log("매핑된 데이터:", mappedData);
+
+        setPost(mappedData);
         // 댓글이 포함되어 있다면 분리
         if (data && data.comments) setComments(data.comments);
       })
       .catch((err) => {
+        console.error("게시글 조회 에러:", err);
         setError("게시글을 불러오지 못했습니다.");
         setPost(null);
       })
@@ -61,6 +130,25 @@ const PostDetail = () => {
     window.alert("링크가 복사되었습니다!");
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      const categoryMap = {
+        review: "REVIEW",
+        question: "QUESTION",
+        free: "FREE",
+      };
+      const category = categoryMap[type] || type.toUpperCase();
+      await axiosInstance.delete(
+        `${API_BASE_URL}${BOARD}/${category}/delete/${id}`
+      );
+      alert("게시글이 삭제되었습니다.");
+      navigate(`/board/${type}`);
+    } catch (err) {
+      alert("게시글 삭제에 실패했습니다.");
+    }
+  };
+
   // 렌더링 시 post가 없으면 로딩/에러 처리
   if (loading) {
     return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
@@ -69,7 +157,15 @@ const PostDetail = () => {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
   if (!post) {
-    return null;
+    return (
+      <div className="p-8 text-center text-gray-500">
+        <p>게시글을 불러올 수 없습니다.</p>
+        <p>
+          URL: /board/detail/{type}/{id}
+        </p>
+        <p>Post 상태: {JSON.stringify(post)}</p>
+      </div>
+    );
   }
 
   return (
@@ -104,7 +200,7 @@ const PostDetail = () => {
                       </span>
                       <span className="text-sm text-gray-400">•</span>
                       <span className="text-sm text-gray-500">
-                        {post.createdAt}
+                        {formatDateTime(post.createdAt)}
                       </span>
                     </div>
                     <h1 className="text-2xl font-bold mb-4 text-gray-900">
@@ -129,12 +225,24 @@ const PostDetail = () => {
                     <Button variant="outline" size="sm" onClick={handleShare}>
                       <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {post && userNickname && post.author === userNickname && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/edit/${type}/${id}`)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleDelete}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -150,9 +258,10 @@ const PostDetail = () => {
                   </div>
                 )}
                 <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6">
-                    {post.content}
-                  </div>
+                  <div
+                    className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-6"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -170,7 +279,12 @@ const PostDetail = () => {
             </Card>
 
             {/* 댓글 섹션 */}
-            <CommentSection postId={id} category={type} showReplies={true} />
+            <CommentSection
+              postId={id}
+              category={type}
+              showReplies={true}
+              userId={post.userId}
+            />
           </div>
 
           {/* 사이드바 영역 */}
