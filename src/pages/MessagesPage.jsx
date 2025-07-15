@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Plus, Send } from "lucide-react";
+import { ArrowLeft, Plus, Send, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,6 +132,31 @@ const MessagesPage = () => {
     if (token) fetchUserData();
   };
 
+  // 채팅방 삭제 함수
+  const handleDeleteChat = async (chatId, e) => {
+    e.stopPropagation(); // 이벤트 버블링 방지
+
+    if (!window.confirm("정말로 이 채팅방을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await axiosInstance.delete(`${API_BASE_URL}${USER}/clear/${chatId}`);
+      console.log("채팅방 삭제 성공");
+
+      // 채팅 목록에서 삭제된 채팅방 제거
+      setMessages((prev) => prev.filter((chat) => chat.chatId !== chatId));
+
+      // 현재 선택된 채팅방이 삭제된 채팅방이라면 선택 해제
+      if (selectedChatId === chatId) {
+        setSelectedChatId(null);
+      }
+    } catch (error) {
+      console.error("채팅방 삭제 실패:", error);
+      alert("채팅방 삭제에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -231,11 +256,23 @@ const MessagesPage = () => {
                                   <h3 className="font-semibold text-gray-800">
                                     {otherNickname}
                                   </h3>
-                                  <span className="text-xs text-gray-500">
-                                    {formatDate(
-                                      chat.message?.createAt || chat.updateAt
-                                    )}
-                                  </span>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-gray-500">
+                                      {formatDate(
+                                        chat.message?.createAt || chat.updateAt
+                                      )}
+                                    </span>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) =>
+                                        handleDeleteChat(chat.chatId, e)
+                                      }
+                                      className="text-red-600 hover:bg-red-50 hover:text-red-700 p-1 h-6 w-6"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </div>
                                 <div className="flex items-center space-x-2 mb-2">
                                   {senderNickname && (
