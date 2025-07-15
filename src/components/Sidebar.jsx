@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, SSE, USER } from "../../configs/host-config";
+import { API_BASE_URL, SSE, USER, BOARD } from "../../configs/host-config";
 import { API_ENDPOINTS } from "../../configs/api-endpoints";
 import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
@@ -239,7 +239,7 @@ const Sidebar = () => {
       setLoading(true);
       try {
         const res = await axiosInstance.get(
-          "/board-service/board/information/popular"
+          `${API_BASE_URL}${BOARD}/information/popular`
         );
         //console.log("인기 게시글 API 응답:", res.data);
         const posts = res.data || [];
@@ -253,6 +253,18 @@ const Sidebar = () => {
         setPopularPosts(mappedPosts);
       } catch (error) {
         console.error("인기 게시글 불러오기 실패:", error);
+        console.error("에러 상세:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          url: error.config?.url,
+        });
+
+        // 404 에러일 때 더 명확한 메시지
+        if (error.response?.status === 404) {
+          console.warn("인기 게시글 API가 백엔드에서 구현되지 않았습니다.");
+        }
+
         setPopularPosts([]);
       } finally {
         setLoading(false);
@@ -782,7 +794,7 @@ const Sidebar = () => {
                     if (post.category === "QUESTION") type = "question";
                     else if (post.category === "REVIEW") type = "review";
                     else if (post.category === "FREE") type = "free";
-                    navigate(`/post/${type}/${post.id}`);
+                    navigate(`/detail/${type}/${post.id}`);
                   }}
                   className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b last:border-b-0"
                 >

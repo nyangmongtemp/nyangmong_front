@@ -6,10 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import CKEditorWrapper from "@/components/CKEditorWrapper";
 
 const ChildCreate = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = !!id;
+
+  // 동적 페이지 타이틀
+  const pageTitle = isEdit
+    ? "우리 아이 소개 게시판 수정"
+    : "우리 아이 소개 게시판 글쓰기";
+  const buttonText = isEdit ? "수정 완료" : "작성 완료";
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -20,6 +31,28 @@ const ChildCreate = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (isEdit) {
+      axiosInstance
+        .get(`${API_BASE_URL}${BOARD}/detail/introduction/${id}`)
+        .then((res) => {
+          let data = res.data.result || res.data.data || res.data;
+          if (Array.isArray(data)) data = data[0];
+          setFormData({
+            title: data.title,
+            description: data.content,
+          });
+          if (data.thumbnailImage || data.thumbnailimage) {
+            setThumbnail({
+              id: Date.now(),
+              url: data.thumbnailImage || data.thumbnailimage,
+              file: null, // 실제 파일은 없으므로 수정 시 새 파일 업로드 필요
+            });
+          }
+        });
+    }
+  }, [isEdit, id]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -59,21 +92,70 @@ const ChildCreate = () => {
     setThumbnail(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!thumbnail) {
       alert("썸네일 이미지를 업로드해주세요.");
       return;
     }
 
-    console.log("제출 내용:", formData, thumbnail);
-    navigate("/posts"); // 실제 경로에 맞게 수정
+    const formDataToSend = new FormData();
+    formDataToSend.append(
+      "context",
+      new Blob(
+        [
+          JSON.stringify({
+            title: formData.title,
+            content: formData.description,
+          }),
+        ],
+        { type: "application/json" }
+      )
+    );
+    formDataToSend.append("thumbnailImage", thumbnail.file);
+
+    try {
+      if (isEdit) {
+        await axiosInstance.put(
+          `${API_BASE_URL}${BOARD}/introduction/modify/${id}`,
+          formDataToSend,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        alert("게시글이 수정되었습니다.");
+        // 강제 새로고침을 위해 replace: false로 설정하고 페이지 새로고침
+        navigate("/child/list?page=1", { replace: false });
+        // 페이지 새로고침으로 최신 데이터 확보
+        window.location.reload();
+      } else {
+        await axiosInstance.post(
+          `${API_BASE_URL}${BOARD}/introduction/create`,
+          formDataToSend,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        alert("게시글이 등록되었습니다.");
+        // 강제 새로고침을 위해 replace: false로 설정하고 페이지 새로고침
+        navigate("/child/list?page=1", { replace: false });
+        // 페이지 새로고침으로 최신 데이터 확보
+        window.location.reload();
+      }
+    } catch (err) {
+      alert(
+        isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다."
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
       <Header />
-
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* 헤더 영역 */}
@@ -88,37 +170,41 @@ const ChildCreate = () => {
                 <span>목록으로</span>
               </Button>
               <div className="text-lg font-semibold text-gray-800">
-                게시물 작성
+                {pageTitle}
               </div>
             </div>
           </div>
-
           {/* 폼 본문 */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                제목 *
+            <div className="space-y-2">
+              <Label
+                htmlFor="title"
+                className="text-sm font-medium text-gray-700"
+              >
+                제목 <span className="text-red-500">*</span>
               </Label>
               <Input
+                id="title"
+                type="text"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 placeholder="제목을 입력하세요"
+                className="border-orange-200 focus:border-orange-400 focus:ring-orange-400"
                 required
               />
             </div>
-
-            <div>
+            <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                썸네일 이미지 업로드 *
+                썸네일 이미지 업로드 <span className="text-red-500">*</span>
               </Label>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <label
                     htmlFor="thumbnail-upload"
-                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-orange-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-10 h-10 mb-4 text-gray-500" />
+                      <Upload className="w-10 h-10 mb-4 text-orange-400" />
                       <p className="mb-2 text-sm text-gray-500">
                         클릭하거나 드래그하여 이미지 업로드
                       </p>
@@ -135,7 +221,6 @@ const ChildCreate = () => {
                     />
                   </label>
                 </div>
-
                 <div>
                   {thumbnail ? (
                     <div className="relative">
@@ -162,22 +247,22 @@ const ChildCreate = () => {
                 </div>
               </div>
             </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                상세 내용 *
+            <div className="space-y-2">
+              <Label
+                htmlFor="description"
+                className="text-sm font-medium text-gray-700"
+              >
+                상세 내용 <span className="text-red-500">*</span>
               </Label>
-              <Textarea
+              <CKEditorWrapper
                 value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                placeholder="내용을 입력하세요..."
-                className="min-h-48 resize-none"
-                required
+                onChange={(data) => handleInputChange("description", data)}
+                boardType="introduction"
+                placeholder="반려동물에 대한 상세한 설명을 입력하세요..."
+                minHeight={400}
+                maxHeight={400}
               />
             </div>
-
             <div className="flex justify-center space-x-4 pt-4">
               <Button
                 type="button"
@@ -190,7 +275,7 @@ const ChildCreate = () => {
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                작성 완료
+                {buttonText}
               </Button>
             </div>
           </form>
