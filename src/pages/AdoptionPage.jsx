@@ -44,18 +44,18 @@ const AdoptionPage = () => {
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
-  
+
   // API 관련 상태
   const [strayAnimals, setStrayAnimals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // 페이징 관련 상태 (서버 사이드)
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  
+
   // 검색 필터 상태
   const [searchWord, setSearchWord] = useState("");
   const [upKindNm, setUpKindNm] = useState("");
@@ -70,7 +70,7 @@ const AdoptionPage = () => {
   const [adoptionCurrentPage, setAdoptionCurrentPage] = useState(0);
   const [adoptionTotalPages, setAdoptionTotalPages] = useState(0);
   const [adoptionTotalElements, setAdoptionTotalElements] = useState(0);
-  
+
   // 분양게시판 검색 필터 상태
   const [adoptionSearchWord, setAdoptionSearchWord] = useState("");
   // adoptionPetCategory, adoptionSex, adoptionAddress 기본값을 '전체'로
@@ -81,27 +81,27 @@ const AdoptionPage = () => {
   // Alert 다이얼로그 상태
   const [alertDialog, setAlertDialog] = useState({
     isOpen: false,
-    title: '',
-    message: '',
-    type: 'info'
+    title: "",
+    message: "",
+    type: "info",
   });
 
   const categories = ["전체", "강아지", "고양이", "기타"];
   const genderOptions = ["전체", "수컷", "암컷", "미상"];
 
   // Alert 다이얼로그 표시 함수
-  const showAlert = (title, message, type = 'info') => {
+  const showAlert = (title, message, type = "info") => {
     setAlertDialog({
       isOpen: true,
       title,
       message,
-      type
+      type,
     });
   };
 
   // Alert 다이얼로그 닫기 함수
   const closeAlert = () => {
-    setAlertDialog(prev => ({ ...prev, isOpen: false }));
+    setAlertDialog((prev) => ({ ...prev, isOpen: false }));
   };
   const regions = [
     { value: "all", label: "전체 지역" },
@@ -129,7 +129,7 @@ const AdoptionPage = () => {
   const fetchStrayAnimals = async (page = 0) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // 지역 필터링을 위한 주소 매핑
       let addressFilter = "";
@@ -153,35 +153,33 @@ const AdoptionPage = () => {
           "jeonbuk-special": "전북특별자치도",
           gyeongsangbuk: "경상북도",
           gyeongsangnam: "경상남도",
-          jeju: "제주"
+          jeju: "제주",
         };
         addressFilter = regionMap[selectedRegion] || "";
       }
-      
+
       // 종류 필터링을 위한 매핑
       let kindFilter = "";
       if (selectedCategory !== "전체") {
         const kindMap = {
-          "강아지": "개",
-          "고양이": "고양이",
-          "기타": "기타"
+          강아지: "개",
+          고양이: "고양이",
+          기타: "기타",
         };
         kindFilter = kindMap[selectedCategory] || "";
       }
-      
+
       // 성별 필터링을 위한 매핑
       let genderFilter = "";
       if (selectedGender !== "전체") {
         const genderMap = {
-          "수컷": "M",
-          "암컷": "F",
-          "미상": "Q"
+          수컷: "M",
+          암컷: "F",
+          미상: "Q",
         };
         genderFilter = genderMap[selectedGender] || "";
       }
-      
 
-      
       const response = await strayAnimalAPI.getStrayAnimals(
         searchWord || searchTerm,
         kindFilter,
@@ -190,24 +188,23 @@ const AdoptionPage = () => {
         page,
         pageSize
       );
-      
 
-      
       // API 응답이 HTML인 경우 (백엔드 서버 연결 실패)
-      if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+      if (
+        typeof response === "string" &&
+        response.includes("<!DOCTYPE html>")
+      ) {
         setStrayAnimals([]);
         setCurrentPage(0);
         setTotalPages(0);
         setTotalElements(0);
-        setError('백엔드 서버에 연결할 수 없습니다.');
+        setError("백엔드 서버에 연결할 수 없습니다.");
         return;
       }
-      
+
       // API 응답 형식에 맞게 데이터 추출
       setStrayAnimals(response.content || response.data || response || []);
-      
 
-      
       if (response.pageable) {
         // API는 0-based, UI는 1-based로 변환
         setCurrentPage(response.pageable.pageNumber);
@@ -215,12 +212,9 @@ const AdoptionPage = () => {
       }
       setTotalPages(response.totalPages || 0);
       setTotalElements(response.totalElements || 0);
-      
-
-      
-        } catch (err) {
-      console.error('유기동물 목록 조회 실패:', err);
-      setError('유기동물 목록을 불러오는데 실패했습니다.');
+    } catch (err) {
+      console.error("유기동물 목록 조회 실패:", err);
+      setError("유기동물 목록을 불러오는데 실패했습니다.");
       setStrayAnimals([]);
     } finally {
       setLoading(false);
@@ -242,7 +236,7 @@ const AdoptionPage = () => {
 
   // 분양게시판 탭이 선택될 때 데이터 로드
   const [activeTab, setActiveTab] = useState("rescue");
-  
+
   useEffect(() => {
     if (activeTab === "adoption") {
       fetchAdoptionPosts(0);
@@ -271,15 +265,15 @@ const AdoptionPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // 분양게시판 목록 조회 함수
   const fetchAdoptionPosts = async (page = 0) => {
     setAdoptionLoading(true);
     setAdoptionError(null);
-    
+
     try {
       // 지역 필터링을 위한 주소 매핑
       let addressFilter = "";
@@ -303,57 +297,61 @@ const AdoptionPage = () => {
           "jeonbuk-special": "전북특별자치도",
           gyeongsangbuk: "경상북도",
           gyeongsangnam: "경상남도",
-          jeju: "제주"
+          jeju: "제주",
         };
         addressFilter = regionMap[adoptionAddress] || adoptionAddress;
       }
-      
 
-      
       const response = await adoptionAPI.getAdoptionBoardPosts(
         adoptionSearchWord,
         adoptionPetCategory === "전체" ? "" : adoptionPetCategory,
         addressFilter,
-        adoptionSex === "전체" ? "" : (adoptionSex === "수컷" ? "M" : adoptionSex === "암컷" ? "F" : "Q"),
+        adoptionSex === "전체"
+          ? ""
+          : adoptionSex === "수컷"
+          ? "M"
+          : adoptionSex === "암컷"
+          ? "F"
+          : "Q",
         page + 1, // API는 1-based
         pageSize
       );
-      
 
-      
+      console.log(response);
+
       // API 응답이 HTML인 경우 (백엔드 서버 연결 실패)
-      if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+      if (
+        typeof response === "string" &&
+        response.includes("<!DOCTYPE html>")
+      ) {
         setAdoptionPosts([]);
         setAdoptionCurrentPage(0);
         setAdoptionTotalPages(0);
         setAdoptionTotalElements(0);
-        setAdoptionError('백엔드 서버에 연결할 수 없습니다.');
+        setAdoptionError("백엔드 서버에 연결할 수 없습니다.");
         return;
       }
-      
+
       // API 응답 형식에 맞게 데이터 추출
       setAdoptionPosts(response.content || response.data || response || []);
-      
 
-      
       if (response.pageable) {
         setAdoptionCurrentPage(response.pageable.pageNumber);
       }
       setAdoptionTotalPages(response.totalPages || 0);
       setAdoptionTotalElements(response.totalElements || 0);
-      
-
-      
     } catch (err) {
-      console.error('분양게시판 목록 조회 실패:', err);
-      
+      console.error("분양게시판 목록 조회 실패:", err);
+
       // 네트워크 오류인 경우 더 친화적인 메시지 표시
-      if (err.code === 'ERR_NETWORK' || err.message?.includes('네트워크')) {
-        setAdoptionError('분양게시판 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      if (err.code === "ERR_NETWORK" || err.message?.includes("네트워크")) {
+        setAdoptionError(
+          "분양게시판 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요."
+        );
       } else {
-        setAdoptionError('분양게시판 목록을 불러오는데 실패했습니다.');
+        setAdoptionError("분양게시판 목록을 불러오는데 실패했습니다.");
       }
-      
+
       setAdoptionPosts([]);
     } finally {
       setAdoptionLoading(false);
@@ -371,12 +369,28 @@ const AdoptionPage = () => {
     return {
       id: animal.desertionNo || animal.id,
       title: animal.kindNm || animal.kindCd || "유기동물",
-      image: animal.popfile1 || animal.popfile || animal.filename || "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      image:
+        animal.popfile1 ||
+        animal.popfile ||
+        animal.filename ||
+        "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       location: animal.careAddr || animal.orgNm || "위치 정보 없음",
       age: animal.age || "나이 정보 없음",
-      gender: animal.sexCd === "M" ? "수컷" : animal.sexCd === "F" ? "암컷" : animal.sexCd === "Q" ? "미상" : "성별 정보 없음",
-      rescueDate: animal.happenDt ? `${animal.happenDt.slice(0, 4)}-${animal.happenDt.slice(4, 6)}-${animal.happenDt.slice(6, 8)}` : "날짜 정보 없음",
-    
+      gender:
+        animal.sexCd === "M"
+          ? "수컷"
+          : animal.sexCd === "F"
+          ? "암컷"
+          : animal.sexCd === "Q"
+          ? "미상"
+          : "성별 정보 없음",
+      rescueDate: animal.happenDt
+        ? `${animal.happenDt.slice(0, 4)}-${animal.happenDt.slice(
+            4,
+            6
+          )}-${animal.happenDt.slice(6, 8)}`
+        : "날짜 정보 없음",
+
       views: 0,
       likes: 0,
       // 추가 정보
@@ -400,15 +414,25 @@ const AdoptionPage = () => {
     return {
       id: post.postId,
       title: post.title,
-      image: post.thumbnailImage || "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      image:
+        post.thumbnailImage ||
+        "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       location: post.address || "위치 정보 없음",
       age: post.age || "나이 정보 없음",
-      gender: post.sexCode === "M" ? "수컷" : post.sexCode === "F" ? "암컷" : "성별 정보 없음",
-      price: post.fee === 0 || post.fee === "0" ? "무료분양" : `${Number(post.fee).toLocaleString()}원`,
-      date: new Date().toISOString().split('T')[0], // 현재 날짜로 설정
+      gender:
+        post.sexCode === "M"
+          ? "수컷"
+          : post.sexCode === "F"
+          ? "암컷"
+          : "성별 정보 없음",
+      price:
+        post.fee === 0 || post.fee === "0"
+          ? "무료분양"
+          : `${Number(post.fee).toLocaleString()}원`,
+      date: new Date().toISOString().split("T")[0], // 현재 날짜로 설정
       views: post.viewCount || 0,
-      likes: 0, // API에 없으므로 기본값
-      comments: 0, // API에 없으므로 기본값
+      likes: post.likeCount || 0, // API에 없으므로 기본값
+      comments: post.commentCount || 0, // API에 없으므로 기본값
       // 추가 정보
       content: post.content,
       petCategory: post.petCategory,
@@ -446,11 +470,13 @@ const AdoptionPage = () => {
     <Card
       className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
       onClick={() => {
-        console.log('PostCard 클릭:', { post, isRescue, id: post.id });
-        const targetUrl = isRescue ? `/rescue-detail/${post.id}` : `/adoption-detail/${post.id}`;
-        console.log('이동할 URL:', targetUrl);
+        console.log("PostCard 클릭:", { post, isRescue, id: post.id });
+        const targetUrl = isRescue
+          ? `/rescue-detail/${post.id}`
+          : `/adoption-detail/${post.id}`;
+        console.log("이동할 URL:", targetUrl);
         navigate(targetUrl);
-        console.log('navigate 함수 실행 완료');
+        console.log("navigate 함수 실행 완료");
       }}
     >
       <div className="relative">
@@ -513,14 +539,16 @@ const AdoptionPage = () => {
   );
 
   const renderPagination = () => {
-    
     // 모바일에서는 간단한 페이징, 데스크톱에서는 전체 페이징
     if (isMobile) {
       // 모바일에서는 3개 페이지 번호만 표시
       const maxVisiblePages = 3;
-      const startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+      const startPage = Math.max(
+        0,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
       const endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
-      
+
       return (
         <div className="mt-8 flex items-center justify-center gap-2 px-4">
           <button
@@ -530,7 +558,7 @@ const AdoptionPage = () => {
           >
             이전
           </button>
-          
+
           {/* 첫 페이지가 보이지 않을 때만 표시 */}
           {startPage > 0 && (
             <>
@@ -547,21 +575,22 @@ const AdoptionPage = () => {
           )}
 
           {/* 현재 페이지 범위 */}
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-            (page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-2 py-1.5 text-xs rounded min-w-[25px] ${
-                  currentPage === page
-                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-orange-100"
-                }`}
-              >
-                {page + 1}
-              </button>
-            )
-          )}
+          {Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+          ).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-2 py-1.5 text-xs rounded min-w-[25px] ${
+                currentPage === page
+                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-orange-100"
+              }`}
+            >
+              {page + 1}
+            </button>
+          ))}
 
           {/* 마지막 페이지가 보이지 않을 때만 표시 */}
           {endPage < totalPages - 1 && (
@@ -577,9 +606,11 @@ const AdoptionPage = () => {
               </button>
             </>
           )}
-          
+
           <button
-            onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+            onClick={() =>
+              handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+            }
             disabled={currentPage === totalPages - 1}
             className="px-2 py-1.5 text-xs bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed min-w-[35px]"
           >
@@ -588,10 +619,13 @@ const AdoptionPage = () => {
         </div>
       );
     }
-    
+
     // 데스크톱에서는 5개 페이지 번호 표시
     const maxVisiblePages = 5;
-    const startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    const startPage = Math.max(
+      0,
+      currentPage - Math.floor(maxVisiblePages / 2)
+    );
     const endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
 
     return (
@@ -601,10 +635,14 @@ const AdoptionPage = () => {
           <PaginationItem>
             <PaginationPrevious
               onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-              className={`${currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-orange-500"} text-sm`}
+              className={`${
+                currentPage === 0
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer hover:text-orange-500"
+              } text-sm`}
             />
           </PaginationItem>
-          
+
           {/* 첫 페이지가 보이지 않을 때만 표시 */}
           {startPage > 0 && (
             <>
@@ -625,19 +663,20 @@ const AdoptionPage = () => {
           )}
 
           {/* 현재 페이지 범위 */}
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-            (page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => handlePageChange(page)}
-                  isActive={currentPage === page}
-                  className="cursor-pointer text-sm px-2 hover:text-orange-500"
-                >
-                  {page + 1}
-                </PaginationLink>
-              </PaginationItem>
-            )
-          )}
+          {Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+          ).map((page) => (
+            <PaginationItem key={page}>
+              <PaginationLink
+                onClick={() => handlePageChange(page)}
+                isActive={currentPage === page}
+                className="cursor-pointer text-sm px-2 hover:text-orange-500"
+              >
+                {page + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
 
           {/* 마지막 페이지가 보이지 않을 때만 표시 */}
           {endPage < totalPages - 1 && (
@@ -657,12 +696,18 @@ const AdoptionPage = () => {
               </PaginationItem>
             </>
           )}
-          
+
           {/* 다음 버튼 */}
           <PaginationItem>
             <PaginationNext
-              onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-              className={`${currentPage === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-orange-500"} text-sm`}
+              onClick={() =>
+                handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+              }
+              className={`${
+                currentPage === totalPages - 1
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer hover:text-orange-500"
+              } text-sm`}
             />
           </PaginationItem>
         </PaginationContent>
@@ -671,25 +716,37 @@ const AdoptionPage = () => {
   };
 
   const renderAdoptionPagination = () => {
-    console.log('분양게시판 페이징 렌더링:', { adoptionCurrentPage, adoptionTotalPages, adoptionTotalElements });
+    console.log("분양게시판 페이징 렌더링:", {
+      adoptionCurrentPage,
+      adoptionTotalPages,
+      adoptionTotalElements,
+    });
 
     // 모바일에서는 간단한 페이징, 데스크톱에서는 전체 페이징
     if (isMobile) {
       // 모바일에서는 3개 페이지 번호만 표시
       const maxVisiblePages = 3;
-      const startPage = Math.max(0, adoptionCurrentPage - Math.floor(maxVisiblePages / 2));
-      const endPage = Math.min(adoptionTotalPages - 1, startPage + maxVisiblePages - 1);
-      
+      const startPage = Math.max(
+        0,
+        adoptionCurrentPage - Math.floor(maxVisiblePages / 2)
+      );
+      const endPage = Math.min(
+        adoptionTotalPages - 1,
+        startPage + maxVisiblePages - 1
+      );
+
       return (
         <div className="mt-8 flex items-center justify-center gap-2 px-4">
           <button
-            onClick={() => handleAdoptionPageChange(Math.max(0, adoptionCurrentPage - 1))}
+            onClick={() =>
+              handleAdoptionPageChange(Math.max(0, adoptionCurrentPage - 1))
+            }
             disabled={adoptionCurrentPage === 0}
             className="px-2 py-1.5 text-xs bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed min-w-[35px]"
           >
             이전
           </button>
-          
+
           {/* 첫 페이지가 보이지 않을 때만 표시 */}
           {startPage > 0 && (
             <>
@@ -706,21 +763,22 @@ const AdoptionPage = () => {
           )}
 
           {/* 현재 페이지 범위 */}
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-            (page) => (
-              <button
-                key={page}
-                onClick={() => handleAdoptionPageChange(page)}
-                className={`px-2 py-1.5 text-xs rounded min-w-[25px] ${
-                  adoptionCurrentPage === page
-                    ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-orange-100"
-                }`}
-              >
-                {page + 1}
-              </button>
-            )
-          )}
+          {Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+          ).map((page) => (
+            <button
+              key={page}
+              onClick={() => handleAdoptionPageChange(page)}
+              className={`px-2 py-1.5 text-xs rounded min-w-[25px] ${
+                adoptionCurrentPage === page
+                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-orange-100"
+              }`}
+            >
+              {page + 1}
+            </button>
+          ))}
 
           {/* 마지막 페이지가 보이지 않을 때만 표시 */}
           {endPage < adoptionTotalPages - 1 && (
@@ -736,9 +794,13 @@ const AdoptionPage = () => {
               </button>
             </>
           )}
-          
+
           <button
-            onClick={() => handleAdoptionPageChange(Math.min(adoptionTotalPages - 1, adoptionCurrentPage + 1))}
+            onClick={() =>
+              handleAdoptionPageChange(
+                Math.min(adoptionTotalPages - 1, adoptionCurrentPage + 1)
+              )
+            }
             disabled={adoptionCurrentPage === adoptionTotalPages - 1}
             className="px-2 py-1.5 text-xs bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed min-w-[35px]"
           >
@@ -747,11 +809,17 @@ const AdoptionPage = () => {
         </div>
       );
     }
-    
+
     // 데스크톱에서는 5개 페이지 번호 표시
     const maxVisiblePages = 5;
-    const startPage = Math.max(0, adoptionCurrentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(adoptionTotalPages - 1, startPage + maxVisiblePages - 1);
+    const startPage = Math.max(
+      0,
+      adoptionCurrentPage - Math.floor(maxVisiblePages / 2)
+    );
+    const endPage = Math.min(
+      adoptionTotalPages - 1,
+      startPage + maxVisiblePages - 1
+    );
 
     return (
       <Pagination className="mt-8">
@@ -759,11 +827,17 @@ const AdoptionPage = () => {
           {/* 이전 버튼 */}
           <PaginationItem>
             <PaginationPrevious
-              onClick={() => handleAdoptionPageChange(Math.max(0, adoptionCurrentPage - 1))}
-              className={`${adoptionCurrentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-orange-500"} text-sm`}
+              onClick={() =>
+                handleAdoptionPageChange(Math.max(0, adoptionCurrentPage - 1))
+              }
+              className={`${
+                adoptionCurrentPage === 0
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer hover:text-orange-500"
+              } text-sm`}
             />
           </PaginationItem>
-          
+
           {/* 첫 페이지가 보이지 않을 때만 표시 */}
           {startPage > 0 && (
             <>
@@ -784,19 +858,20 @@ const AdoptionPage = () => {
           )}
 
           {/* 현재 페이지 범위 */}
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(
-            (page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => handleAdoptionPageChange(page)}
-                  isActive={adoptionCurrentPage === page}
-                  className="cursor-pointer text-sm px-2 hover:text-orange-500"
-                >
-                  {page + 1}
-                </PaginationLink>
-              </PaginationItem>
-            )
-          )}
+          {Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+          ).map((page) => (
+            <PaginationItem key={page}>
+              <PaginationLink
+                onClick={() => handleAdoptionPageChange(page)}
+                isActive={adoptionCurrentPage === page}
+                className="cursor-pointer text-sm px-2 hover:text-orange-500"
+              >
+                {page + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
 
           {/* 마지막 페이지가 보이지 않을 때만 표시 */}
           {endPage < adoptionTotalPages - 1 && (
@@ -808,7 +883,9 @@ const AdoptionPage = () => {
               )}
               <PaginationItem>
                 <PaginationLink
-                  onClick={() => handleAdoptionPageChange(adoptionTotalPages - 1)}
+                  onClick={() =>
+                    handleAdoptionPageChange(adoptionTotalPages - 1)
+                  }
                   className="cursor-pointer text-sm px-2 hover:text-orange-500"
                 >
                   {adoptionTotalPages}
@@ -816,12 +893,20 @@ const AdoptionPage = () => {
               </PaginationItem>
             </>
           )}
-          
+
           {/* 다음 버튼 */}
           <PaginationItem>
             <PaginationNext
-              onClick={() => handleAdoptionPageChange(Math.min(adoptionTotalPages - 1, adoptionCurrentPage + 1))}
-              className={`${adoptionCurrentPage === adoptionTotalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:text-orange-500"} text-sm`}
+              onClick={() =>
+                handleAdoptionPageChange(
+                  Math.min(adoptionTotalPages - 1, adoptionCurrentPage + 1)
+                )
+              }
+              className={`${
+                adoptionCurrentPage === adoptionTotalPages - 1
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer hover:text-orange-500"
+              } text-sm`}
             />
           </PaginationItem>
         </PaginationContent>
@@ -837,7 +922,11 @@ const AdoptionPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl shadow-sm p-6 min-h-[500px]">
-              <Tabs defaultValue="rescue" className="w-full" onValueChange={setActiveTab}>
+              <Tabs
+                defaultValue="rescue"
+                className="w-full"
+                onValueChange={setActiveTab}
+              >
                 <div className="flex justify-between items-center mb-6">
                   <TabsList className="grid w-auto grid-cols-2">
                     <TabsTrigger value="rescue">유기동물분양게시판</TabsTrigger>
@@ -873,7 +962,7 @@ const AdoptionPage = () => {
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               setCurrentPage(0);
                               fetchStrayAnimals(0);
                             }
@@ -904,16 +993,14 @@ const AdoptionPage = () => {
                           </Button>
                         ))}
                       </div>
-                      
+
                       {/* 성별 필터 버튼 */}
                       <div className="flex space-x-2">
                         {genderOptions.map((gender) => (
                           <Button
                             key={gender}
                             variant={
-                              selectedGender === gender
-                                ? "default"
-                                : "outline"
+                              selectedGender === gender ? "default" : "outline"
                             }
                             size="sm"
                             onClick={() => setSelectedGender(gender)}
@@ -940,25 +1027,32 @@ const AdoptionPage = () => {
                       </div>
                       {!loading && !error && totalElements > 0 && (
                         <div className="text-sm text-gray-500">
-                          총 {totalElements}개 중 {(currentPage * pageSize) + 1}-{Math.min((currentPage + 1) * pageSize, totalElements)}개
+                          총 {totalElements}개 중 {currentPage * pageSize + 1}-
+                          {Math.min(
+                            (currentPage + 1) * pageSize,
+                            totalElements
+                          )}
+                          개
                         </div>
                       )}
                     </div>
-                    
+
                     {/* 로딩 상태 */}
                     {loading && (
                       <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-blue-500 mr-2" />
-                        <span className="text-gray-600">유기동물 정보를 불러오는 중...</span>
+                        <span className="text-gray-600">
+                          유기동물 정보를 불러오는 중...
+                        </span>
                       </div>
                     )}
-                    
+
                     {/* 에러 상태 */}
                     {error && !loading && (
                       <div className="flex items-center justify-center py-12">
                         <div className="text-center">
                           <p className="text-red-500 mb-4">{error}</p>
-                          <Button 
+                          <Button
                             onClick={() => fetchStrayAnimals(currentPage)}
                             variant="outline"
                             className="border-red-500 text-red-500 hover:bg-red-50"
@@ -968,22 +1062,26 @@ const AdoptionPage = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* 데이터가 없을 때 */}
                     {!loading && !error && rescuePosts.length === 0 && (
                       <div className="flex items-center justify-center py-12">
                         <div className="text-center">
                           <p className="text-gray-500 mb-4">
-                            {strayAnimals.length === 0 ? "유기동물 데이터를 불러오는 중입니다..." : "검색 조건에 맞는 유기동물이 없습니다."}
+                            {strayAnimals.length === 0
+                              ? "유기동물 데이터를 불러오는 중입니다..."
+                              : "검색 조건에 맞는 유기동물이 없습니다."}
                           </p>
                           {strayAnimals.length === 0 && (
                             <div className="flex items-center justify-center">
                               <Loader2 className="h-6 w-6 animate-spin text-orange-500 mr-2" />
-                              <span className="text-sm text-gray-600">데이터 로딩 중...</span>
+                              <span className="text-sm text-gray-600">
+                                데이터 로딩 중...
+                              </span>
                             </div>
                           )}
                           {strayAnimals.length > 0 && (
-                            <Button 
+                            <Button
                               onClick={() => {
                                 setSearchTerm("");
                                 setSelectedRegion("all");
@@ -999,7 +1097,7 @@ const AdoptionPage = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* 데이터 표시 */}
                     {!loading && !error && rescuePosts.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1025,25 +1123,27 @@ const AdoptionPage = () => {
                             <SelectValue placeholder="지역 선택" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="전체">
-                              전체 지역
-                            </SelectItem>
-                            {regions.filter(region => region.value !== "all").map((region) => (
-                              <SelectItem
-                                key={region.value}
-                                value={region.value}
-                              >
-                                {region.label}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="전체">전체 지역</SelectItem>
+                            {regions
+                              .filter((region) => region.value !== "all")
+                              .map((region) => (
+                                <SelectItem
+                                  key={region.value}
+                                  value={region.value}
+                                >
+                                  {region.label}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <Input
                           placeholder="검색어를 입력하세요"
                           value={adoptionSearchWord}
-                          onChange={(e) => setAdoptionSearchWord(e.target.value)}
+                          onChange={(e) =>
+                            setAdoptionSearchWord(e.target.value)
+                          }
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               setAdoptionCurrentPage(0);
                               fetchAdoptionPosts(0);
                             }
@@ -1081,9 +1181,7 @@ const AdoptionPage = () => {
                           <Button
                             key={gender}
                             variant={
-                              adoptionSex === gender
-                                ? "default"
-                                : "outline"
+                              adoptionSex === gender ? "default" : "outline"
                             }
                             size="sm"
                             onClick={() => setAdoptionSex(gender)}
@@ -1120,11 +1218,19 @@ const AdoptionPage = () => {
                           </Button>
                         )}
                         {/* 총 데이터 개수는 항상 표시 */}
-                        {!adoptionLoading && !adoptionError && adoptionTotalElements > 0 && (
-                          <div className="text-sm text-gray-500">
-                            총 {adoptionTotalElements}개 중 {(adoptionCurrentPage * pageSize) + 1}-{Math.min((adoptionCurrentPage + 1) * pageSize, adoptionTotalElements)}개
-                          </div>
-                        )}
+                        {!adoptionLoading &&
+                          !adoptionError &&
+                          adoptionTotalElements > 0 && (
+                            <div className="text-sm text-gray-500">
+                              총 {adoptionTotalElements}개 중{" "}
+                              {adoptionCurrentPage * pageSize + 1}-
+                              {Math.min(
+                                (adoptionCurrentPage + 1) * pageSize,
+                                adoptionTotalElements
+                              )}
+                              개
+                            </div>
+                          )}
                       </div>
                     </div>
 
@@ -1132,17 +1238,21 @@ const AdoptionPage = () => {
                     {adoptionLoading && (
                       <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-orange-500 mr-2" />
-                        <span className="text-gray-600">분양게시판 정보를 불러오는 중...</span>
+                        <span className="text-gray-600">
+                          분양게시판 정보를 불러오는 중...
+                        </span>
                       </div>
                     )}
-                    
+
                     {/* 에러 상태 */}
                     {adoptionError && !adoptionLoading && (
                       <div className="flex items-center justify-center py-12">
                         <div className="text-center">
                           <p className="text-red-500 mb-4">{adoptionError}</p>
-                          <Button 
-                            onClick={() => fetchAdoptionPosts(adoptionCurrentPage)}
+                          <Button
+                            onClick={() =>
+                              fetchAdoptionPosts(adoptionCurrentPage)
+                            }
                             variant="outline"
                             className="border-red-500 text-red-500 hover:bg-red-50"
                           >
@@ -1151,42 +1261,50 @@ const AdoptionPage = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* 데이터가 없을 때 */}
-                    {!adoptionLoading && !adoptionError && adoptionPostsData.length === 0 && (
-                      <div className="flex items-center justify-center py-12">
-                        <div className="text-center">
-                          <p className="text-gray-500 mb-4">검색 조건에 맞는 분양글이 없습니다.</p>
-                          <Button 
-                            onClick={() => {
-                              setAdoptionSearchWord("");
-                              setAdoptionPetCategory("전체");
-                              setAdoptionAddress("전체");
-                              setAdoptionSex("전체");
-                              setAdoptionCurrentPage(0);
-                            }}
-                            variant="outline"
-                          >
-                            필터 초기화
-                          </Button>
+                    {!adoptionLoading &&
+                      !adoptionError &&
+                      adoptionPostsData.length === 0 && (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="text-center">
+                            <p className="text-gray-500 mb-4">
+                              검색 조건에 맞는 분양글이 없습니다.
+                            </p>
+                            <Button
+                              onClick={() => {
+                                setAdoptionSearchWord("");
+                                setAdoptionPetCategory("전체");
+                                setAdoptionAddress("전체");
+                                setAdoptionSex("전체");
+                                setAdoptionCurrentPage(0);
+                              }}
+                              variant="outline"
+                            >
+                              필터 초기화
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
+                      )}
+
                     {/* 데이터 표시 */}
-                    {!adoptionLoading && !adoptionError && adoptionPostsData.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {adoptionPostsData.map((post) => (
-                          <PostCard key={post.id} post={post} isRescue={false} />
-                        ))}
-                      </div>
-                    )}
-                    
+                    {!adoptionLoading &&
+                      !adoptionError &&
+                      adoptionPostsData.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {adoptionPostsData.map((post) => (
+                            <PostCard
+                              key={post.id}
+                              post={post}
+                              isRescue={false}
+                            />
+                          ))}
+                        </div>
+                      )}
+
                     {/* 분양게시판 페이징 */}
                     {adoptionPostsData.length > 0 && (
-                      <div className="mt-8">
-                        {renderAdoptionPagination()}
-                      </div>
+                      <div className="mt-8">{renderAdoptionPagination()}</div>
                     )}
                   </div>
                 </TabsContent>
