@@ -14,7 +14,6 @@ import AdoptionCreate from "./pages/AdoptionCreate";
 import AdoptionBoard from "./components/AdoptionBoard";
 import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
-import MapPage from "./pages/MapPage";
 import ChildCreate from "./components/ChildCreate";
 import ChildIList from "./components/ChildIList";
 import AdminMain from "./pages/AdminMain";
@@ -33,6 +32,8 @@ import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
 import ChildDetail from "./pages/ChildDetail";
+import MapPage from "./pages/MapPage.jsx";
+import TestMap from "./components/testMap.jsx";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/admin" element={<AdminMain />} />
             <Route path="/admin/users" element={<AdminUserManagement />} />
             <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+            <Route path="test/map" element={<TestMap />} />
             <Route
               path="/admin/managers"
               element={<AdminManagerManagement />}

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL, USER } from "./host-config";
+import { decrypt } from "../src/hooks/use-encode";
 
 // ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
@@ -75,15 +76,18 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const email = localStorage.getItem("email");
-        if (!email) {
+        const encryptedEmail = localStorage.getItem("email");
+        if (!encryptedEmail) {
           throw new Error("No email in localStorage");
         }
+        // email 디코딩
+        const email = await decrypt(encryptedEmail);
         console.log("리프레시발동");
+        console.log(email);
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
-          userEmail: email,
+          email: email,
         });
 
         console.log(res);

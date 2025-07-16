@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
@@ -6,7 +5,13 @@ import MapComponent from "@/components/MapComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MapPin } from "lucide-react";
 
 const MapPage = () => {
@@ -129,9 +134,13 @@ const MapPage = () => {
   ];
 
   const filteredLocations = allLocations.filter((location) => {
-    const matchesCategory = selectedCategory === "all" || location.category === selectedCategory;
-    const matchesRegion = selectedRegion === "all" || location.region === selectedRegion;
-    const matchesSearch = location.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || location.category === selectedCategory;
+    const matchesRegion =
+      selectedRegion === "all" || location.region === selectedRegion;
+    const matchesSearch = location.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesCategory && matchesRegion && matchesSearch;
   });
 
@@ -155,13 +164,16 @@ const MapPage = () => {
               {/* 상단 검색 영역 */}
               <div className="p-6 border-b">
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                  <Input 
-                    placeholder="제목으로 검색" 
+                  <Input
+                    placeholder="제목으로 검색"
                     className="flex-1"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                  <Select
+                    value={selectedRegion}
+                    onValueChange={setSelectedRegion}
+                  >
                     <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="지역 선택" />
                     </SelectTrigger>
@@ -184,10 +196,18 @@ const MapPage = () => {
                     {categories.map((category) => (
                       <Button
                         key={category.id}
-                        variant={selectedCategory === category.id ? "default" : "outline"}
+                        variant={
+                          selectedCategory === category.id
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => handleCategoryClick(category.id)}
-                        className={selectedCategory === category.id ? "bg-orange-500 hover:bg-orange-600" : ""}
+                        className={
+                          selectedCategory === category.id
+                            ? "bg-orange-500 hover:bg-orange-600"
+                            : ""
+                        }
                       >
                         {category.name}
                       </Button>
@@ -226,7 +246,11 @@ const MapPage = () => {
                                   {location.address}
                                 </p>
                                 <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
-                                  {categories.find(c => c.id === location.category)?.name}
+                                  {
+                                    categories.find(
+                                      (c) => c.id === location.category
+                                    )?.name
+                                  }
                                 </span>
                               </div>
                             </div>
