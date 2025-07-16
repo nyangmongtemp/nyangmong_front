@@ -30,7 +30,7 @@ if (clientHostName === "localhost" || clientHostName === "127.0.0.1") {
 
 export const API_BASE_URL = backendHostName;
 export const USER = "/user-service/user";
-export const FESTIVAL = "/festival-service";
+export const FESTIVAL = "/festival-service/api";
 export const ABS = "/animalboard-service";
 export const MAIN = "/main-service/main";
 export const BOARD = "/board-service/board";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import MapComponent from "@/components/MapComponent";
@@ -13,12 +13,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
+import axios from "axios";
+import { API_BASE_URL, FESTIVAL } from "../../configs/host-config";
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("all");
+  const [festivalList, setFestivalList] = useState([]); // 행사정보 리스트
+  const [isFestivalLoading, setIsFestivalLoading] = useState(false);
+  // 행사정보 상세(인포윈도우)용 상태
+  const [selectedFestivalInfo, setSelectedFestivalInfo] = useState(null);
+  // 행사정보 지역 필터 상태
+  const [festivalRegion, setFestivalRegion] = useState("all");
+  const regionMap = {
+    seoul: "서울",
+    busan: "부산",
+    daegu: "대구",
+    incheon: "인천",
+    gwangju: "광주",
+    daejeon: "대전",
+    ulsan: "울산",
+    gyeonggi: "경기",
+    gangwon: "강원",
+    chungcheongbuk: "충북",
+    chungcheongnam: "충남",
+    sejong: "세종",
+    jeollabuk: "전북",
+    jeollanam: "전남",
+    gyeongsangbuk: "경북",
+    gyeongsangnam: "경남",
+    jeju: "제주",
+  };
+  const regionOptions = [
+    { value: "all", label: "전체" },
+    ...Object.entries(regionMap).map(([key, label]) => ({ value: key, label })),
+  ];
 
   const categories = [
     { id: "all", name: "전체" },
@@ -144,6 +175,22 @@ const MapPage = () => {
     return matchesCategory && matchesRegion && matchesSearch;
   });
 
+  // 행사정보 fetch
+  useEffect(() => {
+    if (selectedCategory === "event") {
+      setIsFestivalLoading(true);
+      axios
+        .get(`${API_BASE_URL}${FESTIVAL}/all`)
+        .then((res) => {
+          setFestivalList(res.data || []);
+        })
+        .catch((err) => {
+          setFestivalList([]);
+        })
+        .finally(() => setIsFestivalLoading(false));
+    }
+  }, [selectedCategory]);
+
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
   };
@@ -216,66 +263,166 @@ const MapPage = () => {
                 </div>
               </div>
 
-              {/* 목록과 지도 영역 - 세로 배치 */}
-              <div className="p-6">
-                <div className="space-y-8">
-                  {/* 위: 목록 */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">
-                      분양 위치 목록 ({filteredLocations.length}개)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                      {filteredLocations.map((location) => (
-                        <Card
-                          key={location.id}
-                          className={`cursor-pointer transition-all hover:shadow-md ${
-                            selectedLocation?.id === location.id
-                              ? "ring-2 ring-orange-500"
-                              : ""
-                          }`}
-                          onClick={() => handleLocationClick(location)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start space-x-3">
-                              <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900 text-sm">
-                                  {location.name}
-                                </h4>
-                                <p className="text-xs text-gray-600 mt-1">
-                                  {location.address}
-                                </p>
-                                <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
-                                  {
-                                    categories.find(
-                                      (c) => c.id === location.category
-                                    )?.name
-                                  }
-                                </span>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+              {/* 행사정보 카테고리일 때: 행사 카드 리스트 */}
+              {selectedCategory === "event" && (
+                <div className="p-6 border-b">
+                  <div className="flex items-center mb-2 gap-2">
+                    <h3 className="text-lg font-semibold">행사정보 목록</h3>
+                    {/* 행사정보 지역 셀렉트박스 */}
+                    <select
+                      className="ml-4 border rounded px-2 py-1 text-sm"
+                      value={festivalRegion}
+                      onChange={(e) => setFestivalRegion(e.target.value)}
+                    >
+                      {regionOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
                       ))}
+                    </select>
+                  </div>
+                  {isFestivalLoading ? (
+                    <div className="text-center py-8 text-gray-400">
+                      불러오는 중...
+                    </div>
+                  ) : festivalList.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      행사정보가 없습니다.
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-x-4 gap-y-4 h-[312px] overflow-y-auto pr-2 justify-center">
+                      {festivalList
+                        .filter((festival) => festival.location)
+                        .filter((festival) => {
+                          if (festivalRegion === "all") return true;
+                          const regionName = regionMap[festivalRegion];
+                          const addr = festival.addr || festival.location || "";
+                          return addr.slice(0, 2) === regionName;
+                        })
+                        .map((festival) => (
+                          <Card
+                            key={festival.festivalId || festival.id}
+                            className={`cursor-pointer transition-all hover:shadow-md ${
+                              selectedLocation?.id ===
+                              (festival.festivalId || festival.id)
+                                ? "ring-2 ring-orange-500"
+                                : ""
+                            } w-[320px] min-w-[320px] max-w-[320px]`}
+                            onClick={() => {
+                              handleLocationClick({
+                                id: festival.festivalId || festival.id,
+                                name: festival.title,
+                                address: festival.location,
+                                category: "event",
+                                lat: festival.latitude,
+                                lng: festival.longitude,
+                              });
+                              setSelectedFestivalInfo(festival);
+                            }}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start space-x-3">
+                                <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-black text-sm whitespace-normal break-words">
+                                    {festival.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 mt-1 whitespace-normal break-words">
+                                    {festival.location}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 행사정보가 아닐 때만 기존 분양 위치 목록 노출 */}
+              {selectedCategory !== "event" && (
+                <div className="p-6">
+                  <div className="space-y-8">
+                    {/* 위: 목록 */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">
+                        분양 위치 목록 ({filteredLocations.length}개)
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                        {filteredLocations.map((location) => (
+                          <Card
+                            key={location.id}
+                            className={`cursor-pointer transition-all hover:shadow-md ${
+                              selectedLocation?.id === location.id
+                                ? "ring-2 ring-orange-500"
+                                : ""
+                            }`}
+                            onClick={() => handleLocationClick(location)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start space-x-3">
+                                <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900 text-sm">
+                                    {location.name}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    {location.address}
+                                  </p>
+                                  <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
+                                    {
+                                      categories.find(
+                                        (c) => c.id === location.category
+                                      )?.name
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
                     </div>
                   </div>
+                </div>
+              )}
 
-                  {/* 아래: 지도 */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">위치 지도</h3>
-                    <div className="h-96 rounded-lg overflow-hidden border">
-                      <MapComponent
-                        locations={filteredLocations}
-                        selectedLocation={selectedLocation}
-                      />
-                    </div>
+              {/* 아래: 지도 */}
+              <div className="p-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">위치 지도</h3>
+                  <div className="h-[700px] rounded-lg overflow-hidden border">
+                    <MapComponent
+                      locations={
+                        selectedCategory === "event"
+                          ? festivalList
+                              .filter((f) => f.latitude && f.longitude)
+                              .map((f) => ({
+                                id: f.festivalId || f.id,
+                                name: f.title,
+                                address: f.location,
+                                category: "event",
+                                lat: f.latitude,
+                                lng: f.longitude,
+                              }))
+                          : filteredLocations
+                      }
+                      selectedLocation={selectedLocation}
+                      onLocationClick={handleLocationClick}
+                      selectedFestivalInfo={
+                        selectedCategory === "event"
+                          ? selectedFestivalInfo
+                          : null
+                      }
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <div className="hidden lg:block lg:col-span-1">
+          {/* 사이드바 */}
+          <div className="lg:col-span-1">
             <Sidebar />
           </div>
         </div>
