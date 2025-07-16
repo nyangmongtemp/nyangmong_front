@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { useAuth } from "../context/UserContext";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -35,7 +36,7 @@ const Board = () => {
   const navigate = useNavigate();
   // API에서 받아온 행사 게시글 저장
   const [apiPosts, setApiPosts] = useState([]);
-
+  const { isLoggedIn } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 10;
 
@@ -274,13 +275,15 @@ const Board = () => {
                     {type === "event" ? (
                       <></>
                     ) : (
-                      <Button
-                        onClick={handleCreatePost}
-                        className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        글쓰기
-                      </Button>
+                      isLoggedIn && (
+                        <Button
+                          onClick={handleCreatePost}
+                          className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          글쓰기
+                        </Button>
+                      )
                     )}
                   </div>
                   {currentPosts.map((post) => (

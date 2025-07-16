@@ -1,88 +1,221 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-const APP_KEY = "93631987e177207bdefe1cfab56ba744"; // 임시로 하드코딩
-console.log("APP_KEY:", APP_KEY); // API 키 확인
+const APP_KEY = import.meta.env.VITE_KAKAO_MAP_API;
 
 const TestMap = () => {
   const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const clustererRef = useRef(null);
+  const [search, setSearch] = useState("");
+  const userMarkerRef = useRef(null);
+  const infowindowRef = useRef(null);
 
   useEffect(() => {
-    // 카카오맵 공식 로딩 방식 사용
-    const initMapWithKakaoLoad = () => {
-      if (!window.kakao || !window.kakao.maps) {
-        console.error("카카오맵 API가 로드되지 않았습니다.");
-        return;
-      }
-
-      console.log("카카오맵 API 로드됨, 공식 로딩 방식으로 초기화...");
-
-      // 카카오맵 API 로드 완료 후 실행될 콜백
-      window.kakao.maps.load(function () {
-        console.log("카카오맵 API 초기화 완료!");
-
-        // 지도를 표시할 div와 중심좌표 설정
-        const mapContainer = document.getElementById("map");
-        const mapOption = {
-          center: new window.kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-          level: 3, // 지도의 확대 레벨
-        };
-
-        // 지도 생성
-        const map = new window.kakao.maps.Map(mapContainer, mapOption);
-        console.log("카카오맵 생성 완료");
-      });
-    };
-
-    // 카카오맵 API 스크립트 로드
     const loadKakaoMap = () => {
-      // 이미 로드되어 있는지 확인
       if (window.kakao && window.kakao.maps) {
-        console.log("카카오맵 API 이미 로드됨");
         initMapWithKakaoLoad();
         return;
       }
-
-      // 스크립트가 이미 로드 중인지 확인
       const existingScript = document.querySelector(
         'script[src*="dapi.kakao.com"]'
       );
       if (existingScript) {
-        console.log("카카오맵 API 로드 중...");
-        existingScript.addEventListener("load", () => {
-          console.log("기존 스크립트 로드 완료");
-          initMapWithKakaoLoad();
-        });
+        existingScript.addEventListener("load", initMapWithKakaoLoad);
         return;
       }
-
-      // 새 스크립트 생성 및 로드
       const script = document.createElement("script");
       script.type = "text/javascript";
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${APP_KEY}&autoload=false`;
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${APP_KEY}&autoload=false&libraries=services,clusterer`;
       script.async = true;
-
-      script.onload = () => {
-        console.log("카카오맵 API 스크립트 로드 완료");
-        initMapWithKakaoLoad();
-      };
-
-      script.onerror = () => {
-        console.error("카카오맵 API 로드 실패");
-      };
-
+      script.onload = initMapWithKakaoLoad;
       document.head.appendChild(script);
     };
 
-    loadKakaoMap();
-
-    // 컴포넌트 언마운트 시 정리
-    return () => {
-      // 정리 작업이 필요한 경우 여기에 추가
+    const initMapWithKakaoLoad = () => {
+      if (!window.kakao || !window.kakao.maps) return;
+      window.kakao.maps.load(function () {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            showMap(lat, lng);
+          },
+          (error) => {
+            showMap(33.450701, 126.570667);
+          }
+        );
+      });
     };
+
+    const showMap = (lat, lng) => {
+      const mapContainer = document.getElementById("map");
+      const mapOption = {
+        center: new window.kakao.maps.LatLng(lat, lng),
+        level: 3,
+      };
+      mapInstance.current = new window.kakao.maps.Map(mapContainer, mapOption);
+      // 클러스터러 생성 및 저장
+      clustererRef.current = new window.kakao.maps.MarkerClusterer({
+        map: mapInstance.current,
+        averageCenter: true,
+        minLevel: 5,
+      });
+      // 현재 위치 마커 생성 및 지도에 표시
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+      }
+      userMarkerRef.current = new window.kakao.maps.Marker({
+        position: new window.kakao.maps.LatLng(lat, lng),
+        map: mapInstance.current,
+        title: "현재 위치",
+      });
+    };
+
+    loadKakaoMap();
   }, []);
 
+  // 검색 버튼 클릭 시 실행
+  const handleSearch = () => {
+    if (
+      !window.kakao ||
+      !window.kakao.maps ||
+      !window.kakao.maps.services ||
+      !mapInstance.current ||
+      !clustererRef.current
+    ) {
+      alert("카카오맵이 아직 로드되지 않았습니다.");
+      return;
+    }
+    var places = new window.kakao.maps.services.Places();
+    var callback = function (result, status) {
+      if (
+        status === window.kakao.maps.services.Status.OK &&
+        result.length > 0
+      ) {
+        console.log(result);
+
+        // 첫번째 결과의 좌표
+        const x = parseFloat(result[0].x);
+        const y = parseFloat(result[0].y);
+
+        // 지도 중심 이동
+        mapInstance.current.setCenter(new window.kakao.maps.LatLng(y, x));
+
+        // 마커 생성
+        var marker = new window.kakao.maps.Marker({
+          position: new window.kakao.maps.LatLng(y, x),
+        });
+
+        // 클러스터러에 마커 추가
+        clustererRef.current.clear(); // 기존 마커 제거
+        clustererRef.current.addMarker(marker);
+
+        // 인포윈도우 내용 생성
+        const content = `
+          <div style="padding: 16px; min-width: 300px; font-family: Arial, sans-serif;">
+            <div style="margin-bottom: 12px;">
+              <strong style="color: #ff9800; font-size: 16px;">장소명:</strong>
+              <p style="margin: 4px 0; font-size: 16px; font-weight: bold;">${
+                result[0].place_name
+              }</p>
+            </div>
+            
+            <div style="margin-bottom: 8px;">
+              <strong style="color: #ff9800; font-size: 14px;">카테고리:</strong>
+              <p style="margin: 4px 0; font-size: 14px; color: #666;">${
+                result[0].category_group_name || "정보 없음"
+              }</p>
+            </div>
+            
+            <div style="margin-bottom: 8px;">
+              <strong style="color: #ff9800; font-size: 14px;">전화번호:</strong>
+              <p style="margin: 4px 0; font-size: 14px;">${
+                result[0].phone || "정보 없음"
+              }</p>
+            </div>
+            
+            <div style="margin-bottom: 8px;">
+              <strong style="color: #ff9800; font-size: 14px;">주소:</strong>
+              <p style="margin: 4px 0; font-size: 14px;">${
+                result[0].road_address_name ||
+                result[0].address_name ||
+                "정보 없음"
+              }</p>
+            </div>
+            
+            ${
+              result[0].place_url
+                ? `
+            <div style="margin-top: 12px;">
+              <a href="${result[0].place_url}" target="_blank" rel="noopener noreferrer" 
+                 style="color: #007bff; text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
+                카카오맵에서 보기
+              </a>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+
+        // 인포윈도우 생성
+        if (infowindowRef.current) {
+          infowindowRef.current.close();
+        }
+        infowindowRef.current = new window.kakao.maps.InfoWindow({
+          content: content,
+          removable: true,
+          maxWidth: 350,
+        });
+
+        // 마커 클릭 시 인포윈도우 표시
+        window.kakao.maps.event.addListener(marker, "click", function () {
+          infowindowRef.current.open(mapInstance.current, marker);
+        });
+      }
+    };
+    places.keywordSearch(`${search}`, callback);
+  };
+
   return (
-    <div ref={mapRef} id="map" style={{ width: "100%", height: "400px" }} />
+    <div>
+      <div ref={mapRef} id="map" style={{ width: "100%", height: "600px" }} />
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="검색어를 입력하세요"
+          style={{
+            padding: "8px",
+            border: "1px solid #ccc",
+            borderRadius: 4,
+            width: 240,
+            marginRight: 8,
+          }}
+        />
+        <button
+          style={{
+            padding: "8px 16px",
+            background: "#ff9800",
+            color: "white",
+            border: "none",
+            borderRadius: 4,
+            cursor: "pointer",
+          }}
+          onClick={handleSearch}
+        >
+          검색
+        </button>
+      </div>
+    </div>
   );
 };
 

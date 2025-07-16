@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { useAuth } from "../context/UserContext";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -28,6 +29,7 @@ const ChildIList = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // 1-based
   const pageSize = 10;
+  const { isLoggedIn } = useAuth();
 
   // 쿼리 파라미터에서 page 읽기
   useEffect(() => {
@@ -168,12 +170,14 @@ const ChildIList = () => {
                 <h1 className="text-2xl font-bold text-gray-800">
                   우리 아이 소개 게시판
                 </h1>
-                <Button
-                  onClick={() => navigate("/child/create")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
-                >
-                  게시글 작성
-                </Button>
+                {isLoggedIn && (
+                  <Button
+                    onClick={() => navigate("/child/create")}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                  >
+                    게시글 작성
+                  </Button>
+                )}
               </div>
               <div className="flex gap-4 mb-6">
                 <Input
