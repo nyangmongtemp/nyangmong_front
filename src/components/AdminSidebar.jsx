@@ -1,10 +1,10 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [logoutTrigger, setLogoutTrigger] = useState(false); // 상태 추가
 
   const menuItems = [
     { title: "사용자 관리", path: "/admin/users" },
@@ -14,6 +14,17 @@ const AdminSidebar = () => {
     { title: "배너 관리", path: "/admin/banner" },
     { title: "고객센터", path: "/admin/support" },
   ];
+
+  // 로그인 상태 확인
+  const isLoggedIn = Boolean(sessionStorage.getItem("adminToken")); // 상태가 바뀌면 다시 평가됨
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminEmail");
+    sessionStorage.removeItem("adminName");
+    sessionStorage.removeItem("adminRole");
+    setLogoutTrigger((prev) => !prev); // 강제 리렌더
+    navigate("/admin/login");
+  };
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 pt-20">
@@ -57,12 +68,21 @@ const AdminSidebar = () => {
         >
           마이페이지
         </button>
-        <button
-          onClick={() => navigate("/admin/login")}
-          className="w-full px-4 py-2 text-sm font-medium  border rounded-lg hover:bg-red-50 transition"
-        >
-          로그인
-        </button>
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 text-sm font-medium border rounded-lg hover:bg-red-50 transition text-red-600"
+          >
+            로그아웃
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/admin/login")}
+            className="w-full px-4 py-2 text-sm font-medium  border rounded-lg hover:bg-red-50 transition"
+          >
+            로그인
+          </button>
+        )}
       </div>
     </div>
   );
