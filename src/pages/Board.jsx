@@ -16,7 +16,7 @@ import {
   Edit,
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { API_BASE_URL, BOARD, FESTIVAL } from "../../configs/host-config";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -56,11 +56,23 @@ const Board = () => {
     const fetchBoardPosts = async () => {
       try {
         if (type === "event") {
-          // 행사 게시판
+          // 행사 게시판 - 페이징 파라미터 추가
           const res = await axiosInstance.get(
-            "http://localhost:8000/festival-service/api/festivals"
+            `${API_BASE_URL}${FESTIVAL}/api/festivals`,
+            {
+              params: {
+                page: 0, // Spring Data는 0부터 시작
+                size: 100, // 충분히 큰 값으로 설정하여 모든 데이터 가져오기
+              },
+            }
           );
-          const mappedPosts = res.data.map((festival) => {
+          // Spring Page 객체에서 content 추출
+          let eventData = res.data;
+          if (!Array.isArray(eventData)) {
+            eventData =
+              eventData.content || eventData.result || eventData.data || [];
+          }
+          const mappedPosts = eventData.map((festival) => {
             let imageUrl = null;
             if (festival.imagePath) {
               // imagePath에서 src= 뒤의 URL 추출
@@ -73,7 +85,8 @@ const Board = () => {
             // festivalDate 예: "2025.07.04. (금) ~ 2025.07.06. (일)"
             // 시작일과 종료일만 추출
             const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
-            const dates = festival.festivalDate.match(datePattern);
+            const dates =
+              festival.festivalDate && festival.festivalDate.match(datePattern);
 
             let category = "행사"; // 기본값
             if (dates && dates.length === 2) {
