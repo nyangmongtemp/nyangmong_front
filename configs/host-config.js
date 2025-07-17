@@ -35,3 +35,4 @@ export const ABS = "/animalboard-service";
 export const MAIN = "/main-service/main";
 export const BOARD = "/board-service/board";
 export const SSE = "/user-service/user/sse";
+export const MAP = "/map-service/map";

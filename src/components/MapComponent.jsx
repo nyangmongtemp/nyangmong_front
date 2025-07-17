@@ -9,11 +9,13 @@ const MapComponent = ({
   locations,
   selectedLocation,
   selectedFestivalInfo,
+  selectedCultureDetail,
 }) => {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowRef = useRef(null);
   const initialCenterRef = useRef(null); // 최초 지도 중심
+  const userMarkerRef = useRef(null); // 사용자 위치 마커
 
   useEffect(() => {
     // 카카오맵 스크립트 로드 및 지도 초기화
@@ -49,6 +51,7 @@ const MapComponent = ({
                   pos.coords.latitude,
                   pos.coords.longitude
                 );
+                addUserMarker(initialCenterRef.current);
                 if (selectedFestivalInfo && selectedFestivalInfo.location) {
                   searchAndShowFestivalLocation(selectedFestivalInfo);
                 } else {
@@ -60,6 +63,7 @@ const MapComponent = ({
                   NAMSAN_LAT,
                   NAMSAN_LNG
                 );
+                addUserMarker(initialCenterRef.current);
                 if (selectedFestivalInfo && selectedFestivalInfo.location) {
                   searchAndShowFestivalLocation(selectedFestivalInfo);
                 } else {
@@ -73,14 +77,35 @@ const MapComponent = ({
               NAMSAN_LAT,
               NAMSAN_LNG
             );
+            addUserMarker(initialCenterRef.current);
           }
         }
+        addUserMarker(initialCenterRef.current);
         if (selectedFestivalInfo && selectedFestivalInfo.location) {
           searchAndShowFestivalLocation(selectedFestivalInfo);
         } else {
           showMap();
         }
       });
+    };
+
+    // 사용자 위치 마커 추가
+    const addUserMarker = (latlng) => {
+      if (!window.kakao || !window.kakao.maps || !latlng) return;
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+        userMarkerRef.current = null;
+      }
+      const marker = new window.kakao.maps.Marker({
+        position: latlng,
+        map: mapInstanceRef.current,
+        title: "현재 위치",
+        image: new window.kakao.maps.MarkerImage(
+          "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
+          new window.kakao.maps.Size(24, 35)
+        ),
+      });
+      userMarkerRef.current = marker;
     };
 
     // testMap처럼 장소명으로 검색 후 마커/인포윈도우 표시
@@ -99,6 +124,8 @@ const MapComponent = ({
       );
       // Places API로 장소명 검색
       const ps = new window.kakao.maps.services.Places();
+      console.log(ps);
+
       ps.keywordSearch(festival.location, function (result, status) {
         if (
           status === window.kakao.maps.services.Status.OK &&
@@ -202,6 +229,7 @@ const MapComponent = ({
         mapContainer,
         mapOption
       );
+      addUserMarker(initialCenterRef.current);
       // 기존 마커/인포윈도우 제거
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
@@ -210,42 +238,79 @@ const MapComponent = ({
         infoWindowRef.current = null;
       }
       const bounds = new window.kakao.maps.LatLngBounds();
-      locations.forEach((location) => {
-        const position = new window.kakao.maps.LatLng(
-          location.lat,
-          location.lng
+      // 행사정보와 동일하게: 문화시설 상세 정보가 있으면 마커 하나만 띄우고, 인포윈도우도 하나만 띄움
+      if (selectedCultureDetail && selectedCultureDetail.addr1) {
+        // Places API로 addr1 검색
+        const ps = new window.kakao.maps.services.Places();
+        ps.keywordSearch(
+          selectedCultureDetail.addr1,
+          function (result, status) {
+            if (
+              status === window.kakao.maps.services.Status.OK &&
+              result.length > 0
+            ) {
+              const x = parseFloat(result[0].x);
+              const y = parseFloat(result[0].y);
+              const latlng = new window.kakao.maps.LatLng(y, x);
+              mapInstanceRef.current.setCenter(latlng);
+              // 기존 마커/인포윈도우 제거
+              markersRef.current.forEach((marker) => marker.setMap(null));
+              markersRef.current = [];
+              if (infoWindowRef.current) {
+                infoWindowRef.current.close();
+                infoWindowRef.current = null;
+              }
+              // 마커 생성
+              const marker = new window.kakao.maps.Marker({
+                position: latlng,
+                map: mapInstanceRef.current,
+                image: new window.kakao.maps.MarkerImage(
+                  "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+                  new window.kakao.maps.Size(31, 35)
+                ),
+              });
+              markersRef.current.push(marker);
+              // 인포윈도우 내용 (임시: selectedCultureDetail + 검색 결과 정보)
+              const infoContent = `
+              <div style=\"padding:16px;min-width:240px;font-family:Arial,sans-serif;\">\n                <div style=\"margin-bottom:8px;\"><strong style=\"color:#ff9800;font-size:18px;\">${
+                selectedCultureDetail.title
+              }</strong></div>\n                <div style=\"margin-bottom:8px;\">\n                  <strong style=\"color:#ff9800;font-size:14px;\">상세주소:</strong>\n                  <p style=\"margin:4px 0;font-size:14px;\">${
+                selectedCultureDetail.addr1 || ""
+              }${
+                selectedCultureDetail.addr2
+                  ? " " + selectedCultureDetail.addr2
+                  : ""
+              }</p>\n                </div>\n                <div style=\"margin-bottom:8px;\">\n                  <strong style=\"color:#ff9800;font-size:14px;\">카카오맵 검색 결과 주소:</strong>\n                  <p style=\"margin:4px 0;font-size:14px;\">${
+                result[0].road_address_name || result[0].address_name || ""
+              }</p>\n                </div>\n                <div style=\"margin-top:12px;\">\n                  <a href=\"${
+                result[0].place_url
+              }\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#007bff;text-decoration:none;font-size:14px;padding:6px 12px;border:1px solid #007bff;border-radius:4px;display:inline-block;\">카카오맵에서 보기</a>\n                </div>\n              </div>\n            `;
+              const infowindow = new window.kakao.maps.InfoWindow({
+                content: infoContent,
+                removable: true,
+                maxWidth: 420,
+              });
+              window.kakao.maps.event.addListener(marker, "click", function () {
+                infowindow.open(mapInstanceRef.current, marker);
+              });
+              infoWindowRef.current = infowindow;
+            }
+          }
         );
-        const marker = new window.kakao.maps.Marker({
-          position: position,
-          map: mapInstanceRef.current,
-        });
-        // 선택된 위치 마커 이미지 변경
-        if (selectedLocation && selectedLocation.id === location.id) {
-          marker.setImage(
-            new window.kakao.maps.MarkerImage(
-              "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
-              new window.kakao.maps.Size(31, 35)
-            )
+      } else if (locations.length > 0) {
+        // 문화시설 상세 정보가 없으면 기존 locations 마커 표시
+        locations.forEach((location) => {
+          const position = new window.kakao.maps.LatLng(
+            location.lat,
+            location.lng
           );
-        }
-        // 인포윈도우
-        const infoContent = `
-          <div style="padding:10px;min-width:200px;">
-            <h3 style="margin:0 0 5px 0;font-size:14px;font-weight:bold;">${location.name}</h3>
-            <p style="margin:0;font-size:12px;color:#666;">${location.address}</p>
-            <p style="margin:5px 0 0 0;font-size:11px;color:#999;">${location.category}</p>
-          </div>
-        `;
-        const infowindow = new window.kakao.maps.InfoWindow({
-          content: infoContent,
+          const marker = new window.kakao.maps.Marker({
+            position: position,
+            map: mapInstanceRef.current,
+          });
+          markersRef.current.push(marker);
+          bounds.extend(position);
         });
-        window.kakao.maps.event.addListener(marker, "click", function () {
-          infowindow.open(mapInstanceRef.current, marker);
-        });
-        markersRef.current.push(marker);
-        bounds.extend(position);
-      });
-      if (locations.length > 0) {
         mapInstanceRef.current.setBounds(bounds);
       }
     };
@@ -260,11 +325,29 @@ const MapComponent = ({
         infoWindowRef.current.close();
         infoWindowRef.current = null;
       }
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+        userMarkerRef.current = null;
+      }
     };
     // eslint-disable-next-line
-  }, [locations, selectedLocation, selectedFestivalInfo]);
+  }, [
+    locations,
+    selectedLocation,
+    selectedFestivalInfo,
+    selectedCultureDetail,
+  ]);
 
   // id="map"으로 div를 지정 (testMap과 동일하게)
+  useEffect(() => {
+    // 지도 리사이즈 트리거 (문화시설 등 탭/카테고리/카드 전환 시)
+    if (window.kakao && window.kakao.maps && mapInstanceRef.current) {
+      setTimeout(() => {
+        window.kakao.maps.event.trigger(mapInstanceRef.current, "resize");
+      }, 100); // DOM 렌더링 후 트리거 (100ms 딜레이)
+    }
+  }, [locations, selectedLocation, selectedCultureDetail]);
+
   return <div id="map" style={{ width: "100%", height: "100%" }} />;
 };
 

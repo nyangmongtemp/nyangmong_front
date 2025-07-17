@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
 import MapComponent from "@/components/MapComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
-import axios from "axios";
-import { API_BASE_URL, FESTIVAL } from "../../configs/host-config";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, FESTIVAL, MAP } from "../../configs/host-config";
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -27,6 +26,20 @@ const MapPage = () => {
   const [selectedFestivalInfo, setSelectedFestivalInfo] = useState(null);
   // 행사정보 지역 필터 상태
   const [festivalRegion, setFestivalRegion] = useState("all");
+  // 문화시설 하위 카테고리 상태
+  const [showCultureSubCategories, setShowCultureSubCategories] =
+    useState(false);
+  const [selectedCultureSubCategory, setSelectedCultureSubCategory] =
+    useState("12");
+  // 문화시설 지역 선택 상태
+  const [selectedCultureRegion, setSelectedCultureRegion] = useState("1");
+  // 문화시설 검색 결과 상태
+  const [cultureLocations, setCultureLocations] = useState([]);
+  const [isCultureLoading, setIsCultureLoading] = useState(false);
+  // 문화시설 상세 정보 상태
+  const [selectedCultureDetail, setSelectedCultureDetail] = useState(null);
+  const [isCultureDetailLoading, setIsCultureDetailLoading] = useState(false);
+
   const regionMap = {
     seoul: "서울",
     busan: "부산",
@@ -49,6 +62,37 @@ const MapPage = () => {
   const regionOptions = [
     { value: "all", label: "전체" },
     ...Object.entries(regionMap).map(([key, label]) => ({ value: key, label })),
+  ];
+
+  // 문화시설 하위 카테고리 옵션
+  const cultureSubCategories = [
+    { value: "12", name: "관광지" },
+    { value: "14", name: "문화시설" },
+    { value: "28", name: "레포츠" },
+    { value: "32", name: "숙박" },
+    { value: "38", name: "쇼핑" },
+    { value: "39", name: "음식점" },
+  ];
+
+  // 문화시설 지역 선택 옵션
+  const cultureRegionOptions = [
+    { value: "1", label: "서울" },
+    { value: "2", label: "인천" },
+    { value: "3", label: "대전" },
+    { value: "4", label: "대구" },
+    { value: "5", label: "광주" },
+    { value: "6", label: "부산" },
+    { value: "7", label: "울산" },
+    { value: "8", label: "세종" },
+    { value: "31", label: "경기" },
+    { value: "32", label: "강원" },
+    { value: "33", label: "충북" },
+    { value: "34", label: "충남" },
+    { value: "35", label: "경북" },
+    { value: "36", label: "경남" },
+    { value: "37", label: "전북" },
+    { value: "38", label: "전남" },
+    { value: "39", label: "제주" },
   ];
 
   const categories = [
@@ -179,7 +223,7 @@ const MapPage = () => {
   useEffect(() => {
     if (selectedCategory === "event") {
       setIsFestivalLoading(true);
-      axios
+      axiosInstance
         .get(`${API_BASE_URL}${FESTIVAL}/all`)
         .then((res) => {
           setFestivalList(res.data || []);
@@ -191,6 +235,30 @@ const MapPage = () => {
     }
   }, [selectedCategory]);
 
+  // 문화시설 카테고리/지역 변경 시 POST 요청
+  useEffect(() => {
+    if (selectedCategory === "culture") {
+      setIsCultureLoading(true);
+      console.log(selectedCultureRegion);
+      console.log(selectedCultureSubCategory);
+
+      axiosInstance
+        .post(`${API_BASE_URL}${MAP}/find`, {
+          region: selectedCultureRegion,
+          contentType: selectedCultureSubCategory,
+        })
+        .then((res) => {
+          console.log(res);
+
+          setCultureLocations(res.data?.result || res.data || []);
+        })
+        .catch((err) => {
+          setCultureLocations([]);
+        })
+        .finally(() => setIsCultureLoading(false));
+    }
+  }, [selectedCategory, selectedCultureSubCategory, selectedCultureRegion]);
+
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
   };
@@ -198,6 +266,40 @@ const MapPage = () => {
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
     setSelectedLocation(null);
+    // 문화시설 카테고리 클릭 시 하위 카테고리 표시
+    if (categoryId === "culture") {
+      setShowCultureSubCategories(true);
+    } else {
+      setShowCultureSubCategories(false);
+      setSelectedCultureSubCategory("12");
+    }
+  };
+
+  // 하위 카테고리 클릭 핸들러는 위에서 직접 setSelectedCultureSubCategory로 대체
+  // 필요시 setSelectedLocation(null); 추가 가능
+
+  // 현재 선택된 문화시설 하위 카테고리 라벨값 구하기
+  const selectedCultureLabel = cultureSubCategories.find(
+    (cat) => cat.value === selectedCultureSubCategory
+  )?.name;
+
+  // 문화시설 카드 클릭 시 detail 요청
+  const handleCultureLocationClick = async (location) => {
+    setIsCultureDetailLoading(true);
+    setSelectedLocation(location); // 카드 active 효과
+
+    try {
+      const res = await axiosInstance.get(
+        `${API_BASE_URL}${MAP}/detail/${location.mapId}`
+      );
+      console.log(res);
+
+      setSelectedCultureDetail(res.data?.result || res.data || null);
+    } catch (err) {
+      setSelectedCultureDetail(null);
+    } finally {
+      setIsCultureDetailLoading(false);
+    }
   };
 
   return (
@@ -206,7 +308,7 @@ const MapPage = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               {/* 상단 검색 영역 */}
               <div className="p-6 border-b">
@@ -260,6 +362,56 @@ const MapPage = () => {
                       </Button>
                     ))}
                   </div>
+
+                  {/* 문화시설 하위 카테고리 버튼들 */}
+                  {showCultureSubCategories && (
+                    <div className="mt-4">
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex flex-wrap gap-2">
+                          {cultureSubCategories.map((subCategory) => (
+                            <Button
+                              key={subCategory.value}
+                              variant={
+                                selectedCultureSubCategory === subCategory.value
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() =>
+                                setSelectedCultureSubCategory(subCategory.value)
+                              }
+                              className={
+                                selectedCultureSubCategory === subCategory.value
+                                  ? "bg-blue-500 hover:bg-blue-600"
+                                  : "border-blue-300 text-blue-600 hover:bg-blue-50"
+                              }
+                            >
+                              {subCategory.name}
+                            </Button>
+                          ))}
+                        </div>
+                        {/* 문화시설 지역 선택 셀렉트박스 */}
+                        <Select
+                          value={selectedCultureRegion}
+                          onValueChange={setSelectedCultureRegion}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="지역 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {cultureRegionOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -298,6 +450,16 @@ const MapPage = () => {
                           const regionName = regionMap[festivalRegion];
                           const addr = festival.addr || festival.location || "";
                           return addr.slice(0, 2) === regionName;
+                        })
+                        .filter((festival, idx, arr) => {
+                          // title+location 조합이 중복되지 않게
+                          return (
+                            arr.findIndex(
+                              (f) =>
+                                f.title === festival.title &&
+                                f.location === festival.location
+                            ) === idx
+                          );
                         })
                         .map((festival) => (
                           <Card
@@ -340,49 +502,50 @@ const MapPage = () => {
                 </div>
               )}
 
-              {/* 행사정보가 아닐 때만 기존 분양 위치 목록 노출 */}
-              {selectedCategory !== "event" && (
+              {/* 문화시설 카테고리일 때: 문화시설 목록 노출 */}
+              {selectedCategory === "culture" && (
                 <div className="p-6">
                   <div className="space-y-8">
                     {/* 위: 목록 */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">
-                        분양 위치 목록 ({filteredLocations.length}개)
+                        문화시설 목록 ({cultureLocations.length}개)
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                        {filteredLocations.map((location) => (
-                          <Card
-                            key={location.id}
-                            className={`cursor-pointer transition-all hover:shadow-md ${
-                              selectedLocation?.id === location.id
-                                ? "ring-2 ring-orange-500"
-                                : ""
-                            }`}
-                            onClick={() => handleLocationClick(location)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-start space-x-3">
-                                <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-gray-900 text-sm">
-                                    {location.name}
-                                  </h4>
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    {location.address}
-                                  </p>
-                                  <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
-                                    {
-                                      categories.find(
-                                        (c) => c.id === location.category
-                                      )?.name
-                                    }
-                                  </span>
+                      {isCultureLoading ? (
+                        <div className="text-center py-8 text-gray-400">
+                          불러오는 중...
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-x-4 gap-y-4 max-h-[312px] overflow-y-auto pr-2 justify-center mb-6">
+                          {cultureLocations.map((location) => (
+                            <Card
+                              key={location.mapId || location.title}
+                              className={`w-[320px] min-w-[320px] max-w-[320px] cursor-pointer transition-all hover:shadow-md ${
+                                selectedLocation?.mapId === location.mapId
+                                  ? "ring-2 ring-orange-500"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                handleCultureLocationClick(location)
+                              }
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-start space-x-3">
+                                  <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900 text-sm">
+                                      {location.title}
+                                    </h4>
+                                    <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
+                                      {selectedCultureLabel}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -392,7 +555,7 @@ const MapPage = () => {
               <div className="p-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">위치 지도</h3>
-                  <div className="h-[700px] rounded-lg overflow-hidden border">
+                  <div className="h-[700px] rounded-lg overflow-hidden border relative z-0">
                     <MapComponent
                       locations={
                         selectedCategory === "event"
@@ -406,6 +569,8 @@ const MapPage = () => {
                                 lat: f.latitude,
                                 lng: f.longitude,
                               }))
+                          : selectedCategory === "culture"
+                          ? cultureLocations
                           : filteredLocations
                       }
                       selectedLocation={selectedLocation}
@@ -415,15 +580,16 @@ const MapPage = () => {
                           ? selectedFestivalInfo
                           : null
                       }
+                      selectedCultureDetail={
+                        selectedCategory === "culture"
+                          ? selectedCultureDetail
+                          : null
+                      }
                     />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          {/* 사이드바 */}
-          <div className="lg:col-span-1">
-            <Sidebar />
           </div>
         </div>
       </main>
