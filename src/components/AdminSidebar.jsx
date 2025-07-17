@@ -12,6 +12,7 @@ const AdminSidebar = () => {
     { title: "로그 관리", path: "/admin/logs" },
     { title: "게시판 관리", path: "/admin/boards" },
     { title: "배너 관리", path: "/admin/banner" },
+    { title: "광고 관리", path: "/admin/advertisement" },
     { title: "고객센터", path: "/admin/support" },
   ];
 
