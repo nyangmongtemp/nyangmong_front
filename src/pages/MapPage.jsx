@@ -515,35 +515,43 @@ const MapPage = () => {
                         <div className="text-center py-8 text-gray-400">
                           불러오는 중...
                         </div>
+                      ) : cultureLocations.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                          문화시설이 없습니다.
+                        </div>
                       ) : (
-                        <div className={`flex flex-wrap gap-x-4 gap-y-4 pr-2 justify-center ${cultureLocations.length > 0 ? 'h-[312px] overflow-y-auto mb-6' : ''}`}>
-                          {cultureLocations.map((location) => (
-                            <Card
-                              key={location.mapId || location.title}
-                              className={`w-[320px] min-w-[320px] max-w-[320px] cursor-pointer transition-all hover:shadow-md ${
-                                selectedLocation?.mapId === location.mapId
-                                  ? "ring-2 ring-orange-500"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                handleCultureLocationClick(location)
-                              }
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-start space-x-3">
-                                  <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-gray-900 text-sm">
-                                      {location.title}
-                                    </h4>
-                                    <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
-                                      {selectedCultureLabel}
-                                    </span>
+                        <div className="flex flex-wrap gap-x-4 gap-y-4 h-[312px] overflow-y-auto pr-2 justify-center">
+                          {cultureLocations
+                            .filter(
+                              (location) => location.addr || location.addr1
+                            ) // addr 또는 addr1이 있는 경우만 렌더링
+                            .map((location) => (
+                              <Card
+                                key={location.mapId || location.title}
+                                className={`cursor-pointer transition-all hover:shadow-md ${
+                                  selectedLocation?.mapId === location.mapId
+                                    ? "ring-2 ring-orange-500"
+                                    : ""
+                                } w-[320px] min-w-[320px] max-w-[320px]`}
+                                onClick={() =>
+                                  handleCultureLocationClick(location)
+                                }
+                              >
+                                <CardContent className="p-4">
+                                  <div className="flex items-start space-x-3">
+                                    <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-gray-900 text-sm">
+                                        {location.title}
+                                      </h4>
+                                      <span className="inline-block mt-2 px-2 py-1 text-xs bg-orange-100 text-orange-600 rounded-full">
+                                        {selectedCultureLabel}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
+                                </CardContent>
+                              </Card>
+                            ))}
                         </div>
                       )}
                     </div>
