@@ -516,7 +516,7 @@ const MapPage = () => {
                           불러오는 중...
                         </div>
                       ) : (
-                        <div className="flex flex-wrap gap-x-4 gap-y-4 max-h-[312px] overflow-y-auto pr-2 justify-center mb-6">
+                        <div className="flex flex-wrap gap-x-4 gap-y-4 h-[312px] overflow-y-auto pr-2 justify-center mb-6">
                           {cultureLocations.map((location) => (
                             <Card
                               key={location.mapId || location.title}
