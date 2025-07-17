@@ -31,6 +31,7 @@ const AdvertisementDetailModal = ({
   const [selectedImage, setSelectedImage] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [dateError, setDateError] = useState("");
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -67,6 +68,12 @@ const AdvertisementDetailModal = ({
   };
 
   const handleSave = () => {
+    if (startDate && endDate && endDate < startDate) {
+      setDateError("종료일은 시작일보다 빠를 수 없습니다.");
+      return;
+    }
+    setDateError("");
+
     if (onUpdate) {
       onUpdate({
         ...banner,
@@ -92,7 +99,7 @@ const AdvertisementDetailModal = ({
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>광고 이름 </DialogTitle>
+            <DialogTitle>광고 이름 (입력 가능)</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -162,6 +169,8 @@ const AdvertisementDetailModal = ({
                   />
                 </PopoverContent>
               </Popover>
+
+              {dateError && <p className="text-red-500 text-sm">{dateError}</p>}
             </div>
 
             {/* 이미지 영역 */}
