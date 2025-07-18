@@ -517,24 +517,25 @@ const AdoptionPage = () => {
               <span>{isRescue ? post.rescueDate : post.date}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1">
-                <Eye className="h-4 w-4 text-gray-500" />
-                <span className="text-xs">{post.views}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Heart className="h-4 w-4 text-pink-400" />
-                <span className="text-xs">{post.likes}</span>
-              </div>
-              {!isRescue && (
+          {/* 분양동물(분양게시판)일 때만 조회수/좋아요/댓글 표시 */}
+          {!isRescue && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1">
+                  <Eye className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs">{post.views}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4 text-pink-400" />
+                  <span className="text-xs">{post.likes}</span>
+                </div>
                 <div className="flex items-center space-x-1">
                   <MessageCircle className="h-4 w-4 text-blue-400" />
                   <span className="text-xs">{post.comments}</span>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
