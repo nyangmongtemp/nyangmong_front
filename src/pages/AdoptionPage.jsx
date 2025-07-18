@@ -32,6 +32,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { strayAnimalAPI, adoptionAPI } from "../../configs/api-utils.js";
 import { useAuth } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
@@ -235,7 +236,8 @@ const AdoptionPage = () => {
   }, []);
 
   // 분양게시판 탭이 선택될 때 데이터 로드
-  const [activeTab, setActiveTab] = useState("rescue");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || "rescue");
 
   useEffect(() => {
     if (activeTab === "adoption") {
@@ -923,7 +925,7 @@ const AdoptionPage = () => {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl shadow-sm p-6 min-h-[500px]">
               <Tabs
-                defaultValue="rescue"
+                value={activeTab}
                 className="w-full"
                 onValueChange={setActiveTab}
               >
