@@ -483,7 +483,7 @@ const AdoptionPage = () => {
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-72 object-cover"
         />
         {!isRescue && post.price === "무료분양" && (
           <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500">
