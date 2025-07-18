@@ -64,7 +64,7 @@ const AdoptionCreate = () => {
   useEffect(() => {
     if (!isLoggedIn) {
       alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
-      navigate("/adoption");
+      navigate("/adoption", { state: { tab: "adoption" } });
     }
   }, [isLoggedIn, navigate]);
 
@@ -186,7 +186,7 @@ const AdoptionCreate = () => {
 
     if (!isLoggedIn) {
       alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
-      navigate("/adoption");
+      navigate("/adoption", { state: { tab: "adoption" } });
       return;
     }
 
@@ -258,7 +258,7 @@ const AdoptionCreate = () => {
       try {
         const response = await adoptionAPI.updateAdoptionPost(id, form, token);
         alert("분양글이 성공적으로 수정되었습니다.");
-        navigate("/adoption");
+        navigate("/adoption", { state: { tab: "adoption" } });
       } catch (error) {
         console.error('분양글 수정 실패:', error);
         if (error.response) {
@@ -277,7 +277,7 @@ const AdoptionCreate = () => {
     try {
       const response = await adoptionAPI.createAdoptionPost(form, token);
       alert("분양글이 성공적으로 등록되었습니다.");
-      navigate("/adoption");
+      navigate("/adoption", { state: { tab: "adoption" } });
     } catch (error) {
       console.error('분양글 등록 실패:', error);
       if (error.response) {
@@ -325,7 +325,7 @@ const AdoptionCreate = () => {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={() => navigate("/adoption")}
+                onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
                 className="flex items-center text-gray-600 hover:text-gray-800"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -546,7 +546,7 @@ const AdoptionCreate = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate("/adoption")}
+                      onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
                     >
                       취소
                     </Button>
