@@ -47,7 +47,7 @@ async function urlToFile(url, filename, mimeType) {
 
 const AdoptionCreate = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, nickname } = useAuth();
+  const { isLoggedIn } = useAuth();
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
@@ -67,14 +67,6 @@ const AdoptionCreate = () => {
       navigate("/adoption");
     }
   }, [isLoggedIn, navigate]);
-
-  // nickname이 변경될 때 formData 업데이트
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      nickname: nickname || ""
-    }));
-  }, [nickname]);
 
   useEffect(() => {
     if (isEdit) {
@@ -118,8 +110,7 @@ const AdoptionCreate = () => {
     neutered: "",
     vaccinated: "",
     fee: "",
-    imageUrl: "",
-    nickname: nickname
+    imageUrl: ""
   });
 
   const categories = ["강아지", "고양이", "기타"];
@@ -133,26 +124,6 @@ const AdoptionCreate = () => {
     { label: "예", value: "Y" },
     { label: "아니오", value: "N" },
     { label: "모름", value: "U" }
-  ];
-  const regions = [
-    { value: "서울", label: "서울" },
-    { value: "경기", label: "경기" },
-    { value: "강원도", label: "강원도" },
-    { value: "강원특별자치도", label: "강원특별자치도" },
-    { value: "충청북도", label: "충청북도" },
-    { value: "충청남도", label: "충청남도" },
-    { value: "대전", label: "대전" },
-    { value: "세종", label: "세종" },
-    { value: "전라북도", label: "전라북도" },
-    { value: "전라남도", label: "전라남도" },
-    { value: "전북특별자치도", label: "전북특별자치도" },
-    { value: "광주", label: "광주" },
-    { value: "경상북도", label: "경상북도" },
-    { value: "경상남도", label: "경상남도" },
-    { value: "부산", label: "부산" },
-    { value: "대구", label: "대구" },
-    { value: "울산", label: "울산" },
-    { value: "제주", label: "제주" },
   ];
 
   const handleImageChange = (e) => {
@@ -272,8 +243,7 @@ const AdoptionCreate = () => {
       sexCode: formData.sex,
       neuterYn: formData.neutered,
       address: formData.address,
-      fee: formData.fee,
-      nickname: formData.nickname
+      fee: formData.fee
     };
 
     // FormData 구성
@@ -409,16 +379,6 @@ const AdoptionCreate = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="nickname">닉네임 *</Label>
-                      <Input
-                        id="nickname"
-                        value={formData.nickname}
-                        readOnly
-                        className="bg-gray-50 cursor-not-allowed"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
                       <Label htmlFor="petKind">품종 *</Label>
                       <Input
                         id="petKind"
@@ -470,21 +430,13 @@ const AdoptionCreate = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="address">지역 *</Label>
-                      <Select
+                      <Input
+                        id="address"
                         value={formData.address}
-                        onValueChange={(value) => handleInputChange("address", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="지역을 선택하세요" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {regions.map((region) => (
-                            <SelectItem key={region.value} value={region.value}>
-                              {region.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        placeholder="지역을 입력하세요 (예: 서울 강남구)"
+                        required
+                      />
                     </div>
 
                     {/* 중성화 셀렉트박스 부분 */}
