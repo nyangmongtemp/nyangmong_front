@@ -153,19 +153,20 @@ const AdoptionBoard = () => {
                 alt={post.title}
                 className="w-full h-72 object-cover"
               />
-              {post.price === "무료분양" && (
-                <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500 text-xs">
-                  무료분양
-                </Badge>
+              {(post.price === "무료분양" || post.neuterYn === "Y") && (
+                <div className="absolute top-2 left-2 flex gap-2 z-10">
+                  {post.price === "무료분양" && (
+                    <Badge className="bg-green-500 hover:bg-green-500 text-xs">
+                      무료분양
+                    </Badge>
+                  )}
+                  {post.neuterYn === "Y" && (
+                    <Badge className="bg-blue-500 hover:bg-blue-500 text-xs">
+                      중성화
+                    </Badge>
+                  )}
+                </div>
               )}
-              {post.neuterYn === "Y" && (
-                <Badge className="absolute top-2 left-16 bg-blue-500 hover:bg-blue-500 text-xs">
-                  중성화
-                </Badge>
-              )}
-              <button className="absolute top-2 right-2 p-1 bg-white/80 rounded-full hover:bg-white transition-colors">
-                <Heart className="h-4 w-4 text-gray-600" />
-              </button>
             </div>
             <CardContent className="p-4">
               <h3 className="font-bold text-lg mb-2 line-clamp-1">
