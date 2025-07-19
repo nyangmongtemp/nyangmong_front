@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 const APP_KEY = import.meta.env.VITE_KAKAO_MAP_API;
 
+// 위치 권한 허용안하면, 기본 위치값(현재는 남산임)
 const NAMSAN_LAT = 37.550434;
 const NAMSAN_LNG = 126.990558;
 
@@ -10,6 +11,7 @@ const MapComponent = ({
   selectedLocation,
   selectedFestivalInfo,
   selectedCultureDetail,
+  selectedHospitalDetail,
 }) => {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
@@ -281,6 +283,81 @@ const MapComponent = ({
     }
   }, [selectedCultureDetail]);
 
+  // 동물병원 상세정보(카드 클릭) 시 mapx, mapy 좌표로 바로 마커/인포윈도우 표시
+  useEffect(() => {
+    if (
+      selectedHospitalDetail &&
+      selectedHospitalDetail.mapx &&
+      selectedHospitalDetail.mapy &&
+      window.kakao &&
+      window.kakao.maps &&
+      mapInstanceRef.current
+    ) {
+      // 기존 마커/인포윈도우 제거
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
+      // mapx: 경도, mapy: 위도
+      const latlng = new window.kakao.maps.LatLng(
+        parseFloat(selectedHospitalDetail.mapy),
+        parseFloat(selectedHospitalDetail.mapx)
+      );
+      mapInstanceRef.current.setCenter(latlng);
+      // 마커 생성
+      const marker = new window.kakao.maps.Marker({
+        position: latlng,
+        map: mapInstanceRef.current,
+      });
+      markersRef.current.push(marker);
+      // 인포윈도우 내용
+      const infoContent = `
+        <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
+          <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
+            selectedHospitalDetail.businessName
+          }</strong></div>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedHospitalDetail.fullAddress || "정보 없음"
+            }</p>
+          </div>
+          ${
+            selectedHospitalDetail.phoneNumber
+              ? `
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
+            <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.phoneNumber}</p>
+          </div>
+          `
+              : ""
+          }
+          ${
+            selectedHospitalDetail.lastModified
+              ? `
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
+            <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.lastModified}</p>
+          </div>
+          `
+              : ""
+          }
+        </div>
+      `;
+      const infowindow = new window.kakao.maps.InfoWindow({
+        content: infoContent,
+        removable: true,
+        maxWidth: 420,
+      });
+      window.kakao.maps.event.addListener(marker, "click", function () {
+        infowindow.open(mapInstanceRef.current, marker);
+      });
+      infoWindowRef.current = infowindow;
+    }
+  }, [selectedHospitalDetail]);
+
   // 지도 리사이즈 트리거 (행사정보/문화시설 등 탭/카테고리/카드 전환 시)
   useEffect(() => {
     if (window.kakao && window.kakao.maps && mapInstanceRef.current) {
@@ -293,6 +370,7 @@ const MapComponent = ({
     selectedLocation,
     selectedFestivalInfo,
     selectedCultureDetail,
+    selectedHospitalDetail,
   ]);
 
   // 지도 컴포넌트 렌더링

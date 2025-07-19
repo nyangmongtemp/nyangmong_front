@@ -13,7 +13,12 @@ import {
 } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, FESTIVAL, MAP } from "../../configs/host-config";
+import {
+  API_BASE_URL,
+  FESTIVAL,
+  MAP,
+  HOSPITAL,
+} from "../../configs/host-config";
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -39,6 +44,12 @@ const MapPage = () => {
   // 문화시설 상세 정보 상태
   const [selectedCultureDetail, setSelectedCultureDetail] = useState(null);
   const [isCultureDetailLoading, setIsCultureDetailLoading] = useState(false);
+  // 동물병원 관련 상태
+  const [showHospitalRegion, setShowHospitalRegion] = useState(false);
+  const [selectedHospitalRegion, setSelectedHospitalRegion] = useState("1");
+  const [hospitalList, setHospitalList] = useState([]);
+  const [isHospitalLoading, setIsHospitalLoading] = useState(false);
+  const [selectedHospitalInfo, setSelectedHospitalInfo] = useState(null);
 
   const regionMap = {
     seoul: "서울",
@@ -94,6 +105,9 @@ const MapPage = () => {
     { value: "38", label: "전남" },
     { value: "39", label: "제주" },
   ];
+
+  // 동물병원 지역 선택 옵션 (전체 제외)
+  const hospitalRegionOptions = cultureRegionOptions;
 
   const categories = [
     { id: "all", name: "전체" },
@@ -259,6 +273,30 @@ const MapPage = () => {
     }
   }, [selectedCategory, selectedCultureSubCategory, selectedCultureRegion]);
 
+  // 동물병원 지역 변경 시 GET 요청
+  useEffect(() => {
+    if (selectedCategory === "hospital") {
+      setIsHospitalLoading(true);
+      console.log("동물병원 지역 선택:", selectedHospitalRegion);
+
+      axiosInstance
+        .get(`${API_BASE_URL}${HOSPITAL}/list/${selectedHospitalRegion}`)
+        .then((res) => {
+          console.log("동물병원 응답:", res);
+          // res.data.result에서 동물병원 배열을 가져오고, 상위 10개만 선택
+          const hospitalData = Array.isArray(res.data?.result)
+            ? res.data.result.slice(0, 10)
+            : [];
+          setHospitalList(hospitalData);
+        })
+        .catch((err) => {
+          console.error("동물병원 요청 실패:", err);
+          setHospitalList([]);
+        })
+        .finally(() => setIsHospitalLoading(false));
+    }
+  }, [selectedCategory, selectedHospitalRegion]);
+
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
   };
@@ -269,8 +307,13 @@ const MapPage = () => {
     // 문화시설 카테고리 클릭 시 하위 카테고리 표시
     if (categoryId === "culture") {
       setShowCultureSubCategories(true);
+      setShowHospitalRegion(false);
+    } else if (categoryId === "hospital") {
+      setShowHospitalRegion(true);
+      setShowCultureSubCategories(false);
     } else {
       setShowCultureSubCategories(false);
+      setShowHospitalRegion(false);
       setSelectedCultureSubCategory("12");
     }
   };
@@ -299,6 +342,23 @@ const MapPage = () => {
       setSelectedCultureDetail(null);
     } finally {
       setIsCultureDetailLoading(false);
+    }
+  };
+
+  // 동물병원 카드 클릭 시 detail 요청
+  const handleHospitalLocationClick = async (hospital) => {
+    setSelectedLocation(hospital); // 카드 active 효과
+
+    try {
+      const res = await axiosInstance.get(
+        `${API_BASE_URL}${HOSPITAL}/detail/${hospital.hospitalId}`
+      );
+      console.log("동물병원 상세 정보 응답:", res);
+
+      setSelectedHospitalInfo(res.data?.result || res.data || null);
+    } catch (err) {
+      console.error("동물병원 상세 정보 요청 실패:", err);
+      setSelectedHospitalInfo(null);
     }
   };
 
@@ -400,6 +460,32 @@ const MapPage = () => {
                           </SelectTrigger>
                           <SelectContent>
                             {cultureRegionOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 동물병원 지역 선택 셀렉트박스 */}
+                  {showHospitalRegion && (
+                    <div className="mt-4">
+                      <div className="flex flex-wrap items-center gap-4">
+                        <Select
+                          value={selectedHospitalRegion}
+                          onValueChange={setSelectedHospitalRegion}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="지역 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {hospitalRegionOptions.map((option) => (
                               <SelectItem
                                 key={option.value}
                                 value={option.value}
@@ -559,6 +645,56 @@ const MapPage = () => {
                 </div>
               )}
 
+              {/* 동물병원 카테고리일 때: 동물병원 목록 노출 */}
+              {selectedCategory === "hospital" && (
+                <div className="p-6 border-b">
+                  <div className="flex items-center mb-2 gap-2">
+                    <h3 className="text-lg font-semibold">동물병원 목록</h3>
+                  </div>
+                  {isHospitalLoading ? (
+                    <div className="text-center py-8 text-gray-400">
+                      불러오는 중...
+                    </div>
+                  ) : hospitalList.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      동물병원이 없습니다.
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-x-4 gap-y-4 h-[312px] overflow-y-auto pr-2 justify-center">
+                      {(Array.isArray(hospitalList) ? hospitalList : [])
+                        .filter((hospital) => hospital.hospitalName)
+                        .map((hospital) => (
+                          <Card
+                            key={hospital.hospitalId}
+                            className={`cursor-pointer transition-all hover:shadow-md ${
+                              selectedLocation?.id === hospital.hospitalId
+                                ? "ring-2 ring-orange-500"
+                                : ""
+                            } w-[320px] min-w-[320px] max-w-[320px]`}
+                            onClick={() =>
+                              handleHospitalLocationClick(hospital)
+                            }
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-start space-x-3">
+                                <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-black text-sm whitespace-normal break-words">
+                                    {hospital.hospitalName}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 mt-1 whitespace-normal break-words">
+                                    {hospital.fullAddress}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 아래: 지도 */}
               <div className="p-6">
                 <div className="space-y-4">
@@ -579,6 +715,18 @@ const MapPage = () => {
                               }))
                           : selectedCategory === "culture"
                           ? cultureLocations
+                          : selectedCategory === "hospital"
+                          ? (Array.isArray(hospitalList)
+                              ? hospitalList
+                              : []
+                            ).map((h) => ({
+                              id: h.hospitalId,
+                              name: h.hospitalName,
+                              address: h.fullAddress,
+                              category: "hospital",
+                              lat: h.mapy, // 카카오맵 Y좌표
+                              lng: h.mapx, // 카카오맵 X좌표
+                            }))
                           : filteredLocations
                       }
                       selectedLocation={selectedLocation}
@@ -591,6 +739,16 @@ const MapPage = () => {
                       selectedCultureDetail={
                         selectedCategory === "culture"
                           ? selectedCultureDetail
+                          : null
+                      }
+                      selectedHospitalInfo={
+                        selectedCategory === "hospital"
+                          ? selectedHospitalInfo
+                          : null
+                      }
+                      selectedHospitalDetail={
+                        selectedCategory === "hospital"
+                          ? selectedHospitalInfo
                           : null
                       }
                     />
