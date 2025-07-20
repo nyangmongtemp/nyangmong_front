@@ -298,12 +298,11 @@ const MapComponent = ({
     }
   }, [selectedCultureDetail]);
 
-  // 동물병원 상세정보(카드 클릭) 시 mapx, mapy 좌표로 바로 마커/인포윈도우 표시
+  // 동물병원 상세정보(카드 클릭) 시 주소로 좌표 검색 후 마커/인포윈도우 표시
   useEffect(() => {
     if (
       selectedHospitalDetail &&
-      selectedHospitalDetail.mapx &&
-      selectedHospitalDetail.mapy &&
+      selectedHospitalDetail.fullAddress &&
       window.kakao &&
       window.kakao.maps &&
       mapInstanceRef.current
@@ -315,63 +314,82 @@ const MapComponent = ({
         infoWindowRef.current.close();
         infoWindowRef.current = null;
       }
-      // mapx: 경도, mapy: 위도
-      const latlng = new window.kakao.maps.LatLng(
-        parseFloat(selectedHospitalDetail.mapy),
-        parseFloat(selectedHospitalDetail.mapx)
-      );
-      mapInstanceRef.current.setCenter(latlng);
-      // 마커 생성
-      const marker = new window.kakao.maps.Marker({
-        position: latlng,
-        map: mapInstanceRef.current,
-      });
-      markersRef.current.push(marker);
-      // 인포윈도우 내용
-      const infoContent = `
-        <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
-          <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
-            selectedHospitalDetail.businessName
-          }</strong></div>
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
-            <p style="margin:4px 0;font-size:14px;">${
-              selectedHospitalDetail.fullAddress || "정보 없음"
-            }</p>
-          </div>
-          ${
-            selectedHospitalDetail.phoneNumber
-              ? `
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
-            <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.phoneNumber}</p>
-          </div>
-          `
-              : ""
-          }
-          ${
-            selectedHospitalDetail.lastModified
-              ? `
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
-            <p style="margin:4px 0;font-size:14px;">${formatDate(
-              selectedHospitalDetail.lastModified
-            )}</p>
-          </div>
-          `
-              : ""
-          }
-        </div>
-      `;
-      const infowindow = new window.kakao.maps.InfoWindow({
-        content: infoContent,
-        removable: true,
-        maxWidth: 420,
-      });
-      window.kakao.maps.event.addListener(marker, "click", function () {
-        infowindow.open(mapInstanceRef.current, marker);
-      });
-      infoWindowRef.current = infowindow;
+
+      // 주소로 좌표 검색
+      const geocoder = new window.kakao.maps.services.Geocoder();
+
+      const callback = function (result, status) {
+        if (
+          status === window.kakao.maps.services.Status.OK &&
+          result.length > 0
+        ) {
+          // 첫 번째 결과의 좌표 사용
+          const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
+
+          mapInstanceRef.current.setCenter(coords);
+
+          // 마커 생성
+          const marker = new window.kakao.maps.Marker({
+            position: coords,
+            map: mapInstanceRef.current,
+          });
+          markersRef.current.push(marker);
+
+          // 인포윈도우 내용
+          const infoContent = `
+            <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
+              <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
+                selectedHospitalDetail.businessName
+              }</strong></div>
+              <div style="margin-bottom:8px;">
+                <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
+                <p style="margin:4px 0;font-size:14px;">${
+                  selectedHospitalDetail.fullAddress || "정보 없음"
+                }</p>
+              </div>
+              ${
+                selectedHospitalDetail.phoneNumber
+                  ? `
+              <div style="margin-bottom:8px;">
+                <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
+                <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.phoneNumber}</p>
+              </div>
+              `
+                  : ""
+              }
+              ${
+                selectedHospitalDetail.lastModified
+                  ? `
+              <div style="margin-bottom:8px;">
+                <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
+                <p style="margin:4px 0;font-size:14px;">${formatDate(
+                  selectedHospitalDetail.lastModified
+                )}</p>
+              </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+
+          const infowindow = new window.kakao.maps.InfoWindow({
+            content: infoContent,
+            removable: true,
+            maxWidth: 420,
+          });
+
+          window.kakao.maps.event.addListener(marker, "click", function () {
+            infowindow.open(mapInstanceRef.current, marker);
+          });
+
+          infoWindowRef.current = infowindow;
+        } else {
+          console.error("주소 검색 실패:", status);
+        }
+      };
+
+      // 주소로 좌표 검색 실행
+      geocoder.addressSearch(selectedHospitalDetail.fullAddress, callback);
     }
   }, [selectedHospitalDetail]);
 
