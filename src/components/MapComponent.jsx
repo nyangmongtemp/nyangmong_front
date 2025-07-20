@@ -19,6 +19,21 @@ const MapComponent = ({
   const initialCenterRef = useRef(null); // 최초 지도 중심
   const userMarkerRef = useRef(null); // 사용자 위치 마커
 
+  // 날짜 형식을 연월일로 변환하는 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   // 카카오맵 스크립트 로드 함수
   function loadKakaoMapScript(callback) {
     if (window.kakao && window.kakao.maps) {
@@ -339,7 +354,9 @@ const MapComponent = ({
               ? `
           <div style="margin-bottom:8px;">
             <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
-            <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.lastModified}</p>
+            <p style="margin:4px 0;font-size:14px;">${formatDate(
+              selectedHospitalDetail.lastModified
+            )}</p>
           </div>
           `
               : ""

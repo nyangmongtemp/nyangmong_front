@@ -47,6 +47,8 @@ const MapPage = () => {
   // 동물병원 관련 상태
   const [showHospitalRegion, setShowHospitalRegion] = useState(false);
   const [selectedHospitalRegion, setSelectedHospitalRegion] = useState("1");
+  const [hospitalCategoryOptions, setHospitalCategoryOptions] = useState([]);
+  const [selectedHospitalCategory, setSelectedHospitalCategory] = useState("");
   const [hospitalList, setHospitalList] = useState([]);
   const [isHospitalLoading, setIsHospitalLoading] = useState(false);
   const [selectedHospitalInfo, setSelectedHospitalInfo] = useState(null);
@@ -273,29 +275,58 @@ const MapPage = () => {
     }
   }, [selectedCategory, selectedCultureSubCategory, selectedCultureRegion]);
 
-  // 동물병원 지역 변경 시 GET 요청
+  // 동물병원 지역 변경 시 category 요청
   useEffect(() => {
     if (selectedCategory === "hospital") {
-      setIsHospitalLoading(true);
       console.log("동물병원 지역 선택:", selectedHospitalRegion);
 
+      // category 요청으로 두 번째 셀렉트박스 옵션 가져오기
       axiosInstance
-        .get(`${API_BASE_URL}${HOSPITAL}/list/${selectedHospitalRegion}`)
+        .get(`${API_BASE_URL}${HOSPITAL}/category/${selectedHospitalRegion}`)
         .then((res) => {
-          console.log("동물병원 응답:", res);
-          // res.data.result에서 동물병원 배열을 가져오고, 상위 10개만 선택
+          console.log("동물병원 category 응답:", res);
+          const categoryData = res.data?.result || res.data || [];
+          setHospitalCategoryOptions(categoryData);
+
+          // 첫 번째 값으로 기본값 설정
+          if (categoryData.length > 0) {
+            setSelectedHospitalCategory(categoryData[0]);
+          }
+        })
+        .catch((err) => {
+          console.error("동물병원 category 요청 실패:", err);
+          setHospitalCategoryOptions([]);
+          setSelectedHospitalCategory("");
+        });
+    }
+  }, [selectedCategory, selectedHospitalRegion]);
+
+  // 동물병원 카테고리 변경 시 list 요청
+  useEffect(() => {
+    if (selectedCategory === "hospital" && selectedHospitalCategory) {
+      setIsHospitalLoading(true);
+      console.log("동물병원 카테고리 선택:", selectedHospitalCategory);
+
+      // list 요청
+      axiosInstance
+        .get(
+          `${API_BASE_URL}${HOSPITAL}/list/${selectedHospitalRegion}/${selectedHospitalCategory}`
+        )
+        .then((res) => {
+          console.log("동물병원 list 응답:", res);
+          // res.data.result에서 동물병원 배열을 가져옴 (전체)
           const hospitalData = Array.isArray(res.data?.result)
-            ? res.data.result.slice(0, 10)
+            ? res.data.result
             : [];
           setHospitalList(hospitalData);
         })
         .catch((err) => {
-          console.error("동물병원 요청 실패:", err);
+          console.error("동물병원 list 요청 실패:", err);
           setHospitalList([]);
         })
         .finally(() => setIsHospitalLoading(false));
     }
-  }, [selectedCategory, selectedHospitalRegion]);
+  }, [selectedCategory, selectedHospitalRegion, selectedHospitalCategory]);
 
   const handleLocationClick = (location) => {
     setSelectedLocation(location);
@@ -495,6 +526,25 @@ const MapPage = () => {
                             ))}
                           </SelectContent>
                         </Select>
+
+                        {/* 두 번째 셀렉트박스: 카테고리 선택 */}
+                        {hospitalCategoryOptions.length > 0 && (
+                          <Select
+                            value={selectedHospitalCategory}
+                            onValueChange={setSelectedHospitalCategory}
+                          >
+                            <SelectTrigger className="w-[140px]">
+                              <SelectValue placeholder="카테고리 선택" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {hospitalCategoryOptions.map((option, index) => (
+                                <SelectItem key={index} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                       </div>
                     </div>
                   )}
@@ -667,7 +717,8 @@ const MapPage = () => {
                           <Card
                             key={hospital.hospitalId}
                             className={`cursor-pointer transition-all hover:shadow-md ${
-                              selectedLocation?.id === hospital.hospitalId
+                              selectedLocation?.hospitalId ===
+                              hospital.hospitalId
                                 ? "ring-2 ring-orange-500"
                                 : ""
                             } w-[320px] min-w-[320px] max-w-[320px]`}
