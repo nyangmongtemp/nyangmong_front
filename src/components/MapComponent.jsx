@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import ImageModal from "./ImageModal";
 
 const APP_KEY = import.meta.env.VITE_KAKAO_MAP_API;
 
@@ -18,6 +19,10 @@ const MapComponent = ({
   const infoWindowRef = useRef(null);
   const initialCenterRef = useRef(null); // 최초 지도 중심
   const userMarkerRef = useRef(null); // 사용자 위치 마커
+
+  // 이미지 모달 상태
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [modalImages, setModalImages] = useState({ image1: "", image2: "" });
 
   // 날짜 형식을 연월일로 변환하는 함수
   const formatDate = (dateString) => {
@@ -57,6 +62,12 @@ const MapComponent = ({
 
   // 최초 1회만 지도 객체 생성 (스크립트가 완전히 로드된 후에만)
   useEffect(() => {
+    // 전역 함수 설정
+    window.openImageModal = (image1, image2) => {
+      setModalImages({ image1, image2 });
+      setIsImageModalOpen(true);
+    };
+
     loadKakaoMapScript(() => {
       window.kakao.maps.load(function () {
         const mapContainer = document.getElementById("map");
@@ -102,6 +113,11 @@ const MapComponent = ({
         }
       });
     });
+
+    // 컴포넌트 언마운트 시 전역 함수 제거
+    return () => {
+      delete window.openImageModal;
+    };
   }, []);
 
   // 사용자 위치 마커 추가
@@ -258,31 +274,47 @@ const MapComponent = ({
       markersRef.current.push(marker);
       // 인포윈도우 내용 (좌표는 제외, tel/카테고리 한글 변환)
       const infoContent = `
-        <div style=\"padding:16px;min-width:320px;font-family:Arial,sans-serif;\">
-          <div style=\"margin-bottom:8px;\"><strong style=\"color:#ff9800;font-size:18px;\">${
+        <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
+          <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
             selectedCultureDetail.title
           }</strong></div>
-          <div style=\"margin-bottom:8px;\">
-            <strong style=\"color:#ff9800;font-size:14px;\">상세주소:</strong>
-            <p style=\"margin:4px 0;font-size:14px;\">${
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
               selectedCultureDetail.addr1 || "정보 없음"
             }</p>
           </div>
           ${
             selectedCultureDetail.tel
               ? `
-          <div style=\"margin-bottom:8px;\">
-            <strong style=\"color:#ff9800;font-size:14px;\">전화번호:</strong>
-            <p style=\"margin:4px 0;font-size:14px;\">${selectedCultureDetail.tel}</p>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
+            <p style="margin:4px 0;font-size:14px;">${selectedCultureDetail.tel}</p>
           </div>
           `
               : ""
           }
-          <div style=\"margin-bottom:8px;\">
-            <strong style=\"color:#ff9800;font-size:14px;\">카테고리:</strong>
-            <p style=\"margin:4px 0;font-size:14px;\">${
-              contentTypeMap[selectedCultureDetail.contentType] || "-"
-            }</p>
+          <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong style="color:#ff9800;font-size:14px;">카테고리:</strong>
+              <p style="margin:4px 0;font-size:14px;">${
+                contentTypeMap[selectedCultureDetail.contentType] || "-"
+              }</p>
+            </div>
+            ${
+              selectedCultureDetail.image1 || selectedCultureDetail.image2
+                ? `
+            <button 
+              onclick="window.openImageModal('${
+                selectedCultureDetail.image1 || ""
+              }', '${selectedCultureDetail.image2 || ""}')"
+              style="background-color:#ff9800;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:14px;"
+            >
+              이미지 보기
+            </button>
+            `
+                : ""
+            }
           </div>
         </div>
       `;
@@ -409,7 +441,17 @@ const MapComponent = ({
   ]);
 
   // 지도 컴포넌트 렌더링
-  return <div id="map" style={{ width: "100%", height: "100%" }} />;
+  return (
+    <>
+      <div id="map" style={{ width: "100%", height: "100%" }} />
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        image1={modalImages.image1}
+        image2={modalImages.image2}
+      />
+    </>
+  );
 };
 
 export default MapComponent;
