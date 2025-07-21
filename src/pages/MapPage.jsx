@@ -242,6 +242,8 @@ const MapPage = () => {
       axiosInstance
         .get(`${API_BASE_URL}${FESTIVAL}/all`)
         .then((res) => {
+          console.log(res);
+
           setFestivalList(res.data || []);
         })
         .catch((err) => {

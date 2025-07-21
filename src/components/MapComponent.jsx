@@ -24,8 +24,6 @@ const MapComponent = ({
   // 이미지 모달 상태
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [modalImages, setModalImages] = useState({ image1: "", image2: "" });
-  // 미용실 검색 결과 상태
-  const [groomingResults, setGroomingResults] = useState([]);
 
   // 날짜 형식을 연월일로 변환하는 함수
   const formatDate = (dateString) => {
@@ -457,6 +455,58 @@ const MapComponent = ({
     }
   }, [selectedHospitalDetail]);
 
+  // locations(행사정보 등) 기반 마커 렌더링
+  useEffect(() => {
+    if (!window.kakao || !window.kakao.maps || !mapInstanceRef.current) return;
+    // 기존 마커 제거
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
+    if (infoWindowRef.current) {
+      infoWindowRef.current.close();
+      infoWindowRef.current = null;
+    }
+    if (!locations || locations.length === 0) return;
+    locations.forEach((loc) => {
+      if (!loc.lat || !loc.lng) return;
+      const latlng = new window.kakao.maps.LatLng(loc.lat, loc.lng);
+      const marker = new window.kakao.maps.Marker({
+        position: latlng,
+        map: mapInstanceRef.current,
+      });
+      markersRef.current.push(marker);
+      const infoContent = `
+        <div style="padding:12px;min-width:220px;">
+          <div style="font-weight:bold;font-size:16px;color:#ff9800;">${
+            loc.name || loc.title || ""
+          }</div>
+          <div style="margin:4px 0;">${loc.address || ""}</div>
+        </div>
+      `;
+      const infowindow = new window.kakao.maps.InfoWindow({
+        content: infoContent,
+        removable: true,
+        maxWidth: 320,
+      });
+      window.kakao.maps.event.addListener(marker, "click", function () {
+        if (infoWindowRef.current) infoWindowRef.current.close();
+        infowindow.open(mapInstanceRef.current, marker);
+        infoWindowRef.current = infowindow;
+      });
+    });
+  }, [locations]);
+
+  // 행사정보 카테고리에서 카드 클릭 시 해당 장소명으로 Places 검색 및 마커 표시
+  useEffect(() => {
+    if (
+      selectedCategory === "event" &&
+      selectedFestivalInfo &&
+      selectedFestivalInfo.location
+    ) {
+      searchAndShowFestivalLocation(selectedFestivalInfo);
+    }
+    // eslint-disable-next-line
+  }, [selectedCategory, selectedFestivalInfo]);
+
   // 지도 리사이즈 트리거 (행사정보/문화시설 등 탭/카테고리/카드 전환 시)
   useEffect(() => {
     if (window.kakao && window.kakao.maps && mapInstanceRef.current) {
@@ -472,134 +522,9 @@ const MapComponent = ({
     selectedHospitalDetail,
   ]);
 
-  // 미용실 검색 결과로 마커 표시 및 인포윈도우
-  useEffect(() => {
-    if (!window.kakao || !window.kakao.maps || !mapInstanceRef.current) return;
-    // 기존 마커 제거
-    markersRef.current.forEach((marker) => marker.setMap(null));
-    markersRef.current = [];
-    if (infoWindowRef.current) {
-      infoWindowRef.current.close();
-      infoWindowRef.current = null;
-    }
-    if (!groomingResults || groomingResults.length === 0) return;
-    groomingResults.forEach((place) => {
-      const latlng = new window.kakao.maps.LatLng(place.y, place.x);
-      const marker = new window.kakao.maps.Marker({
-        position: latlng,
-        map: mapInstanceRef.current,
-      });
-      markersRef.current.push(marker);
-      const infoContent = `
-        <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
-          <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
-            place.place_name
-          }</strong></div>
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">지번 주소:</strong>
-            <p style="margin:4px 0;font-size:14px;">${
-              place.address_name || "-"
-            }</p>
-          </div>
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">도로명 주소:</strong>
-            <p style="margin:4px 0;font-size:14px;">${
-              place.road_address_name || "-"
-            }</p>
-          </div>
-          <div style="margin-bottom:8px;">
-            <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
-            <p style="margin:4px 0;font-size:14px;">${place.phone || "-"}</p>
-          </div>
-          <div style="margin-top:12px;">
-            <a href="${
-              place.place_url
-            }" target="_blank" rel="noopener noreferrer" style="color:#007bff;text-decoration:none;font-size:14px;padding:6px 12px;border:1px solid #007bff;border-radius:4px;display:inline-block;">카카오맵 상세보기</a>
-          </div>
-        </div>
-      `;
-      const infowindow = new window.kakao.maps.InfoWindow({
-        content: infoContent,
-        removable: true,
-        maxWidth: 320,
-      });
-      window.kakao.maps.event.addListener(marker, "click", function () {
-        // 기존에 열려 있던 인포윈도우 닫기
-        if (infoWindowRef.current) {
-          infoWindowRef.current.close();
-        }
-        infowindow.open(mapInstanceRef.current, marker);
-        infoWindowRef.current = infowindow;
-      });
-    });
-  }, [groomingResults]);
-
   // 지도 컴포넌트 렌더링
   return (
     <>
-      {props.selectedCategory === "grooming" && (
-        <button
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            zIndex: 10,
-            background: "#ff9800",
-            color: "white",
-            border: "none",
-            borderRadius: 8,
-            padding: "10px 18px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-          onClick={() => {
-            if (
-              window.kakao &&
-              window.kakao.maps &&
-              window.kakao.maps.services
-            ) {
-              const places = new window.kakao.maps.services.Places();
-              // 지도 중심 또는 사용자 위치
-              let center = null;
-              if (mapInstanceRef.current) {
-                center = mapInstanceRef.current.getCenter();
-              } else if (initialCenterRef.current) {
-                center = initialCenterRef.current;
-              } else {
-                center = new window.kakao.maps.LatLng(37.550434, 126.990558); // 남산
-              }
-              // 검색 옵션 객체
-              const options = {
-                location: new window.kakao.maps.LatLng(
-                  center.getLat(),
-                  center.getLng()
-                ),
-                radius: 5000,
-                size: 15,
-                page: 1,
-                sort: window.kakao.maps.services.SortBy.DISTANCE,
-              };
-              places.keywordSearch(
-                "반려동물미용",
-                function (result, status) {
-                  if (status === window.kakao.maps.services.Status.OK) {
-                    setGroomingResults(result);
-                    console.log("[카카오 미용실 검색 결과]", result);
-                  } else {
-                    console.warn("카카오 미용실 검색 실패:", status);
-                  }
-                },
-                options
-              );
-            } else {
-              alert("카카오맵이 아직 로드되지 않았습니다.");
-            }
-          }}
-        >
-          반려동물 미용실 검색
-        </button>
-      )}
       <div id="map" style={{ width: "100%", height: "100%" }} />
       <ImageModal
         isOpen={isImageModalOpen}
