@@ -25,7 +25,6 @@ import PasswordChangeForm from "@/components/PasswordChangeForm";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PostsList from "@/components/PostsList";
 import CommentsList from "@/components/CommentsList";
-import LikedPostsList from "@/components/LikedPostsList";
 import TabNavigation from "@/components/TabNavigation";
 import { useUserPageData } from "@/hooks/useUserPageData";
 import { useAuth } from "../context/UserContext";
@@ -157,7 +156,6 @@ const UserMyPage = () => {
 
   const [myPosts, setMyPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
-  const [likedPosts, setLikedPosts] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -182,9 +180,6 @@ const UserMyPage = () => {
       case "comments":
         data = myComments;
         break;
-      case "likes":
-        data = likedPosts;
-        break;
       default:
         return [];
     }
@@ -201,9 +196,6 @@ const UserMyPage = () => {
         break;
       case "comments":
         totalItems = myComments.length;
-        break;
-      case "likes":
-        totalItems = likedPosts.length;
         break;
       default:
         totalItems = 0;
@@ -265,9 +257,6 @@ const UserMyPage = () => {
         if (category) {
           fetchMyPostsByCategory(category);
         }
-        break;
-      case "likes":
-        // TODO: 좋아요한 게시글 데이터 가져오기
         break;
       default:
         break;
@@ -366,10 +355,6 @@ const UserMyPage = () => {
 
     if (activeTab === "comments") {
       return <CommentsList />;
-    }
-
-    if (activeTab === "likes") {
-      return <LikedPostsList posts={displayData} />;
     }
   };
 
