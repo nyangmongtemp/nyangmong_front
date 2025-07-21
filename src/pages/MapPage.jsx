@@ -116,7 +116,7 @@ const MapPage = () => {
     { id: "event", name: "행사정보" },
     { id: "culture", name: "반려동물 입장가능 문화시설" },
     { id: "hospital", name: "동물병원" },
-    { id: "grooming", name: "애견미용실" },
+    { id: "grooming", name: "반려동물 미용실" },
     { id: "restaurant", name: "반려동물 입장가능 업장" },
     { id: "shelter", name: "유기견보호소" },
     { id: "park", name: "산책명소" },
@@ -752,6 +752,7 @@ const MapPage = () => {
                   <h3 className="text-lg font-semibold">위치 지도</h3>
                   <div className="h-[700px] rounded-lg overflow-hidden border relative z-0">
                     <MapComponent
+                      key={selectedCategory}
                       locations={
                         selectedCategory === "event"
                           ? festivalList
@@ -802,6 +803,7 @@ const MapPage = () => {
                           ? selectedHospitalInfo
                           : null
                       }
+                      selectedCategory={selectedCategory}
                     />
                   </div>
                 </div>
