@@ -350,6 +350,76 @@ const MapComponent = ({
       // 주소로 좌표 검색
       const geocoder = new window.kakao.maps.services.Geocoder();
 
+      const createMarkerAndInfoWindow = (coords) => {
+        mapInstanceRef.current.setCenter(coords);
+
+        // 마커 생성
+        const marker = new window.kakao.maps.Marker({
+          position: coords,
+          map: mapInstanceRef.current,
+        });
+        markersRef.current.push(marker);
+
+        // 인포윈도우 내용
+        const infoContent = `
+          <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
+            <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
+              selectedHospitalDetail.businessName
+            }</strong></div>
+                      <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedHospitalDetail.fullAddress || "정보 없음"
+            }</p>
+          </div>
+          ${
+            selectedHospitalDetail.roadAddress
+              ? `
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">도로명 주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.roadAddress}</p>
+          </div>
+          `
+              : ""
+          }
+            ${
+              selectedHospitalDetail.phoneNumber
+                ? `
+            <div style="margin-bottom:8px;">
+              <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
+              <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.phoneNumber}</p>
+            </div>
+            `
+                : ""
+            }
+            ${
+              selectedHospitalDetail.lastModified
+                ? `
+            <div style="margin-bottom:8px;">
+              <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
+              <p style="margin:4px 0;font-size:14px;">${formatDate(
+                selectedHospitalDetail.lastModified
+              )}</p>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+
+        const infowindow = new window.kakao.maps.InfoWindow({
+          content: infoContent,
+          removable: true,
+          maxWidth: 420,
+        });
+
+        window.kakao.maps.event.addListener(marker, "click", function () {
+          infowindow.open(mapInstanceRef.current, marker);
+        });
+
+        infoWindowRef.current = infowindow;
+      };
+
       const callback = function (result, status) {
         if (
           status === window.kakao.maps.services.Status.OK &&
@@ -357,70 +427,41 @@ const MapComponent = ({
         ) {
           // 첫 번째 결과의 좌표 사용
           const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x);
-
-          mapInstanceRef.current.setCenter(coords);
-
-          // 마커 생성
-          const marker = new window.kakao.maps.Marker({
-            position: coords,
-            map: mapInstanceRef.current,
-          });
-          markersRef.current.push(marker);
-
-          // 인포윈도우 내용
-          const infoContent = `
-            <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
-              <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
-                selectedHospitalDetail.businessName
-              }</strong></div>
-              <div style="margin-bottom:8px;">
-                <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
-                <p style="margin:4px 0;font-size:14px;">${
-                  selectedHospitalDetail.fullAddress || "정보 없음"
-                }</p>
-              </div>
-              ${
-                selectedHospitalDetail.phoneNumber
-                  ? `
-              <div style="margin-bottom:8px;">
-                <strong style="color:#ff9800;font-size:14px;">전화번호:</strong>
-                <p style="margin:4px 0;font-size:14px;">${selectedHospitalDetail.phoneNumber}</p>
-              </div>
-              `
-                  : ""
-              }
-              ${
-                selectedHospitalDetail.lastModified
-                  ? `
-              <div style="margin-bottom:8px;">
-                <strong style="color:#ff9800;font-size:14px;">정보 갱신 일자:</strong>
-                <p style="margin:4px 0;font-size:14px;">${formatDate(
-                  selectedHospitalDetail.lastModified
-                )}</p>
-              </div>
-              `
-                  : ""
-              }
-            </div>
-          `;
-
-          const infowindow = new window.kakao.maps.InfoWindow({
-            content: infoContent,
-            removable: true,
-            maxWidth: 420,
-          });
-
-          window.kakao.maps.event.addListener(marker, "click", function () {
-            infowindow.open(mapInstanceRef.current, marker);
-          });
-
-          infoWindowRef.current = infowindow;
+          createMarkerAndInfoWindow(coords);
         } else {
-          console.error("주소 검색 실패:", status);
+          console.error("fullAddress 검색 실패:", status);
+
+          // fullAddress 검색 실패 시 roadAddress로 재검색
+          if (selectedHospitalDetail.roadAddress) {
+            console.log(
+              "roadAddress로 재검색 시도:",
+              selectedHospitalDetail.roadAddress
+            );
+            geocoder.addressSearch(
+              selectedHospitalDetail.roadAddress,
+              (roadResult, roadStatus) => {
+                if (
+                  roadStatus === window.kakao.maps.services.Status.OK &&
+                  roadResult.length > 0
+                ) {
+                  // 첫 번째 결과의 좌표 사용
+                  const coords = new window.kakao.maps.LatLng(
+                    roadResult[0].y,
+                    roadResult[0].x
+                  );
+                  createMarkerAndInfoWindow(coords);
+                } else {
+                  console.error("roadAddress 검색도 실패:", roadStatus);
+                }
+              }
+            );
+          } else {
+            console.error("roadAddress도 없음");
+          }
         }
       };
 
-      // 주소로 좌표 검색 실행
+      // 주소로 좌표 검색 실행 (fullAddress 우선)
       geocoder.addressSearch(selectedHospitalDetail.fullAddress, callback);
     }
   }, [selectedHospitalDetail]);
