@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,92 +12,40 @@ import {
 import AdminCreateModal from "@/components/AdminCreateModal";
 import AdminDeleteModal from "@/components/AdminDeleteModal";
 import AdminEditModal from "../components/AdminEditModal";
+import { useAdmin } from "../context/AdminContext";
 
 const AdminManagerManagement = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState(null);
+  const { role, isLoggedIn } = useAdmin();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const role = sessionStorage.getItem("adminRole");
+    if (role !== "BOSS") {
+      alert("권한이 없습니다.");
+      navigate("/admin", { replace: true });
+    }
+  }, [navigate]);
+
+  // DEBUG: 콘솔에 현재 role, isLoggedIn 출력
+  console.log(
+    "AdminManagerManagement: role =",
+    role,
+    "isLoggedIn =",
+    isLoggedIn
+  );
 
   // 임시 관리자 데이터
   const managers = [
     {
       id: 1,
-      name: "이메일",
       email: "권한(셀렉트박스)",
       phone: "이름",
       role: "전화번호",
       status: "활성화여부(셀렉트박스)",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 2,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 3,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 4,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 5,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 6,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 7,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
-      count: "수정",
-      action: "삭제",
-    },
-    {
-      id: 8,
-      name: "이메일",
-      email: "권한(셀렉트박스)",
-      phone: "이름",
-      role: "전화번호",
-      status: "활성화여부",
       count: "수정",
       action: "삭제",
     },
@@ -111,6 +60,9 @@ const AdminManagerManagement = () => {
     setSelectedManager(manager);
     setIsDeleteModalOpen(true);
   };
+
+  // 관리자 등록 버튼 노출 조건: 세션스토리지의 adminRole이 BOSS
+  const isBoss = isLoggedIn && sessionStorage.getItem("adminRole") === "BOSS";
 
   return (
     <div className="min-h-screen bg-gray-50">
