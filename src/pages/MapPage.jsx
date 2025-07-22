@@ -18,6 +18,7 @@ import {
   FESTIVAL,
   MAP,
   HOSPITAL,
+  STYLE,
 } from "../../configs/host-config";
 
 const MapPage = () => {
@@ -52,6 +53,86 @@ const MapPage = () => {
   const [hospitalList, setHospitalList] = useState([]);
   const [isHospitalLoading, setIsHospitalLoading] = useState(false);
   const [selectedHospitalInfo, setSelectedHospitalInfo] = useState(null);
+  // 반려동물 미용실 관련 상태
+  const [showGroomingRegion, setShowGroomingRegion] = useState(false);
+  const [selectedGroomingRegion, setSelectedGroomingRegion] = useState("1");
+  // 미용실 세부지역(구) 상태
+  const [groomingDistrictOptions, setGroomingDistrictOptions] = useState([]);
+  const [selectedGroomingDistrict, setSelectedGroomingDistrict] = useState("");
+  // 미용실 리스트 상태
+  const [groomingList, setGroomingList] = useState([]);
+  // 미용실 상세 정보 상태 (MapComponent로 전달)
+  const [selectedGroomingDetail, setSelectedGroomingDetail] = useState(null);
+  // 미용실 지역 변경 시 리스트 요청
+  useEffect(() => {
+    const groomingCategories = [
+      "style",
+      "cafe",
+      "shop",
+      "museum",
+      "art",
+      "literary",
+      "drug",
+    ];
+    const isGroomingCategory = groomingCategories.includes(selectedCategory);
+
+    if (isGroomingCategory) {
+      setShowGroomingRegion(true);
+      axiosInstance
+        .get(
+          `${API_BASE_URL}${STYLE}/region/list/${selectedGroomingRegion}/${selectedCategory}`
+        )
+        .then((res) => {
+          const districts = res.data?.result || [];
+          setGroomingDistrictOptions(districts);
+          setSelectedGroomingDistrict(districts[0] || "");
+          console.log("미용실 지역 리스트 응답:", res);
+        })
+        .catch((err) => {
+          setGroomingDistrictOptions([]);
+          setSelectedGroomingDistrict("");
+          console.error("미용실 지역 리스트 요청 실패:", err);
+        });
+    } else {
+      setShowGroomingRegion(false);
+      setGroomingDistrictOptions([]);
+      setSelectedGroomingDistrict("");
+    }
+  }, [selectedCategory, selectedGroomingRegion]);
+
+  // 미용실 세부지역(구) 값이 바뀔 때마다 미용실 리스트 요청
+  useEffect(() => {
+    const groomingCategories = [
+      "style",
+      "cafe",
+      "shop",
+      "museum",
+      "art",
+      "literary",
+      "drug",
+    ];
+    const isGroomingCategory = groomingCategories.includes(selectedCategory);
+
+    if (
+      isGroomingCategory &&
+      selectedGroomingRegion &&
+      selectedGroomingDistrict
+    ) {
+      axiosInstance
+        .get(
+          `${API_BASE_URL}${STYLE}/list/${selectedGroomingRegion}/${selectedGroomingDistrict}/${selectedCategory}`
+        )
+        .then((res) => {
+          const list = res.data?.result || [];
+          setGroomingList(list);
+          console.log("미용실 리스트 응답:", res);
+        })
+        .catch((err) => {
+          setGroomingList([]);
+          console.error("미용실 리스트 요청 실패:", err);
+        });
+    }
+  }, [selectedCategory, selectedGroomingRegion, selectedGroomingDistrict]);
 
   const regionMap = {
     seoul: "서울",
@@ -116,10 +197,13 @@ const MapPage = () => {
     { id: "event", name: "행사정보" },
     { id: "culture", name: "반려동물 입장가능 문화시설" },
     { id: "hospital", name: "동물병원" },
-    { id: "grooming", name: "반려동물 미용실" },
-    { id: "restaurant", name: "반려동물 입장가능 업장" },
-    { id: "shelter", name: "유기견보호소" },
-    { id: "park", name: "산책명소" },
+    { id: "style", name: "반려동물 미용실" },
+    { id: "cafe", name: "반려동물 카페" },
+    { id: "shop", name: "반려동물용품샵" },
+    { id: "museum", name: "반려동물 박물관" },
+    { id: "art", name: "미술관" },
+    { id: "literary", name: "반려동물 문예시설" },
+    { id: "drug", name: "반려동물 약국" },
   ];
 
   const regions = [
@@ -395,6 +479,34 @@ const MapPage = () => {
     }
   };
 
+  // 미용실 카드 클릭 시 상세 정보 요청
+  const handleGroomingCardClick = (shop) => {
+    axiosInstance
+      .get(`${API_BASE_URL}${STYLE}/detail/${selectedCategory}/${shop.id}`)
+      .then((res) => {
+        console.log(res.data.result);
+
+        setSelectedGroomingDetail(res.data.result || null);
+        console.log(selectedGroomingDetail);
+      })
+      .catch((err) => {
+        setSelectedGroomingDetail(null);
+        console.error("미용실 상세 정보 요청 실패:", err);
+      });
+  };
+
+  // groomingCategories와 isGroomingCategory를 컴포넌트 함수 시작 직후에 한 번만 선언
+  const groomingCategories = [
+    "style",
+    "cafe",
+    "shop",
+    "museum",
+    "art",
+    "literary",
+    "drug",
+  ];
+  const isGroomingCategory = groomingCategories.includes(selectedCategory);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">
       <Header />
@@ -547,6 +659,48 @@ const MapPage = () => {
                             </SelectContent>
                           </Select>
                         )}
+                      </div>
+                    </div>
+                  )}
+                  {/* 미용실 지역 선택 셀렉트박스 */}
+                  {showGroomingRegion && (
+                    <div className="mt-4">
+                      <div className="flex flex-wrap items-center gap-4">
+                        {/* 상위 지역(도/시) 셀렉트박스 */}
+                        <Select
+                          value={selectedGroomingRegion}
+                          onValueChange={setSelectedGroomingRegion}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="지역 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {hospitalRegionOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {/* 세부지역(구) 셀렉트박스 */}
+                        <Select
+                          value={selectedGroomingDistrict}
+                          onValueChange={setSelectedGroomingDistrict}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="세부지역 선택" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {groomingDistrictOptions.map((district) => (
+                              <SelectItem key={district} value={district}>
+                                {district}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   )}
@@ -748,6 +902,35 @@ const MapPage = () => {
                 </div>
               )}
 
+              {/* 미용실 리스트 카드 렌더링 */}
+              {isGroomingCategory && groomingList.length > 0 && (
+                <div className="p-6 border-b">
+                  <div className="flex flex-wrap gap-x-4 gap-y-4 h-[312px] overflow-y-auto pr-2 justify-center">
+                    {groomingList.map((shop) => (
+                      <Card
+                        key={shop.id}
+                        className="cursor-pointer transition-all hover:shadow-md w-[320px] min-w-[320px] max-w-[320px]"
+                        onClick={() => handleGroomingCardClick(shop)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start space-x-3">
+                            <MapPin className="h-5 w-5 text-orange-500 mt-1 flex-shrink-0" />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-black text-sm whitespace-normal break-words">
+                                {shop.facilityName}
+                              </h4>
+                              <p className="text-xs text-gray-600 mt-1 whitespace-normal break-words">
+                                {shop.fullAddress}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* 아래: 지도 */}
               <div className="p-6">
                 <div className="space-y-4">
@@ -756,7 +939,9 @@ const MapPage = () => {
                     <MapComponent
                       key={selectedCategory}
                       locations={
-                        selectedCategory === "event"
+                        isGroomingCategory
+                          ? []
+                          : selectedCategory === "event"
                           ? festivalList
                               .filter((f) => f.latitude && f.longitude)
                               .map((f) => ({
@@ -806,6 +991,7 @@ const MapPage = () => {
                           : null
                       }
                       selectedCategory={selectedCategory}
+                      selectedGroomingDetail={selectedGroomingDetail}
                     />
                   </div>
                 </div>

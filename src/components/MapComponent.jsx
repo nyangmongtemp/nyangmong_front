@@ -14,6 +14,7 @@ const MapComponent = ({
   selectedCultureDetail,
   selectedHospitalDetail,
   selectedCategory,
+  selectedGroomingDetail,
 }) => {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
@@ -507,6 +508,114 @@ const MapComponent = ({
     // eslint-disable-next-line
   }, [selectedCategory, selectedFestivalInfo]);
 
+  // 미용실 상세 정보가 바뀔 때마다 지도에 마커 및 인포윈도우 표시
+  // 미용실 상세 정보 마커 생성 (props로 받은 selectedGroomingDetail만 사용)
+  const groomingCategories = [
+    "style",
+    "cafe",
+    "shop",
+    "museum",
+    "art",
+    "literary",
+    "drug",
+  ];
+  // 더보기 상태 관리
+  const [showGroomingMore, setShowGroomingMore] = useState(false);
+
+  useEffect(() => {
+    console.log("[미용실 마커 useEffect 실행]");
+    console.log("mapInstanceRef.current:", mapInstanceRef.current);
+    console.log("props.selectedGroomingDetail:", selectedGroomingDetail);
+    setShowGroomingMore(false); // 마커 바뀔 때마다 더보기 닫기
+    if (
+      groomingCategories.includes(selectedCategory) &&
+      typeof selectedGroomingDetail === "object" &&
+      selectedGroomingDetail &&
+      selectedGroomingDetail.mapx &&
+      selectedGroomingDetail.mapy &&
+      window.kakao &&
+      window.kakao.maps &&
+      mapInstanceRef.current
+    ) {
+      // 기존 마커/인포윈도우 제거
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
+      // mapx: 위도, mapy: 경도
+      console.log(
+        "미용실 마커 좌표(mapx, mapy):",
+        selectedGroomingDetail.mapx,
+        selectedGroomingDetail.mapy
+      );
+      const lat = parseFloat(selectedGroomingDetail.mapy); // 위도
+      const lng = parseFloat(selectedGroomingDetail.mapx); // 경도
+      console.log("lat:", lat, "lng:", lng);
+      const latlng = new window.kakao.maps.LatLng(lat, lng);
+      mapInstanceRef.current.setCenter(latlng);
+      mapInstanceRef.current.setLevel(5); // 진단용: 지도 확대
+      // 마커 생성
+      const marker = new window.kakao.maps.Marker({
+        position: latlng,
+        map: mapInstanceRef.current,
+      });
+      console.log("마커 객체:", marker);
+      markersRef.current.push(marker);
+      // 인포윈도우 내용 (동물병원과 동일한 디자인 + 도로명주소, 휴무일, 영업시간, 더보기)
+      const infoContent = `
+        <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
+          <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
+            selectedGroomingDetail.facilityName
+          }</strong></div>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">지번 주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedGroomingDetail.fullAddress || "정보 없음"
+            }</p>
+          </div>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">도로명 주소:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedGroomingDetail.roadAddress || "정보 없음"
+            }</p>
+          </div>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">휴무일:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedGroomingDetail.restInfo || "정보 없음"
+            }</p>
+          </div>
+          <div style="margin-bottom:8px;">
+            <strong style="color:#ff9800;font-size:14px;">영업시간:</strong>
+            <p style="margin:4px 0;font-size:14px;">${
+              selectedGroomingDetail.operTime || "정보 없음"
+            }</p>
+          </div>
+          <div style="text-align:right;">
+            <button id="grooming-more-btn" style="background-color:#ff9800;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:14px;">더보기</button>
+          </div>
+        </div>
+      `;
+      const infowindow = new window.kakao.maps.InfoWindow({
+        content: infoContent,
+        removable: true,
+        maxWidth: 420,
+      });
+      window.kakao.maps.event.addListener(marker, "click", function () {
+        infowindow.open(mapInstanceRef.current, marker);
+        setTimeout(() => {
+          const btn = document.getElementById("grooming-more-btn");
+          if (btn) {
+            btn.onclick = () => setShowGroomingMore(true);
+          }
+        }, 100);
+      });
+      infoWindowRef.current = infowindow;
+    }
+  }, [selectedCategory, selectedGroomingDetail]);
+
   // 지도 리사이즈 트리거 (행사정보/문화시설 등 탭/카테고리/카드 전환 시)
   useEffect(() => {
     if (window.kakao && window.kakao.maps && mapInstanceRef.current) {
@@ -520,12 +629,135 @@ const MapComponent = ({
     selectedFestivalInfo,
     selectedCultureDetail,
     selectedHospitalDetail,
+    selectedGroomingDetail,
   ]);
+
+  // 더보기 모달/창 렌더링
+  const renderGroomingMore = () => {
+    if (!showGroomingMore || !selectedGroomingDetail) return null;
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0,0,0,0.4)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 12,
+            padding: 32,
+            minWidth: 340,
+            maxWidth: 400,
+            boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+          }}
+        >
+          <h2 style={{ color: "#ff9800", fontSize: 22, marginBottom: 16 }}>
+            {selectedGroomingDetail.facilityName}
+          </h2>
+          <div style={{ marginBottom: 8 }}>
+            <b>지번 주소:</b> {selectedGroomingDetail.fullAddress || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>도로명 주소:</b> {selectedGroomingDetail.roadAddress || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>전화번호:</b> {selectedGroomingDetail.telNum || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>휴무일:</b> {selectedGroomingDetail.restInfo || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>영업시간:</b> {selectedGroomingDetail.operTime || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>주차:</b>{" "}
+            {selectedGroomingDetail.parking === "Y"
+              ? "가능"
+              : selectedGroomingDetail.parking === "N"
+              ? "불가"
+              : "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>반려동물 실내 동반:</b>{" "}
+            {selectedGroomingDetail.inPlace === "Y"
+              ? "가능"
+              : selectedGroomingDetail.inPlace === "N"
+              ? "불가"
+              : "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>반려동물 실외 동반:</b>{" "}
+            {selectedGroomingDetail.outPlace === "Y"
+              ? "가능"
+              : selectedGroomingDetail.outPlace === "N"
+              ? "불가"
+              : "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>반려동물 크기 제한:</b> {selectedGroomingDetail.petSize || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>반려동물 입장 제한:</b>{" "}
+            {selectedGroomingDetail.petRestrict || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>반려동물 정보:</b> {selectedGroomingDetail.petInfo || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>추가 요금:</b> {selectedGroomingDetail.extraFee || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>가격:</b> {selectedGroomingDetail.price || "-"}
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <b>설명:</b> {selectedGroomingDetail.infoDesc || "-"}
+          </div>
+          {selectedGroomingDetail.url && (
+            <div style={{ marginBottom: 8 }}>
+              <a
+                href={selectedGroomingDetail.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#007bff", textDecoration: "underline" }}
+              >
+                홈페이지 바로가기
+              </a>
+            </div>
+          )}
+          <button
+            onClick={() => setShowGroomingMore(false)}
+            style={{
+              marginTop: 16,
+              background: "#ff9800",
+              color: "white",
+              border: "none",
+              padding: "8px 24px",
+              borderRadius: 6,
+              fontSize: 16,
+              cursor: "pointer",
+            }}
+          >
+            닫기
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // 지도 컴포넌트 렌더링
   return (
     <>
       <div id="map" style={{ width: "100%", height: "100%" }} />
+      {renderGroomingMore()}
       <ImageModal
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}

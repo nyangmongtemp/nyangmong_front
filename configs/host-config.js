@@ -37,3 +37,4 @@ export const BOARD = "/board-service/board";
 export const SSE = "/user-service/user/sse";
 export const MAP = "/map-service/map";
 export const HOSPITAL = "/map-service/hospital";
+export const STYLE = "/map-service/culture";
