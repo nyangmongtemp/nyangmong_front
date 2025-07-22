@@ -37,12 +37,9 @@ const Board = () => {
   const [apiPosts, setApiPosts] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 5;
+  const postsPerPage = 10;
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [totalPage, setTotalPage] = useState(1);
-  const [searchWord, setSearchWord] = useState("");
-  const [searchWordInput, setSearchWordInput] = useState("");
-  const [parentSelectedDate, setParentSelectedDate] = useState(null);
 
   useEffect(() => {
     console.log(type);
@@ -177,97 +174,6 @@ const Board = () => {
     fetchBoardPosts();
   }, [type]);
 
-  // event 타입일 때만 별도 useEffect로 처리
-  useEffect(
-    () => {
-      if (type === "event") {
-        console.log("useEffect triggered:", {
-          currentPage,
-          type,
-          searchWord,
-          parentSelectedDate,
-        });
-
-        const searchDateParam = parentSelectedDate
-          ? `&searchDate=${parentSelectedDate.toLocaleDateString("sv-SE")}` // 'YYYY-MM-DD'
-          : "";
-
-        axios
-          .get(
-            `${API_BASE_URL}${FESTIVAL}/festivals?searchWord=${searchWord}${searchDateParam}&page=${
-              currentPage - 1
-            }&size=${postsPerPage}`
-          )
-          .then((res) => {
-            console.log(res);
-
-            const festivals = res.data.content || [];
-
-            const mappedPosts = festivals.map((festival) => {
-              let imageUrl = null;
-              if (festival.imagePath) {
-                const match = festival.imagePath.match(/src\s*=\s*([^&\s]+)/i);
-                if (match && match[1]) {
-                  imageUrl = decodeURIComponent(match[1]);
-                }
-              }
-
-              const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
-              const dates = festival.festivalDate.match(datePattern);
-
-              let category = "행사";
-              if (dates && dates.length === 2) {
-                const [startStr, endStr] = dates;
-                const startDate = new Date(startStr.replace(/\./g, "-"));
-                const endDate = new Date(endStr.replace(/\./g, "-"));
-                const now = new Date();
-
-                if (now < startDate) {
-                  category = "진행예정";
-                } else if (now >= startDate && now <= endDate) {
-                  category = "진행중";
-                } else {
-                  category = "종료";
-                }
-              }
-
-              return {
-                id: festival.festivalId,
-                title: festival.title,
-                content: festival.location ? `위치: ${festival.location}` : "",
-                date: festival.festivalDate,
-                category,
-                imageUrl,
-                money: festival.money,
-                url: festival.url,
-                reservationDate: festival.reservationDate,
-                description: festival.description,
-                time: festival.festivalTime,
-              };
-            });
-
-            setApiPosts(mappedPosts);
-            setTotalPage(res.data.totalPages || 1);
-          })
-          .catch((err) => {
-            console.error("행사 게시글 불러오기 실패", err);
-            setApiPosts([]);
-            setTotalPages(1);
-          });
-        console.log("선택된 날짜:", parentSelectedDate?.toISOString());
-      }
-    },
-    type,
-    currentPage,
-    searchWord,
-    parentSelectedDate
-  );
-
-  const handleSelectedDateChange = (date) => {
-    setParentSelectedDate(date);
-    setCurrentPage(1); // 날짜 검색 시 페이지 초기화
-  };
-
   // 게시판 제목 매핑
   const boardTitles = {
     free: "자유게시판",
@@ -282,15 +188,11 @@ const Board = () => {
   };
 
   const allPosts = getBoardSpecificPosts(type);
-  // 페이지네이션 계산 - event 타입일 때는 API 페이징 정보 사용
+  // 페이지네이션 계산
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts =
-    type === "event"
-      ? allPosts
-      : allPosts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages =
-    type === "event" ? totalPage : Math.ceil(allPosts.length / postsPerPage);
+  const currentPosts = allPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(allPosts.length / postsPerPage);
 
   const handlePostClick = (post) => {
     if (type === "event" && post.url) {
@@ -516,7 +418,7 @@ const Board = () => {
                   ))}
                 </div>
                 {/* 페이지네이션 */}
-                <div className="flex justify-center items-center">
+                <div className="flex justify-between items-center">
                   <div className="flex space-x-2">{renderPagination()}</div>
                 </div>
               </CardContent>
