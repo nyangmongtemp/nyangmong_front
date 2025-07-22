@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD, FESTIVAL } from "../../configs/host-config";
-import axios from "axios";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -60,8 +59,70 @@ const Board = () => {
     const fetchBoardPosts = async () => {
       try {
         if (type === "event") {
-          // event 타입일 때는 별도 useEffect에서 처리
-          return;
+          // 행사 게시판 - 페이징 파라미터 추가
+          const res = await axiosInstance.get(
+            `${API_BASE_URL}${FESTIVAL}/api/festivals`,
+            {
+              params: {
+                page: 0, // Spring Data는 0부터 시작
+                size: 100, // 충분히 큰 값으로 설정하여 모든 데이터 가져오기
+              },
+            }
+          );
+          // Spring Page 객체에서 content 추출
+          let eventData = res.data;
+          if (!Array.isArray(eventData)) {
+            eventData =
+              eventData.content || eventData.result || eventData.data || [];
+          }
+          const mappedPosts = eventData.map((festival) => {
+            let imageUrl = null;
+            if (festival.imagePath) {
+              // imagePath에서 src= 뒤의 URL 추출
+              const match = festival.imagePath.match(/src\s*=\s*([^&\s]+)/i);
+              if (match && match[1]) {
+                imageUrl = decodeURIComponent(match[1]);
+              }
+            }
+
+            // festivalDate 예: "2025.07.04. (금) ~ 2025.07.06. (일)"
+            // 시작일과 종료일만 추출
+            const datePattern = /(\d{4}\.\d{2}\.\d{2})/g;
+            const dates =
+              festival.festivalDate && festival.festivalDate.match(datePattern);
+
+            let category = "행사"; // 기본값
+            if (dates && dates.length === 2) {
+              const [startStr, endStr] = dates;
+              // 날짜 객체 생성 (YYYY.MM.DD → YYYY-MM-DD 형식으로 변환 후)
+              const startDate = new Date(startStr.replace(/\./g, "-"));
+              const endDate = new Date(endStr.replace(/\./g, "-"));
+              const now = new Date();
+
+              if (now < startDate) {
+                category = "진행예정";
+              } else if (now >= startDate && now <= endDate) {
+                category = "진행중";
+              } else {
+                category = "종료";
+              }
+            }
+
+            return {
+              id: festival.festivalId,
+              title: festival.title,
+              content: festival.location ? `위치: ${festival.location}` : "",
+              date: festival.festivalDate,
+              category,
+              imageUrl,
+              money: festival.money, // 가격 정보
+              url: festival.url, // 행사 URL
+              reservationDate: festival.reservationDate, //예매기간
+              description: festival.description, //행사설명
+              time: festival.festivalTime, //행사진행시간
+            };
+          });
+          setApiPosts(mappedPosts);
         } else {
           // review, question, free 게시판
           const categoryMap = {

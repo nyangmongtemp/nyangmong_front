@@ -34,6 +34,7 @@ export const FESTIVAL = "/festival-service/api";
 export const ABS = "/animalboard-service";
 export const MAIN = "/main-service/main";
 export const BOARD = "/board-service/board";
+export const ADMIN = "/admin-service/admin";
 export const SSE = "/user-service/user/sse";
 export const MAP = "/map-service/map";
 export const HOSPITAL = "/map-service/hospital";

@@ -15,7 +15,9 @@ const axiosInstance = axios.create({
 // ✅ 요청 인터셉터 설정
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    // 관리자 토큰 우선, 없으면 유저 토큰
+    const token =
+      sessionStorage.getItem("adminToken") || localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -87,7 +87,7 @@ const PetShowcase = () => {
   const PetCard = ({ pet, isLarge = false }) => (
     <Card
       className={`overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer ${
-        isLarge ? "md:h-96" : "h-48"
+        isLarge ? "md:h-full" : "h-48"
       } relative`}
     >
       <div className="relative h-full">

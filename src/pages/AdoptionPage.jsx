@@ -32,6 +32,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { strayAnimalAPI, adoptionAPI } from "../../configs/api-utils.js";
 import { useAuth } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
@@ -235,7 +236,8 @@ const AdoptionPage = () => {
   }, []);
 
   // 분양게시판 탭이 선택될 때 데이터 로드
-  const [activeTab, setActiveTab] = useState("rescue");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.tab || "rescue");
 
   useEffect(() => {
     if (activeTab === "adoption") {
@@ -483,7 +485,7 @@ const AdoptionPage = () => {
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-72 object-cover"
         />
         {!isRescue && post.price === "무료분양" && (
           <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500">
@@ -515,24 +517,25 @@ const AdoptionPage = () => {
               <span>{isRescue ? post.rescueDate : post.date}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1">
-                <Eye className="h-4 w-4 text-gray-500" />
-                <span className="text-xs">{post.views}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Heart className="h-4 w-4 text-pink-400" />
-                <span className="text-xs">{post.likes}</span>
-              </div>
-              {!isRescue && (
+          {/* 분양동물(분양게시판)일 때만 조회수/좋아요/댓글 표시 */}
+          {!isRescue && (
+            <div className="flex items-center justify-between pt-2 border-t">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1">
+                  <Eye className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs">{post.views}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4 text-pink-400" />
+                  <span className="text-xs">{post.likes}</span>
+                </div>
                 <div className="flex items-center space-x-1">
                   <MessageCircle className="h-4 w-4 text-blue-400" />
                   <span className="text-xs">{post.comments}</span>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -923,7 +926,7 @@ const AdoptionPage = () => {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl shadow-sm p-6 min-h-[500px]">
               <Tabs
-                defaultValue="rescue"
+                value={activeTab}
                 className="w-full"
                 onValueChange={setActiveTab}
               >
