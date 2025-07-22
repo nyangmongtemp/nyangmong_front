@@ -52,6 +52,20 @@ const LoginPage = () => {
 
       // 인증번호가 응답에 포함되어 있음 (개발용)
       if (response.data.result) {
+        // isFirst가 true면 바로 로그인 처리
+        if (
+          typeof response.data.result === "object" &&
+          response.data.result.isFirst === true
+        ) {
+          const adminData = response.data.result;
+          sessionStorage.setItem("adminToken", adminData.token);
+          sessionStorage.setItem("adminEmail", adminData.email);
+          sessionStorage.setItem("adminName", adminData.name);
+          sessionStorage.setItem("adminRole", adminData.role);
+          alert("로그인이 완료되었습니다.");
+          navigate("/admin");
+          return;
+        }
         alert(
           `인증번호가 이메일로 발송되었습니다.\n개발용 인증번호: ${response.data.result}`
         );

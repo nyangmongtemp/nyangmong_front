@@ -23,7 +23,7 @@ import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminManagerManagement from "./pages/AdminManagerManagement";
 import AdminLogManagement from "./pages/AdminLogManagement";
 import AdminBoardManagement from "./pages/AdminBoardManagement";
-import MyPage from "./pages/MyPage";
+import MyPage from "./pages/AdminMyPage.jsx";
 import LoginPage from "./pages/LoginPage";
 import UserMyPage from "./pages/UserMyPage";
 import AdminCustomerSupport from "./pages/AdminCustomerSupport";
@@ -32,6 +32,7 @@ import AdminPolicyCreate from "./pages/AdminPolicyCreate";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
+import { AdminProvider } from "./context/AdminContext";
 import ChildDetail from "./pages/ChildDetail";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* User routes */}
             <Route path="/" element={<Index />} />
             <Route path="/board/:type" element={<Board />} />
             <Route path="/post/:type/:id" element={<PostDetail />} />
@@ -65,23 +67,33 @@ const App = () => (
             <Route path="/mypage" element={<UserMyPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/customer-service" element={<CustomerServicePage />} />
-            <Route path="/admin" element={<AdminMain />} />
-            <Route path="/admin/users" element={<AdminUserManagement />} />
-            <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+            {/* Admin routes wrapped with AdminProvider */}
             <Route
-              path="/admin/managers"
-              element={<AdminManagerManagement />}
+              path="/admin/*"
+              element={
+                <AdminProvider>
+                  <Routes>
+                    <Route path="" element={<AdminMain />} />
+                    <Route path="users" element={<AdminUserManagement />} />
+                    <Route path="users/:id" element={<AdminUserDetail />} />
+                    <Route
+                      path="managers"
+                      element={<AdminManagerManagement />}
+                    />
+                    <Route path="logs" element={<AdminLogManagement />} />
+                    <Route path="boards" element={<AdminBoardManagement />} />
+                    <Route path="banner" element={<AdminBannerManagement />} />
+                    <Route path="support" element={<AdminCustomerSupport />} />
+                    <Route
+                      path="policy/create"
+                      element={<AdminPolicyCreate />}
+                    />
+                    <Route path="mypage" element={<MyPage />} />
+                    <Route path="login" element={<LoginPage />} />
+                  </Routes>
+                </AdminProvider>
+              }
             />
-            <Route path="/admin/logs" element={<AdminLogManagement />} />
-            <Route path="/admin/boards" element={<AdminBoardManagement />} />
-            <Route path="/admin/banner" element={<AdminBannerManagement />} />
-            <Route path="/admin/support" element={<AdminCustomerSupport />} />
-            <Route
-              path="/admin/policy/create"
-              element={<AdminPolicyCreate />}
-            />
-            <Route path="/admin/mypage" element={<MyPage />} />
-            <Route path="/admin/login" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
