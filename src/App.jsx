@@ -14,7 +14,6 @@ import AdoptionCreate from "./pages/AdoptionCreate";
 import AdoptionBoard from "./components/AdoptionBoard";
 import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
-import MapPage from "./pages/MapPage";
 import ChildCreate from "./components/ChildCreate";
 import ChildIList from "./components/ChildIList";
 import AdminMain from "./pages/AdminMain";
@@ -34,6 +33,8 @@ import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
 import { AdminProvider } from "./context/AdminContext";
 import ChildDetail from "./pages/ChildDetail";
+import MapPage from "./pages/MapPage.jsx";
+import TestMap from "./components/testMap.jsx";
 
 const queryClient = new QueryClient();
 

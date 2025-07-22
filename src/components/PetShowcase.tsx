@@ -26,6 +26,7 @@ const PetShowcase = () => {
         const response = await axiosInstance.get(
           `${API_BASE_URL}${BOARD}/introduction/main`
         );
+        console.log(response);
 
         // API 응답을 컴포넌트에서 사용할 형태로 매핑
         const mappedPets = response.data.map((pet, index) => ({
