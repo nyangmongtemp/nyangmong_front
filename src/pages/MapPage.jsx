@@ -324,7 +324,7 @@ const MapPage = () => {
     if (selectedCategory === "event") {
       setIsFestivalLoading(true);
       axiosInstance
-        .get(`${API_BASE_URL}${FESTIVAL}/all`)
+        .get(`${API_BASE_URL}${FESTIVAL}/api/all`)
         .then((res) => {
           console.log(res);
 
