@@ -12,95 +12,54 @@ import {
 import AdminSidebar from "../components/AdminSidebar";
 import AdvertisementDetailModal from "../components/AdvertisementDetailModal";
 import AdvertisementCreateModal from "../components/AdvertisementCreateModal";
-import AdvertisementOrderModal from "../components/AdvertisementOrderModal";
+import AdvertisementModifyModal from "../components/AdvertisementModifyModal";
 
 const AdminAdvertisementManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("createdAt_desc");
+  const [displayCount, setDisplayCount] = useState();
 
-  const [banners, setBanners] = useState([
-    {
-      id: 1,
-      order: 1,
-      name: "기본 배너",
-      createdAt: "2025-07-01",
-      updatedAt: "2025-07-10",
-      imageUrl:
-        "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop",
-    },
-    {
-      id: 2,
-      order: 2,
-      name: "추기된 배너",
-      createdAt: "2025-07-02",
-      updatedAt: "2025-07-11",
-      imageUrl:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop",
-    },
-    {
-      id: 3,
-      order: 3,
-      name: "추가된 배너1",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      imageUrl:
-        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop",
-    },
-    {
-      id: 4,
-      order: 4,
-      name: "추가된 배너2",
-      createdAt: "2025-07-04",
-      updatedAt: "2025-07-13",
-      imageUrl:
-        "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop",
-    },
-    {
-      id: 5,
-      order: 5,
-      name: "추가된 배너3",
-      createdAt: "2025-07-05",
-      updatedAt: "2025-07-14",
-      imageUrl:
-        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=400&fit=crop",
-    },
+  const [ads, setAds] = useState([
+    { id: 1, title: "광고 1", createdAt: "2025-07-01", updatedAt: "2025-07-10", confirmed: "false", active: "true" },
+    { id: 2, title: "광고 2", createdAt: "2025-07-02", updatedAt: "2025-07-11", confirmed: "false", active: "true" },
+    { id: 3, title: "광고 3", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
+    { id: 4, title: "광고 4", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
+    { id: 5, title: "광고 5", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
+    { id: 6, title: "광고 6", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
+    { id: 7, title: "광고 7", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
   ]);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const [selectedBanner, setSelectedBanner] = useState(null);
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [selectedAd, setSelectedAd] = useState(null);
 
-  const handleDetailClick = (banner) => {
-    setSelectedBanner(banner);
+  const handleDetailClick = (ad) => {
+    setSelectedAd(ad);
     setIsDetailModalOpen(true);
   };
 
-  const handleBannerUpdate = (updatedBanner) => {
-    setBanners((prev) =>
-      prev.map((banner) =>
-        banner.id === updatedBanner.id ? updatedBanner : banner
-      )
-    );
+  const handleAdUpdate = (updatedAd) => {
+    setAds((prev) => prev.map((ad) => (ad.id === updatedAd.id ? updatedAd : ad)));
   };
 
-  const handleBannerCreate = (newBanner) => {
-    const banner = {
+  const handleAdCreate = (newAd) => {
+    const ad = {
       id: Date.now(),
-      order: banners.length + 1,
+      order: ads.length + 1,
       createdAt: new Date().toISOString().split("T")[0],
       updatedAt: new Date().toISOString().split("T")[0],
-      ...newBanner,
+      ...newAd,
     };
-    setBanners((prev) => [...prev, banner]);
+    setAds((prev) => [...prev, ad]);
   };
 
-  const handleBannerDelete = (bannerId) => {
-    setBanners((prev) => prev.filter((banner) => banner.id !== bannerId));
+  const handleAdDelete = (adId) => {
+    setAds((prev) => prev.filter((ad) => ad.id !== adId));
   };
 
   const handleOrderUpdate = (newOrder) => {
-    setBanners(newOrder);
+    setAds(newOrder);
   };
 
   return (
@@ -113,11 +72,29 @@ const AdminAdvertisementManagement = () => {
               <h1 className="text-2xl font-bold text-gray-900">광고 관리</h1>
             </div>
 
-            {/* 검색 및 정렬 영역 */}
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div className="text-gray-800 font-medium">
+                노출 광고 수: <span className="font-bold">{ads.length}</span>개
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">광고 개수 변경</span>
+                <Input
+                  type="number"
+                  value={displayCount}
+                  onChange={(e) => setDisplayCount(e.target.value)}
+                  className="w-24"
+                />
+                <Button
+                  variant="default"
+                  onClick={() => alert(`노출 개수: ${displayCount} 적용됨`)}
+                >
+                  적용
+                </Button>
+              </div>
+            </div>
+
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center mb-4">
-
-                {/* 검색창 + 버튼 */}
                 <div className="flex items-center gap-2 flex-1 max-w-md">
                   <Input
                     placeholder="검색어 입력"
@@ -143,47 +120,49 @@ const AdminAdvertisementManagement = () => {
               </div>
             </div>
 
-            {/* 헤더 */}
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-6 gap-4 text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-7 gap-4 text-sm font-medium text-gray-700">
                 <div>광고 아이디</div>
-                <div>순서</div>
                 <div>제목</div>
                 <div>생성일</div>
                 <div>수정일</div>
+                <div>필수노출</div>
+                <div>활성화</div>
                 <div className="text-right">관리</div>
               </div>
             </div>
 
-
-            {/* 리스트 */}
             <div className="px-4 space-y-2">
-              {banners
-                .filter((banner) =>
-                  banner.name.toLowerCase().includes(searchTerm.toLowerCase())
+              {ads
+                .filter((ad) =>
+                  (ad.title || "").toLowerCase().includes(searchTerm.toLowerCase())
                 )
-                .map((banner) => (
+                .map((ad) => (
                   <div
-                    key={banner.id}
-                    className="grid grid-cols-6 gap-4 items-center border-b py-2 text-sm"
+                    key={ad.id}
+                    className="grid grid-cols-7 gap-4 items-center border-b py-2 text-sm"
                   >
-                    <div>{banner.id}</div>
-                    <div>{banner.order}</div>
-                    <div>{banner.name}</div>
-                    <div>{banner.createdAt}</div>
-                    <div>{banner.updatedAt}</div>
+                    <div>{ad.id}</div>
+                    <div>{ad.title}</div>
+                    <div>{ad.createdAt}</div>
+                    <div>{ad.updatedAt}</div>
+                    <div>{ad.confirmed}</div>
+                    <div>{ad.active}</div>
                     <div className="flex justify-end space-x-2">
                       <Button
                         size="sm"
-                        variant="destructive"
-                        onClick={() => handleBannerDelete(banner.id)}
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedAd(ad);
+                          setIsModifyModalOpen(true); // 수정 모달 열기
+                        }}
                       >
-                        삭제하기
+                        수정
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDetailClick(banner)}
+                        onClick={() => handleDetailClick(ad)}
                       >
                         상세 보기
                       </Button>
@@ -192,10 +171,7 @@ const AdminAdvertisementManagement = () => {
                 ))}
             </div>
 
-            <div className="flex justify-between px-4 py-6">
-              <Button variant="outline" onClick={() => setIsOrderModalOpen(true)}>
-                순서 수정하기
-              </Button>
+            <div className="flex justify-end px-4 py-6">
               <Button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -207,24 +183,25 @@ const AdminAdvertisementManagement = () => {
         </div>
       </div>
 
+      {/* 모달 */}
       <AdvertisementDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        banner={selectedBanner}
-        onUpdate={handleBannerUpdate}
-        onDelete={handleBannerDelete}
+        ad={selectedAd}
+        onUpdate={handleAdUpdate}
+        onDelete={handleAdDelete}
       />
 
       <AdvertisementCreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleBannerCreate}
+        onCreate={handleAdCreate}
       />
 
-      <AdvertisementOrderModal
-        isOpen={isOrderModalOpen}
-        onClose={() => setIsOrderModalOpen(false)}
-        banners={banners}
+      <AdvertisementModifyModal
+        isOpen={isModifyModalOpen}
+        onClose={() => setIsModifyModalOpen(false)}
+        ad={selectedAd} // 배열이 아니라 선택된 광고만 전달
         onOrderUpdate={handleOrderUpdate}
       />
     </div>

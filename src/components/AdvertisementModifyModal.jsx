@@ -17,7 +17,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import ImageCropModal from "./ImageCropModal";
 
-const AdvertisementCreateModal = ({
+const AdvertisementModifyModal = ({
   isOpen,
   onClose,
   ad,
@@ -115,7 +115,7 @@ const AdvertisementCreateModal = ({
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
-              광고 등록
+              광고 수정
             </DialogTitle>
           </DialogHeader>
           <DialogHeader>
@@ -230,6 +230,34 @@ const AdvertisementCreateModal = ({
                 </div>
               </div>
 
+              {/* 활성화 여부 */}
+              <div>
+                < DialogHeader>
+                  <DialogTitle>활성화 여부</DialogTitle>
+                </DialogHeader>
+                <div className="flex space-x-4 mt-2">
+                  <label className="flex items-center space-x-1">
+                    <input
+                      type="radio"
+                      name="isActive"
+                      value="true"
+                      checked={isActive === true}
+                      onChange={() => setIsActive(true)}
+                    />
+                    <span>예</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input
+                      type="radio"
+                      name="isActive"
+                      value="false"
+                      checked={isActive === false}
+                      onChange={() => setIsActive(false)}
+                    />
+                    <span>아니오</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div className="bg-gray-50 border rounded-lg h-48 flex items-center justify-center overflow-hidden">
@@ -283,4 +311,4 @@ const AdvertisementCreateModal = ({
   );
 };
 
-export default AdvertisementCreateModal;
+export default AdvertisementModifyModal;
