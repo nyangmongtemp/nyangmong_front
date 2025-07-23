@@ -1,11 +1,16 @@
-
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import CustomerInquiry from "@/components/CustomerInquiry";
@@ -19,7 +24,7 @@ const CustomerServicePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="flex">
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
@@ -36,33 +41,35 @@ const CustomerServicePage = () => {
 
             {/* 페이지 제목 */}
             <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">고객센터</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                고객센터
+              </h1>
             </div>
 
             {/* 탭 메뉴 */}
             <div className="bg-white rounded-lg border">
               <Tabs defaultValue="inquiry" className="w-full">
                 <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1 m-6 mb-0">
-                  <TabsTrigger 
-                    value="inquiry" 
+                  <TabsTrigger
+                    value="inquiry"
                     className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                   >
-                    1:1 문의
+                    고객 문의
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="terms" 
+                  <TabsTrigger
+                    value="terms"
                     className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                   >
                     이용약관 관리
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="privacy" 
+                  <TabsTrigger
+                    value="privacy"
                     className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                   >
                     개인정보처리방침 관리
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="qna" 
+                  <TabsTrigger
+                    value="qna"
                     className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                   >
                     Q&A
