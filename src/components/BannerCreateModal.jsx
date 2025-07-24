@@ -1,6 +1,10 @@
-
 import React, { useState, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImageCropModal from "./ImageCropModal";
@@ -10,6 +14,7 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
   const [bannerImage, setBannerImage] = useState("");
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [thumbnailImageFile, setThumbnailImageFile] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleImageClick = () => {
@@ -18,7 +23,8 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
+      setThumbnailImageFile(file); // 파일 객체 저장
       const reader = new FileReader();
       reader.onload = (event) => {
         setSelectedImage(event.target.result);
@@ -34,15 +40,16 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
   };
 
   const handleSubmit = () => {
-    if (bannerName.trim() && bannerImage) {
+    if (bannerName.trim() && bannerImage && thumbnailImageFile) {
       if (onCreate) {
         onCreate({
-          name: bannerName,
-          imageUrl: bannerImage
+          title: bannerName,
+          thumbnailImageFile: thumbnailImageFile,
         });
       }
       setBannerName("");
       setBannerImage("");
+      setThumbnailImageFile(null);
       onClose();
     }
   };
@@ -50,6 +57,7 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
   const handleClose = () => {
     setBannerName("");
     setBannerImage("");
+    setThumbnailImageFile(null);
     onClose();
   };
 
@@ -58,7 +66,7 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>배너 이름 (입력 가능)</DialogTitle>
+            <DialogTitle>배너 이름</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -68,13 +76,13 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
               placeholder="배너 이름을 입력하세요"
             />
 
-            <div 
+            <div
               className="bg-gray-50 border rounded-lg h-48 flex items-center justify-center cursor-pointer overflow-hidden"
               onClick={handleImageClick}
             >
               {bannerImage ? (
-                <img 
-                  src={bannerImage} 
+                <img
+                  src={bannerImage}
                   alt="배너 이미지"
                   className="max-w-full max-h-full object-contain"
                 />
@@ -84,7 +92,7 @@ const BannerCreateModal = ({ isOpen, onClose, onCreate }) => {
             </div>
 
             <div className="flex justify-end">
-              <Button 
+              <Button
                 onClick={handleSubmit}
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={!bannerName.trim() || !bannerImage}
