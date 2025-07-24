@@ -71,6 +71,7 @@ export const API_ENDPOINTS = {
     BANNERS: "/admin-service/banners",
     POLICIES: "/admin-service/policies",
     LOGS: "/admin-service/logs",
+    LOG_LIST: "/admin-service/admin/log/list",
   },
 
   // 고객 지원
