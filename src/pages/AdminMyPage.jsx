@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
 import EmailChangeModal from "../components/EmailChangeModal";
@@ -31,6 +31,7 @@ function parseJwt(token) {
 
 const AdminMyPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 세션스토리지에서 관리자 정보 가져오기
   const adminEmail = sessionStorage.getItem("adminEmail") || "";
@@ -66,6 +67,15 @@ const AdminMyPage = () => {
     }));
     // eslint-disable-next-line
   }, [adminId, adminName, adminEmail, adminRole, email, role]);
+
+  // forceEmailChange가 있으면 다른 페이지 이동 차단
+  useEffect(() => {
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange && location.pathname !== "/admin/mypage") {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+    }
+  }, [location, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -24,6 +24,12 @@ const AdminManagerManagement = () => {
 
   useEffect(() => {
     const role = sessionStorage.getItem("adminRole");
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange) {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+      return;
+    }
     if (role !== "BOSS") {
       alert("권한이 없습니다.");
       navigate("/admin", { replace: true });

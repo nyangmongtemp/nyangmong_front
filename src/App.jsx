@@ -32,8 +32,8 @@ import AdminPolicyCreate from "./pages/AdminPolicyCreate";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
-import { AdminProvider } from "./context/AdminContext";
 import ChildDetail from "./pages/ChildDetail";
+import { AdminProvider } from "./context/AdminContext";
 
 const queryClient = new QueryClient();
 

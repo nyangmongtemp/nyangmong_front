@@ -81,9 +81,10 @@ const EmailChangeModal = ({ open, onOpenChange, onSuccess }) => {
       // 성공 시 isFirst를 false로 저장
       sessionStorage.setItem("adminIsFirst", "false");
       localStorage.setItem("admin_isFirst", "false");
+      sessionStorage.removeItem("forceEmailChange");
       // 성공 시 로그아웃 및 메인 이동
       sessionStorage.clear();
-      window.location.href = "/";
+      window.location.href = "/admin/login";
       onSuccess && onSuccess(newEmail);
       onOpenChange(false);
     } catch (e) {
