@@ -159,7 +159,7 @@ const RecentPosts = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
-                          <span>(post.time)</span>
+                          <span>{formatDateTime(post.time)}</span>
                         </div>
                       </div>
                     </div>
