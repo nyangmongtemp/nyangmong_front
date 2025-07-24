@@ -227,3 +227,21 @@ export const adoptionAPI = {
     );
   },
 }; 
+
+export const getAdminLogList = async (page = 0, size = 10, searchWord = "") => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("size", size);
+  if (searchWord) params.append("searchWord", searchWord);
+
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/log/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
