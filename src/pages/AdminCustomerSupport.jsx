@@ -1,11 +1,21 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminInquiryManagement from "../components/AdminInquiryManagement";
 import AdminPolicyManagement from "../components/AdminPolicyManagement";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const AdminCustomerSupport = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange) {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+      return;
+    }
+  }, [navigate]);
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -15,29 +25,29 @@ const AdminCustomerSupport = () => {
             <div className="p-6 border-b">
               <h1 className="text-2xl font-bold text-gray-900">고객센터</h1>
             </div>
-            
+
             <Tabs defaultValue="inquiry" className="w-full">
               <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1 m-6 mb-0">
-                <TabsTrigger 
-                  value="inquiry" 
+                <TabsTrigger
+                  value="inquiry"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                 >
                   1:1 문의 (DM)
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="medical" 
+                <TabsTrigger
+                  value="medical"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                 >
                   이용약관 관리
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="policy" 
+                <TabsTrigger
+                  value="policy"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                 >
                   개인정보처리방침 관리
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="qna" 
+                <TabsTrigger
+                  value="qna"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                 >
                   Q&A
@@ -50,8 +60,12 @@ const AdminCustomerSupport = () => {
 
               <TabsContent value="medical" className="p-6">
                 <div className="text-center py-12">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">이용약관 관리</h3>
-                  <p className="text-gray-500">이용약관 관리 기능이 준비 중입니다.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    이용약관 관리
+                  </h3>
+                  <p className="text-gray-500">
+                    이용약관 관리 기능이 준비 중입니다.
+                  </p>
                 </div>
               </TabsContent>
 

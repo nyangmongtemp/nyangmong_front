@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
 import EmailChangeModal from "../components/EmailChangeModal";
 import PasswordChangeModal from "../components/PasswordChangeModal";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, ADMIN } from "../../configs/host-config";
 
 // JWT 디코딩 함수 (jwt-decode 없이 직접 구현)
 function parseJwt(token) {
@@ -31,6 +33,7 @@ function parseJwt(token) {
 
 const AdminMyPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 세션스토리지에서 관리자 정보 가져오기
   const adminEmail = sessionStorage.getItem("adminEmail") || "";
@@ -42,30 +45,65 @@ const AdminMyPage = () => {
   const { adminId = "", role = "", email = "" } = parseJwt(adminToken);
 
   const [formData, setFormData] = useState({
-    adminId: adminId,
-    name: adminName,
-    email: adminEmail || email,
-    phone: "", // 별도 API 필요시 더미 유지
+    adminId: "",
+    name: "",
+    email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
-    role: adminRole || role,
-    isFirst: "", // 최초 로그인 여부는 별도 값 필요시 추가
-    number: "", // 인증번호
+    role: "",
+    isFirst: "",
+    number: "",
   });
 
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [pwModalOpen, setPwModalOpen] = useState(false);
 
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      adminId: adminId,
-      name: adminName,
-      email: adminEmail || email,
-      role: adminRole || role,
-    }));
-    // eslint-disable-next-line
-  }, [adminId, adminName, adminEmail, adminRole, email, role]);
+    // 마이페이지 정보 조회 API 호출
+    const fetchAdminInfo = async () => {
+      try {
+        const token = sessionStorage.getItem("adminToken");
+        const res = await axiosInstance.get(`${API_BASE_URL}${ADMIN}/mypage`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const admin = res.data.result;
+        if (admin) {
+          setFormData((prev) => ({
+            ...prev,
+            adminId: admin.adminId || "",
+            name: admin.name || "",
+            email: admin.email || "",
+            phone: admin.phone || "",
+            role: admin.role || "",
+          }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            adminId: "",
+            name: "",
+            email: "",
+            phone: "",
+            role: "",
+          }));
+        }
+      } catch (error) {
+        alert("관리자 정보를 불러오지 못했습니다.");
+      }
+    };
+    fetchAdminInfo();
+  }, []);
+
+  // forceEmailChange가 있으면 다른 페이지 이동 차단
+  useEffect(() => {
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange && location.pathname !== "/admin/mypage") {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+    }
+  }, [location, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -85,6 +123,44 @@ const AdminMyPage = () => {
     alert("비밀번호가 성공적으로 변경되었습니다. 다시 로그인 해주세요.");
     sessionStorage.clear();
     window.location.href = "/admin/login";
+  };
+
+  // 추가: handleUpdate 함수 구현
+  const handleUpdate = async () => {
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+      };
+      const token = sessionStorage.getItem("adminToken");
+      const res = await axiosInstance.patch(
+        `${API_BASE_URL}${ADMIN}/modify`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.data && res.data.result === true) {
+        // 세션스토리지에서 관리자 정보 삭제
+        sessionStorage.removeItem("adminToken");
+        sessionStorage.removeItem("adminEmail");
+        sessionStorage.removeItem("adminName");
+        sessionStorage.removeItem("adminRole");
+        sessionStorage.removeItem("forceEmailChange");
+        alert("수정이 완료되었습니다. 다시 로그인 해주세요.");
+        window.location.href = "/admin/login";
+      } else {
+        alert(res.data?.statusMessage || "수정에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response?.data?.statusMessage) {
+        alert(error.response.data.statusMessage);
+      } else {
+        alert("수정에 실패했습니다.");
+      }
+    }
   };
 
   return (
@@ -123,22 +199,7 @@ const AdminMyPage = () => {
                   className="bg-gray-100 cursor-not-allowed"
                 />
               </div>
-
-              {/* 이름 (읽기전용) */}
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  이름
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  readOnly
-                  className="bg-gray-100 cursor-not-allowed"
-                />
-              </div>
-
-              {/* 이메일 (수정가능) */}
+              {/* 이메일 (읽기전용) */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   이메일
@@ -148,10 +209,25 @@ const AdminMyPage = () => {
                   name="email"
                   type="email"
                   value={formData.email}
+                  readOnly
+                  className="bg-gray-100 cursor-not-allowed"
+                />
+              </div>
+
+              {/* 이름 (수정가능) */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  이름
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   className="border-gray-300"
                 />
               </div>
+
               {/* 전화번호 (수정가능) */}
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-sm font-medium">
@@ -207,7 +283,7 @@ const AdminMyPage = () => {
                 <Button
                   type="button"
                   className="w-full bg-orange-500 hover:bg-orange-600"
-                  onClick={() => setPwModalOpen(true)}
+                  onClick={handleUpdate}
                 >
                   수정하기
                 </Button>

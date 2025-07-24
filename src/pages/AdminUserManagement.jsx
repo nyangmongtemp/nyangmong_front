@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAdmin } from "../context/AdminContext";
+import { useEffect } from "react";
 
 const AdminUserManagement = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange) {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+      return;
+    }
+  }, [navigate]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("createdAt_desc");
 

@@ -62,8 +62,9 @@ const LoginPage = () => {
           sessionStorage.setItem("adminEmail", adminData.email);
           sessionStorage.setItem("adminName", adminData.name);
           sessionStorage.setItem("adminRole", adminData.role);
-          alert("로그인이 완료되었습니다.");
-          navigate("/admin");
+          sessionStorage.setItem("forceEmailChange", "true");
+          alert("로그인이 완료되었습니다. 이메일 변경을 먼저 진행해주세요.");
+          navigate("/admin/mypage");
           return;
         }
         alert(

@@ -8,8 +8,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAdmin } from "../context/AdminContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const AdminLogManagement = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const forceEmailChange = sessionStorage.getItem("forceEmailChange");
+    if (forceEmailChange) {
+      alert("이메일 변경을 완료해야 다른 기능을 이용할 수 있습니다.");
+      navigate("/admin/mypage", { replace: true });
+      return;
+    }
+  }, [navigate]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [managerFilter, setManagerFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
