@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
   // 유기동물 관련
   STRAY_ANIMAL: {
     LIST: "/animalboard-service/stray-animal-board/list",
+    MAIN: "/animalboard-service/stray-animal-board/main",
     DETAIL: (id) => `/animalboard-service/stray-animal-board/${id}`,
     CREATE: "/animalboard-service/stray-animal-board/create",
     UPDATE: (id) => `/animalboard-service/stray-animal-board/${id}`,

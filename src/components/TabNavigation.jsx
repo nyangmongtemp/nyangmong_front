@@ -1,4 +1,3 @@
-
 import React from "react";
 import { User, FileText, MessageCircle, Heart } from "lucide-react";
 
@@ -7,7 +6,6 @@ const TabNavigation = ({ activeTab, setActiveTab, setCurrentPage }) => {
     { id: "profile", label: "프로필 정보", icon: User },
     { id: "posts", label: "내 게시글", icon: FileText },
     { id: "comments", label: "내 댓글", icon: MessageCircle },
-    { id: "likes", label: "좋아요", icon: Heart },
   ];
 
   return (

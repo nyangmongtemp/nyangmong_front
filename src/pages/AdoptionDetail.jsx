@@ -145,7 +145,7 @@ const AdoptionDetail = () => {
             <div className="text-center">
               <p className="text-red-500 mb-4">{error}</p>
               <Button
-                onClick={() => navigate("/adoption")}
+                onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
                 variant="outline"
                 className="border-red-500 text-red-500 hover:bg-red-50"
               >
@@ -166,7 +166,7 @@ const AdoptionDetail = () => {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <p className="text-gray-500 mb-4">분양글을 찾을 수 없습니다.</p>
-              <Button onClick={() => navigate("/adoption")} variant="outline">
+              <Button onClick={() => navigate("/adoption", { state: { tab: "adoption" } })} variant="outline">
                 목록으로 돌아가기
               </Button>
             </div>
@@ -193,7 +193,7 @@ const AdoptionDetail = () => {
                   <div className="flex items-center space-x-4">
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/adoption")}
+                      onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
                       className="flex items-center space-x-2"
                     >
                       <ArrowLeft className="h-4 w-4" />
@@ -460,7 +460,7 @@ const AdoptionDetail = () => {
                           const token = localStorage.getItem("token");
                           await adoptionAPI.deleteAdoptionPost(id, token);
                           alert("게시글이 성공적으로 삭제되었습니다.");
-                          navigate("/adoption");
+                          navigate("/adoption", { state: { tab: "adoption" } });
                         } catch (err) {
                           alert("게시글 삭제에 실패했습니다.");
                         }
