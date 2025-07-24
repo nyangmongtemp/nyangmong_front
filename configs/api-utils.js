@@ -245,3 +245,25 @@ export const getAdminLogList = async (page = 0, size = 10, searchWord = "") => {
   );
   return response.result;
 }; 
+
+export const getAdminUserList = async (page = 0, size = 10, search = "", report = "false", active = "all") => {
+  const params = new URLSearchParams();
+  if (search) {
+    params.append("keyword", search);
+  }
+  if (report === "true" || report === "false") params.append("report", report);
+  if (active === "true" || active === "false") params.append("active", active);
+  params.append("page", page);
+  params.append("size", size);
+
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/user/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 

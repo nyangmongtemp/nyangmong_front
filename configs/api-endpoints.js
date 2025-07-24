@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
   ADMIN: {
     USERS: "/admin-service/users",
     USER_DETAIL: (id) => `/admin-service/users/${id}`,
+    USER_LIST: "/admin-service/admin/user/list",
     BOARDS: "/admin-service/boards",
     INQUIRIES: "/admin-service/inquiries",
     BANNERS: "/admin-service/banners",
