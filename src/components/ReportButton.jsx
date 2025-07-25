@@ -41,8 +41,11 @@ const ReportButton = ({ category, accusedUserId }) => {
       <Button
         variant="ghost"
         size="sm"
-        className="text-red-500 hover:bg-red-50"
-        onClick={() => setOpen(true)}
+        className="text-red-500 hover:bg-red-50 border border-red-500 rounded-md"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
       >
         신고
       </Button>
