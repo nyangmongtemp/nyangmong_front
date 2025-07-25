@@ -1,6 +1,5 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import InquiryDetailModal from "./InquiryDetailModal";
 import {
@@ -19,89 +18,34 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { getAdminInquiryList } from "../../configs/api-utils";
 
 const AdminInquiryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState("createdAt_desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const inquiries = [
-    {
-      id: 1,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "Y(응답 여부)",
-    },
-    {
-      id: 2,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "Y(응답 여부)",
-    },
-    {
-      id: 3,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "N(응답 여부)",
-    },
-    {
-      id: 4,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "N(응답 여부)",
-    },
-    {
-      id: 5,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "N(응답 여부)",
-    },
-    {
-      id: 6,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "Y(응답 여부)",
-    },
-    {
-      id: 7,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "N(응답 여부)",
-    },
-    {
-      id: 8,
-      author: "사용자 이름",
-      title: "내용 (1줄 정도만 노출)",
-      progress: "진행 완료",
-      date: "Y(응답 여부)",
-    }
-  ];
+  useEffect(() => {
+    setLoading(true);
+    getAdminInquiryList(currentPage, 10, searchTerm)
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [currentPage, searchTerm]);
 
-  const handleInquiryClick = (inquiry) => {
-    setSelectedInquiry(inquiry);
-    setIsModalOpen(true);
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const yyyy = date.getFullYear();
+    const MM = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const HH = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${MM}-${dd} ${HH}:${mm}`;
   };
-
-  const filteredInquiries = inquiries.filter(
-    (inquiry) =>
-      inquiry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inquiry.author.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // 페이징 계산
-  const totalPages = Math.ceil(filteredInquiries.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedInquiries = filteredInquiries.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -110,53 +54,44 @@ const AdminInquiryManagement = () => {
           <Input
             placeholder="검색어 입력 (이름, 이메일)"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="w-80"
           />
         </div>
-        <Select value={sortOrder} onValueChange={setSortOrder}>
-          <SelectTrigger className="ml-4 w-40">
-            <SelectValue placeholder="정렬조건" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="createdAt_desc">최신순</SelectItem>
-            <SelectItem value="createdAt_asc">오래된순</SelectItem>
-            <SelectItem value="no_answer">응답</SelectItem>
-            <SelectItem value="yes_answer">미응답</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="border rounded-lg overflow-hidden">
         <div className="bg-gray-50 px-4 py-3 border-b">
-          <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-700">
+          <div className="grid grid-cols-5 gap-4 text-sm font-medium text-gray-700">
             <span>사용자 이름</span>
-            <span>내용 (1줄 정도만 노출)</span>
-            <span>진행 완료</span>
-            <span>Y(응답 여부)</span>
+            <span>이메일</span>
+            <span>제목</span>
+            <span>답변여부</span>
+            <span>문의일시</span>
           </div>
         </div>
 
-        {paginatedInquiries.map((inquiry) => (
+        {loading && <div className="p-4 text-center">로딩중...</div>}
+        {!loading && data?.content?.length === 0 && <div className="p-4 text-center">문의가 없습니다.</div>}
+        {!loading && data?.content?.map((inquiry) => (
           <div
-            key={inquiry.id}
+            key={inquiry.informId}
             className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
-            onClick={() => handleInquiryClick(inquiry)}
+            onClick={() => { setSelectedInquiry(inquiry); setIsModalOpen(true); }}
           >
-            <div className="grid grid-cols-4 gap-4 text-sm">
-              <span>{inquiry.author}</span>
-              <span className="text-blue-600 hover:underline">
-                {inquiry.title}
-              </span>
-              <span>{inquiry.progress}</span>
-              <span>{inquiry.date}</span>
+            <div className="grid grid-cols-5 gap-4 text-sm">
+              <span>{inquiry.userName}</span>
+              <span>{inquiry.userEmail}</span>
+              <span className="text-blue-600 hover:underline">{inquiry.title}</span>
+              <span>{inquiry.answered ? "답변완료" : "미답변"}</span>
+              <span>{formatDate(inquiry.createAt)}</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* 페이징 */}
-      {totalPages > 1 && (
+      {data?.totalPages && data.totalPages >= 1 && (
         <div className="flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -171,11 +106,11 @@ const AdminInquiryManagement = () => {
                 />
               </PaginationItem>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
+              {Array.from({ length: data.totalPages }, (_, i) => i + 1)
                 .filter(
                   (page) =>
                     page === 1 ||
-                    page === totalPages ||
+                    page === data.totalPages ||
                     Math.abs(page - currentPage) <= 2
                 )
                 .map((page, index, array) => (
@@ -189,7 +124,11 @@ const AdminInquiryManagement = () => {
                       <PaginationLink
                         onClick={() => setCurrentPage(page)}
                         isActive={currentPage === page}
-                        className="cursor-pointer"
+                        className={`cursor-pointer px-3 py-1 rounded border transition-colors ${
+                          currentPage === page
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-700 border-gray-300"
+                        }`}
                       >
                         {page}
                       </PaginationLink>
@@ -200,10 +139,10 @@ const AdminInquiryManagement = () => {
               <PaginationItem>
                 <PaginationNext
                   onClick={() =>
-                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    setCurrentPage(Math.min(data.totalPages, currentPage + 1))
                   }
                   className={
-                    currentPage === totalPages
+                    currentPage === data.totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }

@@ -281,3 +281,22 @@ export const getAdminUserDetail = async (userId) => {
   );
   return response.result;
 }; 
+
+// 1:1 문의(고객센터) 목록 조회
+export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "") => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("size", size);
+  if (searchWord) params.append("searchWord", searchWord);
+
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/inform/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
