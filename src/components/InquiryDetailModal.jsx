@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { getAdminInquiryDetail } from "../../configs/api-utils";
+import { getAdminInquiryDetail, patchAdminInquiryReply } from "../../configs/api-utils";
 
 const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
   const [data, setData] = useState(null);
@@ -13,6 +13,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !informId) return;
@@ -29,15 +30,30 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
   }, [isOpen, informId]);
 
   // 답변 등록/재등록 버튼 클릭 핸들러
-  const handleRegisterClick = () => {
+  const handleRegisterClick = async () => {
     // 유효성 검사: 빈값, 엔터/스페이스만 입력 불가
     if (!responseText || !responseText.replace(/\s/g, "")) {
       setValidationError("답변 내용을 입력해 주세요.");
       return;
     }
     setValidationError("");
-    // TODO: 답변 등록 API 호출
-    // ...
+    if (!window.confirm("답변을 등록하시겠습니까?")) {
+      return;
+    }
+    setRegistering(true);
+    try {
+      await patchAdminInquiryReply(informId, responseText);
+      // 등록 성공 시 상세 재조회
+      const res = await getAdminInquiryDetail(informId);
+      setData(res);
+      setIsEditing(false);
+      alert("답변이 등록되었습니다.");
+      onClose();
+    } catch (e) {
+      setValidationError(e.message || "답변 등록에 실패했습니다.");
+    } finally {
+      setRegistering(false);
+    }
   };
 
   return (
@@ -108,8 +124,8 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               </Button>
               {data.answered ? (
                 isEditing ? (
-                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick}>
-                    답변 등록
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick} disabled={registering}>
+                    {registering ? "등록 중..." : "답변 등록"}
                   </Button>
                 ) : (
                   <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsEditing(true)}>
@@ -117,8 +133,8 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
                   </Button>
                 )
               ) : (
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick}>
-                  답변 등록
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick} disabled={registering}>
+                  {registering ? "등록 중..." : "답변 등록"}
                 </Button>
               )}
             </div>

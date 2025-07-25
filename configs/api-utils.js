@@ -314,3 +314,18 @@ export const getAdminInquiryDetail = async (informId) => {
   );
   return response.result;
 }; 
+
+export const patchAdminInquiryReply = async (informId, reply) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.put(
+    `/admin-service/admin/inform/${informId}`,
+    { reply },
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.result;
+}; 

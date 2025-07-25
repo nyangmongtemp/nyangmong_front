@@ -28,13 +28,14 @@ const AdminInquiryManagement = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [answered, setAnswered] = useState("all");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     getAdminInquiryList(currentPage, 10, searchTerm, answered)
       .then(setData)
       .finally(() => setLoading(false));
-  }, [currentPage, searchTerm, answered]);
+  }, [currentPage, searchTerm, answered, refreshKey]);
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -166,7 +167,10 @@ const AdminInquiryManagement = () => {
 
       <InquiryDetailModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setRefreshKey((prev) => prev + 1);
+        }}
         informId={selectedInquiry?.informId}
       />
     </div>
