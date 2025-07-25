@@ -283,11 +283,12 @@ export const getAdminUserDetail = async (userId) => {
 }; 
 
 // 1:1 문의(고객센터) 목록 조회
-export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "") => {
+export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "", answered = "all") => {
   const params = new URLSearchParams();
   params.append("page", page);
   params.append("size", size);
   if (searchWord) params.append("searchWord", searchWord);
+  if (answered === "true" || answered === "false") params.append("answered", answered);
 
   const adminToken = sessionStorage.getItem("adminToken");
   const response = await apiUtils.get(

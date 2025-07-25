@@ -27,13 +27,14 @@ const AdminInquiryManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [answered, setAnswered] = useState("all");
 
   useEffect(() => {
     setLoading(true);
-    getAdminInquiryList(currentPage, 10, searchTerm)
+    getAdminInquiryList(currentPage, 10, searchTerm, answered)
       .then(setData)
       .finally(() => setLoading(false));
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, answered]);
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -50,9 +51,19 @@ const AdminInquiryManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <Select value={answered} onValueChange={v => { setAnswered(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="답변여부" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="true">답변완료</SelectItem>
+              <SelectItem value="false">미답변</SelectItem>
+            </SelectContent>
+          </Select>
           <Input
-            placeholder="검색어 입력 (이름, 이메일)"
+            placeholder="검색어 입력 (이름, 이메일, 제목)"
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="w-80"
