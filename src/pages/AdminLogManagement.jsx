@@ -24,7 +24,7 @@ const AdminLogManagement = () => {
   // 데이터 fetch
   useEffect(() => {
     setLoading(true);
-    getAdminLogList(currentPage - 1, 10, searchTerm)
+    getAdminLogList(currentPage, 10, searchTerm)
       .then(setData)
       .finally(() => setLoading(false));
   }, [currentPage, searchTerm]);

@@ -281,3 +281,51 @@ export const getAdminUserDetail = async (userId) => {
   );
   return response.result;
 }; 
+
+// 1:1 문의(고객센터) 목록 조회
+export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "", answered = "all") => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("size", size);
+  if (searchWord) params.append("searchWord", searchWord);
+  if (answered === "true" || answered === "false") params.append("answered", answered);
+
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/inform/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const getAdminInquiryDetail = async (informId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/inform/${informId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const patchAdminInquiryReply = async (informId, reply) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.put(
+    `/admin-service/admin/inform/${informId}`,
+    { reply },
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.result;
+}; 
