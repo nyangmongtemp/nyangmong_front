@@ -301,3 +301,16 @@ export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "", 
   );
   return response.result;
 }; 
+
+export const getAdminInquiryDetail = async (informId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/inform/${informId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 

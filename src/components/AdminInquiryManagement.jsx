@@ -167,7 +167,7 @@ const AdminInquiryManagement = () => {
       <InquiryDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        inquiry={selectedInquiry}
+        informId={selectedInquiry?.informId}
       />
     </div>
   );
