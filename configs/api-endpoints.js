@@ -65,7 +65,8 @@ export const API_ENDPOINTS = {
   // 관리자 관련
   ADMIN: {
     USERS: "/admin-service/users",
-    USER_DETAIL: (id) => `/admin-service/users/${id}`,
+    USER_DETAIL: (id) => `/admin-service/admin/user/detail/${id}`,
+    USER_LIST: "/admin-service/admin/user/list",
     BOARDS: "/admin-service/boards",
     INQUIRIES: "/admin-service/inquiries",
     BANNERS: "/admin-service/banners",
