@@ -257,7 +257,7 @@ const AdminBannerManagement = () => {
                 <span>
                   배너 관리{" "}
                   <span className="text-base font-normal text-gray-500">
-                    (노출 배너 개수 : {bannerCount})
+                    (노출 가능 배너 개수 : {bannerCount})
                   </span>
                 </span>
                 <button
