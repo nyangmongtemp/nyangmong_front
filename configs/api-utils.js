@@ -1,5 +1,6 @@
 import axiosInstance from './axios-config';
 import { handleAxiosError } from './HandleAxiosError';
+import { API_ENDPOINTS } from "./api-endpoints";
 
 // 기본 API 호출 함수들
 export const apiUtils = {
@@ -259,6 +260,19 @@ export const getAdminUserList = async (page = 0, size = 10, search = "", report 
   const adminToken = sessionStorage.getItem("adminToken");
   const response = await apiUtils.get(
     `/admin-service/admin/user/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const getAdminUserDetail = async (userId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    API_ENDPOINTS.ADMIN.USER_DETAIL(userId),
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,
