@@ -96,7 +96,7 @@ const AdminInquiryManagement = () => {
               <span>{inquiry.userEmail}</span>
               <span className="text-blue-600 hover:underline">{inquiry.title}</span>
               <span>{inquiry.answered ? "답변완료" : "미답변"}</span>
-              <span>{formatDate(inquiry.createAt)}</span>
+              <span>{formatDate(inquiry.createAt) || "-"}</span>
             </div>
           </div>
         ))}

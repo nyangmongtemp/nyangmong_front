@@ -56,6 +56,18 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
     }
   };
 
+  // 날짜 포맷 함수 (중복 정의 방지, 없으면 추가)
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    const yyyy = date.getFullYear();
+    const MM = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const HH = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${MM}-${dd} ${HH}:${mm}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -84,7 +96,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">문의일시</label>
-                <Input value={data.createAt} readOnly className="bg-gray-50" />
+                <Input value={formatDate(data.createAt)} readOnly className="bg-gray-50" />
               </div>
             </div>
             {/* 제목 */}
@@ -105,7 +117,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">답변일시</label>
-                <Input value={data.answered ? (data.updateAt || "-") : "-"} readOnly className="bg-gray-50" />
+                <Input value={data.answered ? formatDate(data.updateAt) : "-"} readOnly className="bg-gray-50" />
               </div>
             </div>
             <div>
