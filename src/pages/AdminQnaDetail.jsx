@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAdminTermsDetail, updateAdminTerms } from "../../configs/api-utils";
+import { getAdminTermsDetail, updateAdminTerms, deleteAdminTerms } from "../../configs/api-utils";
 import CKEditorWrapper from "@/components/CKEditorWrapper";
 import AdminSidebar from "@/components/AdminSidebar";
 
@@ -126,6 +126,28 @@ const AdminQnaDetail = () => {
     } catch (error) {
       console.error("Q&A 수정 오류:", error);
       alert("Q&A 수정 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    // 확인 다이얼로그
+    if (!window.confirm("Q&A를 삭제하시겠습니까?")) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await deleteAdminTerms("qna", id);
+      
+      alert("Q&A가 삭제되었습니다.");
+      
+      navigate("/admin/support?tab=qna");
+    } catch (error) {
+      console.error("Q&A 삭제 오류:", error);
+      alert("Q&A 삭제 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -270,33 +292,43 @@ const AdminQnaDetail = () => {
                           </div>
                         </div>
 
-                        <div className="flex justify-end space-x-3 pt-6">
+                        <div className="flex justify-between items-center pt-6">
                           <Button
                             type="button"
-                            variant="outline"
-                            onClick={handleCancel}
+                            variant="destructive"
+                            onClick={handleDeleteClick}
                             disabled={isSubmitting}
                           >
-                            {isEditing ? "취소" : "목록"}
+                            삭제
                           </Button>
-                          {isEditing ? (
+                          <div className="flex space-x-3">
                             <Button
                               type="button"
-                              className="bg-blue-600 hover:bg-blue-700"
-                              onClick={handleUpdateClick}
+                              variant="outline"
+                              onClick={handleCancel}
                               disabled={isSubmitting}
                             >
-                              {isSubmitting ? "수정 중..." : "수정완료"}
+                              {isEditing ? "취소" : "목록"}
                             </Button>
-                          ) : (
-                            <Button
-                              type="button"
-                              className="bg-blue-600 hover:bg-blue-700"
-                              onClick={handleModifyClick}
-                            >
-                              수정
-                            </Button>
-                          )}
+                            {isEditing ? (
+                              <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700"
+                                onClick={handleUpdateClick}
+                                disabled={isSubmitting}
+                              >
+                                {isSubmitting ? "수정 중..." : "수정완료"}
+                              </Button>
+                            ) : (
+                              <Button
+                                type="button"
+                                className="bg-blue-600 hover:bg-blue-700"
+                                onClick={handleModifyClick}
+                              >
+                                수정
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </form>
                     </CardContent>

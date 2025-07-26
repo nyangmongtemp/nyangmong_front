@@ -402,4 +402,17 @@ export const getAdminTermsDetail = async (category, id) => {
     }
   );
   return response.result;
+};
+
+export const deleteAdminTerms = async (category, id) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.delete(
+    `/admin-service/admin/${category}/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
 }; 
