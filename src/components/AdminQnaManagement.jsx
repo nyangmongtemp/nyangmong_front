@@ -67,9 +67,6 @@ const AdminQnaManagement = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-900">Q&A 관리</h3>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          생성
-        </Button>
       </div>
 
       <div className="flex justify-between items-center">
@@ -126,47 +123,52 @@ const AdminQnaManagement = () => {
           </div>
 
           {/* 페이징 */}
-          <div className="flex justify-center py-4">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                    className={
-                      currentPage === 1
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-
-                {Array.from({ length: Math.max(1, data.totalPages) }, (_, i) => i + 1).map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => handlePageChange(page)}
-                      className={`cursor-pointer ${
-                        currentPage === page 
-                          ? "bg-blue-500 text-white border-blue-500" 
-                          : "bg-white text-gray-700 border-gray-300"
-                      }`}
-                    >
-                      {page}
-                    </PaginationLink>
+          <div className="flex justify-between items-center">
+            <div className="flex justify-center flex-1">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
                   </PaginationItem>
-                ))}
 
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(Math.min(data.totalPages, currentPage + 1))}
-                    className={
-                      currentPage === data.totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {Array.from({ length: Math.max(1, data.totalPages) }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(page)}
+                        className={`cursor-pointer ${
+                          currentPage === page 
+                            ? "bg-blue-500 text-white border-blue-500" 
+                            : "bg-white text-gray-700 border-gray-300"
+                        }`}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => handlePageChange(Math.min(data.totalPages, currentPage + 1))}
+                      className={
+                        currentPage === data.totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              생성
+            </Button>
           </div>
         </>
       )}

@@ -27,7 +27,7 @@ const AdminCustomerSupport = () => {
               <h1 className="text-2xl font-bold text-gray-900">고객센터</h1>
             </div>
 
-            <Tabs defaultValue="inquiry" className="w-full p-3">
+            <Tabs defaultValue="inquiry" className="w-full p-3" style={{ paddingBottom: '0px' }}>
               <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1">
                 <TabsTrigger
                   value="inquiry"
