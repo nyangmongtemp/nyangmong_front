@@ -260,12 +260,12 @@ const CustomerInquiry = () => {
               >
                 <SelectTrigger className="w-32 h-9 text-sm">
                   <SelectValue placeholder="정렬" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="latest">최신순</SelectItem>
-                  <SelectItem value="oldest">오래된순</SelectItem>
-                </SelectContent>
-              </Select>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="latest">최신순</SelectItem>
+              <SelectItem value="oldest">오래된순</SelectItem>
+            </SelectContent>
+          </Select>
             </div>
           </div>
           {/* 문의 리스트 */}
@@ -374,8 +374,8 @@ const CustomerInquiry = () => {
                   {createLoading ? "등록 중..." : "등록하기"}
                 </Button>
               </div>
-            </div>
-          </div>
+        </div>
+      </div>
         </DialogContent>
       </Dialog>
 
@@ -526,7 +526,7 @@ const CustomerInquiry = () => {
                 </>
               ) : null}
             </div>
-          </div>
+      </div>
         </DialogContent>
       </Dialog>
     </div>

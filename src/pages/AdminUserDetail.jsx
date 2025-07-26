@@ -45,31 +45,31 @@ const AdminUserDetail = () => {
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">이메일</span>
               <span>{data.email}</span>
-            </div>
+          </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">닉네임</span>
               <span>{data.nickname}</span>
-            </div>
+                  </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">주소</span>
               <span>{data.address || "-"}</span>
-            </div>
+                </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">전화번호</span>
               <span>{data.phone || "-"}</span>
-            </div>
+                  </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">소셜ID</span>
               <span>{data.socialId || "-"}</span>
-            </div>
+                </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">소셜 Provider</span>
               <span>{data.socialProvider || "-"}</span>
-            </div>
+              </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">계정 활성화</span>
               <span>{data.active ? "활성화" : "비활성화"}</span>
-            </div>
+                  </div>
             <div className="flex justify-between border-b pb-2">
               <span className="font-medium text-gray-600">신고횟수</span>
               <span>
@@ -77,21 +77,21 @@ const AdminUserDetail = () => {
                 <button
                   className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
                   onClick={() => setIsReportModalOpen(true)}
-                >
+                    >
                   신고이력 보기
                 </button>
-              </span>
-            </div>
+                    </span>
+                  </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-600">정지횟수</span>
               <span>{data.pauseCount}</span>
-            </div>
-          </div>
-          <ReportHistoryModal
-            isOpen={isReportModalOpen}
-            onClose={() => setIsReportModalOpen(false)}
-            userId={id}
-          />
+        </div>
+      </div>
+      <ReportHistoryModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        userId={id}
+      />
           <div className="mt-8 flex justify-end">
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

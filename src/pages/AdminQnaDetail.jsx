@@ -5,14 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminTermsDetail, updateAdminTerms } from "../../configs/api-utils";
-import { useToast } from "@/hooks/use-toast";
 import CKEditorWrapper from "@/components/CKEditorWrapper";
 import AdminSidebar from "@/components/AdminSidebar";
 
 const AdminQnaDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,20 +58,12 @@ const AdminQnaDetail = () => {
     
     // 유효성 검사
     if (!formData.title.trim()) {
-      toast({
-        title: "오류",
-        description: "제목을 입력해주세요.",
-        variant: "destructive",
-      });
+      alert("제목을 입력해주세요.");
       return;
     }
 
     if (!formData.content.trim() || formData.content === "<p><br></p>") {
-      toast({
-        title: "오류",
-        description: "내용을 입력해주세요.",
-        variant: "destructive",
-      });
+      alert("내용을 입력해주세요.");
       return;
     }
 
@@ -87,20 +77,55 @@ const AdminQnaDetail = () => {
     try {
       await updateAdminTerms("qna", id, formData);
       
-      toast({
-        title: "성공",
-        description: "Q&A가 수정되었습니다.",
-      });
+      alert("Q&A가 수정되었습니다.");
       
       setIsEditing(false);
       fetchQnaData(); // 데이터 다시 불러오기
     } catch (error) {
       console.error("Q&A 수정 오류:", error);
-      toast({
-        title: "오류",
-        description: "Q&A 수정 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+      alert("Q&A 수정 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleModifyClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleUpdateClick = async () => {
+    // 유효성 검사
+    if (!formData.title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+
+    if (!formData.content.trim() || formData.content === "<p><br></p>") {
+      alert("내용을 입력해주세요.");
+      return;
+    }
+
+    // 확인 다이얼로그
+    if (!window.confirm("Q&A를 수정하시겠습니까?")) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await updateAdminTerms("qna", id, formData);
+      
+      alert("Q&A가 수정되었습니다.");
+      
+      setIsEditing(false);
+      fetchQnaData(); // 데이터 다시 불러오기
+    } catch (error) {
+      console.error("Q&A 수정 오류:", error);
+      alert("Q&A 수정 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -256,8 +281,9 @@ const AdminQnaDetail = () => {
                           </Button>
                           {isEditing ? (
                             <Button
-                              type="submit"
+                              type="button"
                               className="bg-blue-600 hover:bg-blue-700"
+                              onClick={handleUpdateClick}
                               disabled={isSubmitting}
                             >
                               {isSubmitting ? "수정 중..." : "수정완료"}
@@ -266,7 +292,7 @@ const AdminQnaDetail = () => {
                             <Button
                               type="button"
                               className="bg-blue-600 hover:bg-blue-700"
-                              onClick={() => setIsEditing(true)}
+                              onClick={handleModifyClick}
                             >
                               수정
                             </Button>

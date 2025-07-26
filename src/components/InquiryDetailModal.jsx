@@ -77,7 +77,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
         {loading && <div>로딩중...</div>}
         {error && <div className="text-red-500">{error}</div>}
         {data && (
-          <div className="space-y-6">
+        <div className="space-y-6">
             {/* 사용자이름/이메일, 답변여부/문의일시 */}
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -88,8 +88,8 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">이메일</label>
                 <Input value={data.userEmail} readOnly className="bg-gray-50" />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
+          </div>
+          <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">답변여부</label>
                 <Input value={data.answered ? "답변완료" : "미답변"} readOnly className="bg-gray-50" />
@@ -105,7 +105,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               <Input value={data.title} readOnly className="bg-gray-50" />
             </div>
             {/* 내용 */}
-            <div>
+          <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
               <Textarea value={data.content} readOnly className="bg-gray-50 min-h-[200px] resize-none" />
             </div>
@@ -118,22 +118,22 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">답변일시</label>
                 <Input value={data.answered ? formatDate(data.updateAt) : "-"} readOnly className="bg-gray-50" />
-              </div>
             </div>
-            <div>
+          </div>
+          <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">답변</label>
-              <Textarea
-                value={responseText}
-                onChange={(e) => setResponseText(e.target.value)}
+            <Textarea
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
                 className={`min-h-[200px] resize-none ${data.answered && !isEditing ? 'bg-gray-50' : ''}`}
                 readOnly={data.answered && !isEditing}
-              />
+            />
               {validationError && <div className="text-red-500 text-sm mt-1">{validationError}</div>}
-            </div>
-            <div className="flex justify-end space-x-4">
-              <Button variant="outline" onClick={onClose}>
-                취소
-              </Button>
+          </div>
+          <div className="flex justify-end space-x-4">
+            <Button variant="outline" onClick={onClose}>
+              취소
+            </Button>
               {data.answered ? (
                 isEditing ? (
                   <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick} disabled={registering}>
@@ -147,7 +147,7 @@ const InquiryDetailModal = ({ isOpen, onClose, informId }) => {
               ) : (
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleRegisterClick} disabled={registering}>
                   {registering ? "등록 중..." : "답변 등록"}
-                </Button>
+            </Button>
               )}
             </div>
           </div>

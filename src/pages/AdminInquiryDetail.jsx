@@ -6,19 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminInquiryDetail, patchAdminInquiryReply } from "../../configs/api-utils";
-import { useToast } from "@/hooks/use-toast";
 import AdminSidebar from "@/components/AdminSidebar";
 
 const AdminInquiryDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseText, setResponseText] = useState("");
+  const [hasOriginalReply, setHasOriginalReply] = useState(false);
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -43,6 +42,7 @@ const AdminInquiryDetail = () => {
       setData(result);
       setResponseText(result.reply || "");
       setIsEditing(false);
+      setHasOriginalReply(!!result.reply);
     } catch (error) {
       setError(error.message || "문의 조회에 실패했습니다.");
     } finally {
@@ -55,11 +55,7 @@ const AdminInquiryDetail = () => {
     
     // 유효성 검사
     if (!responseText.trim()) {
-      toast({
-        title: "오류",
-        description: "답변 내용을 입력해주세요.",
-        variant: "destructive",
-      });
+      alert("답변 내용을 입력해주세요.");
       return;
     }
 
@@ -73,20 +69,50 @@ const AdminInquiryDetail = () => {
     try {
       await patchAdminInquiryReply(id, responseText);
       
-      toast({
-        title: "성공",
-        description: "답변이 등록되었습니다.",
-      });
+      alert("답변이 등록되었습니다.");
       
       setIsEditing(false);
       fetchInquiryData(); // 데이터 다시 불러오기
     } catch (error) {
       console.error("답변 등록 오류:", error);
-      toast({
-        title: "오류",
-        description: "답변 등록 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+      alert("답변 등록 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleModifyClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleReSubmitClick = async () => {
+    // 유효성 검사
+    if (!responseText.trim()) {
+      alert("답변 내용을 입력해주세요.");
+      return;
+    }
+
+    // 확인 다이얼로그
+    if (!window.confirm("답변을 수정하시겠습니까?")) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await patchAdminInquiryReply(id, responseText);
+      
+      alert("답변이 수정되었습니다.");
+      
+      setIsEditing(false);
+      fetchInquiryData(); // 데이터 다시 불러오기
+    } catch (error) {
+      console.error("답변 수정 오류:", error);
+      alert("답변 수정 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -214,8 +240,10 @@ const AdminInquiryDetail = () => {
                             value={responseText}
                             onChange={(e) => setResponseText(e.target.value)}
                             placeholder="답변을 입력하세요"
-                            className="min-h-[200px] resize-none"
-                            readOnly={!isEditing}
+                            className={`min-h-[200px] resize-none ${
+                              hasOriginalReply && !isEditing ? "bg-gray-50" : "bg-white"
+                            }`}
+                            readOnly={hasOriginalReply && !isEditing}
                           />
                         </div>
 
@@ -230,19 +258,20 @@ const AdminInquiryDetail = () => {
                           </Button>
                           {isEditing ? (
                             <Button
-                              type="submit"
+                              type="button"
                               className="bg-blue-600 hover:bg-blue-700"
+                              onClick={handleReSubmitClick}
                               disabled={isSubmitting}
                             >
-                              {isSubmitting ? "등록 중..." : "답변등록"}
+                              {isSubmitting ? "수정 중..." : "답변재등록"}
                             </Button>
                           ) : (
                             <Button
                               type="button"
                               className="bg-blue-600 hover:bg-blue-700"
-                              onClick={() => setIsEditing(true)}
+                              onClick={data?.answered ? handleModifyClick : handleSubmit}
                             >
-                              {data?.answered ? "답변재등록" : "답변등록"}
+                              {data?.answered ? "답변수정" : "답변등록"}
                             </Button>
                           )}
                         </div>
