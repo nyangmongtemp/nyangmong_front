@@ -289,6 +289,7 @@ const CKEditorWrapper = ({
 		>
 			{editorConfig && (
 				<CKEditor
+					key={`ckeditor-${readOnly}`} // readOnly 상태가 변경될 때마다 에디터 재생성
 					editor={ClassicEditor}
 					config={{
 						...editorConfig,
@@ -301,7 +302,10 @@ const CKEditorWrapper = ({
 						]
 					}}
 					data={value}
-					onReady={editor => applyFixedHeight(editor)}
+					onReady={editor => {
+						applyFixedHeight(editor);
+						console.log('CKEditor 초기 readOnly 설정:', readOnly);
+					}}
 					onFocus={(_, editor) => applyFixedHeight(editor)}
 					onBlur={(_, editor) => applyFixedHeight(editor)}
 					onChange={(event, editor) => {

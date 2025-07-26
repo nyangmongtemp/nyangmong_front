@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminInquiryManagement from "../components/AdminInquiryManagement";
-import AdminPolicyManagement from "../components/AdminPolicyManagement";
+import AdminTermsManagement from "../components/AdminTermsManagement";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -35,7 +35,7 @@ const AdminCustomerSupport = () => {
                   1:1 문의 (DM)
                 </TabsTrigger>
                 <TabsTrigger
-                  value="medical"
+                  value="terms"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
                 >
                   이용약관 관리
@@ -58,19 +58,19 @@ const AdminCustomerSupport = () => {
                 <AdminInquiryManagement />
               </TabsContent>
 
-              <TabsContent value="medical" className="p-6">
-                <div className="text-center py-12">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    이용약관 관리
-                  </h3>
-                  <p className="text-gray-500">
-                    이용약관 관리 기능이 준비 중입니다.
-                  </p>
-                </div>
+              <TabsContent value="terms" className="p-6">
+                <AdminTermsManagement />
               </TabsContent>
 
               <TabsContent value="policy" className="p-6">
-                <AdminPolicyManagement />
+                <div className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    개인정보처리방침 관리
+                  </h3>
+                  <p className="text-gray-500">
+                    개인정보처리방침 관리 기능이 준비 중입니다.
+                  </p>
+                </div>
               </TabsContent>
 
               <TabsContent value="qna" className="p-6">
