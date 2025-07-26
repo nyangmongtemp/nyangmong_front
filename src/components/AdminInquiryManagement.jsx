@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import InquiryDetailModal from "./InquiryDetailModal";
 import {
   Select,
   SelectContent,
@@ -21,9 +21,8 @@ import {
 import { getAdminInquiryList } from "../../configs/api-utils";
 
 const AdminInquiryManagement = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedInquiry, setSelectedInquiry] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -89,7 +88,7 @@ const AdminInquiryManagement = () => {
           <div
             key={inquiry.informId}
             className="px-4 py-3 border-b hover:bg-gray-50 cursor-pointer"
-            onClick={() => { setSelectedInquiry(inquiry); setIsModalOpen(true); }}
+            onClick={() => navigate(`/admin/inquiry/${inquiry.informId}`)}
           >
             <div className="grid grid-cols-5 gap-4 text-sm">
               <span>{inquiry.userName}</span>
@@ -165,14 +164,6 @@ const AdminInquiryManagement = () => {
         </div>
       )}
 
-      <InquiryDetailModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setRefreshKey((prev) => prev + 1);
-        }}
-        informId={selectedInquiry?.informId}
-      />
     </div>
   );
 };

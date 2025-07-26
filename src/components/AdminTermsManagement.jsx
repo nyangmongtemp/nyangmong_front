@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CKEditorWrapper from "./CKEditorWrapper";
-import { getAdminTermsDetail, createAdminTerms, updateAdminTerms } from "../../configs/api-utils";
+import { getAdminTermsLastPost, createAdminTerms, updateAdminTerms } from "../../configs/api-utils";
 
 const AdminTermsManagement = () => {
   const [data, setData] = useState(null);
@@ -33,7 +33,7 @@ const AdminTermsManagement = () => {
   const fetchTermsData = async () => {
     setLoading(true);
     try {
-      const result = await getAdminTermsDetail();
+      const result = await getAdminTermsLastPost();
       setData(result);
       if (result) {
         setFormData({

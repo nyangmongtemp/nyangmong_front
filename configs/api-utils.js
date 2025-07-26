@@ -330,7 +330,7 @@ export const patchAdminInquiryReply = async (informId, reply) => {
   return response.result;
 }; 
 
-export const getAdminTermsDetail = async () => {
+export const getAdminTermsLastPost = async () => {
   const adminToken = sessionStorage.getItem("adminToken");
   const response = await apiUtils.get(
     `/admin-service/admin/terms/lastPost`,
@@ -382,6 +382,19 @@ export const getAdminTermsList = async (category, page = 1, size = 10, searchWor
   const adminToken = sessionStorage.getItem("adminToken");
   const response = await apiUtils.get(
     `/admin-service/admin/${category}/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+};
+
+export const getAdminTermsDetail = async (category, id) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/${category}/${id}`,
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,

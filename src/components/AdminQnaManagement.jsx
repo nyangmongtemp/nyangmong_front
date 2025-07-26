@@ -74,7 +74,7 @@ const AdminQnaManagement = () => {
       <div className="flex justify-between items-center">
         <div className="flex-1 max-w-md">
           <Input
-            placeholder="제목, 내용 검색"
+            placeholder="검색어 입력 (이름, 제목)"
             value={searchTerm}
             onChange={handleSearch}
             className="w-full"
@@ -109,7 +109,10 @@ const AdminQnaManagement = () => {
                     <span className="text-gray-500">
                       {(currentPage - 1) * 10 + index + 1}
                     </span>
-                    <span className="text-blue-600 hover:underline truncate">
+                    <span 
+                      className="text-blue-600 hover:underline truncate cursor-pointer"
+                      onClick={() => navigate(`/admin/qna/${qna.termsId}`)}
+                    >
                       {qna.title}
                     </span>
                     <span className="truncate">
