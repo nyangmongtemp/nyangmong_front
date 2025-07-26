@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createAdminTerms } from "../../configs/api-utils";
-import { useToast } from "@/hooks/use-toast";
 import CKEditorWrapper from "@/components/CKEditorWrapper";
 import AdminSidebar from "@/components/AdminSidebar";
 
 const AdminPolicyCreate = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -24,20 +22,12 @@ const AdminPolicyCreate = () => {
     
     // 유효성 검사
     if (!formData.title.trim()) {
-      toast({
-        title: "오류",
-        description: "제목을 입력해주세요.",
-        variant: "destructive",
-      });
+      alert("제목을 입력해주세요.");
       return;
     }
 
     if (!formData.content.trim() || formData.content === "<p><br></p>") {
-      toast({
-        title: "오류",
-        description: "내용을 입력해주세요.",
-        variant: "destructive",
-      });
+      alert("내용을 입력해주세요.");
       return;
     }
 
@@ -51,19 +41,12 @@ const AdminPolicyCreate = () => {
     try {
       await createAdminTerms("policy", formData);
       
-      toast({
-        title: "성공",
-        description: "개인정보처리방침이 등록되었습니다.",
-      });
+      alert("개인정보처리방침이 등록되었습니다.");
       
       navigate("/admin/support?tab=policy");
     } catch (error) {
       console.error("개인정보처리방침 등록 오류:", error);
-      toast({
-        title: "오류",
-        description: "개인정보처리방침 등록 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+      alert("개인정보처리방침 등록 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
