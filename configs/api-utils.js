@@ -317,7 +317,7 @@ export const getAdminInquiryDetail = async (informId) => {
 
 export const patchAdminInquiryReply = async (informId, reply) => {
   const adminToken = sessionStorage.getItem("adminToken");
-  const response = await apiUtils.put(
+  const response = await apiUtils.patch(
     `/admin-service/admin/inform/${informId}`,
     { reply },
     {
