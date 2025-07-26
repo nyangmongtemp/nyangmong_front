@@ -28,6 +28,7 @@ import UserMyPage from "./pages/UserMyPage";
 import AdminCustomerSupport from "./pages/AdminCustomerSupport";
 import AdminBannerManagement from "./pages/AdminBannerManagement";
 import AdminPolicyCreate from "./pages/AdminPolicyCreate";
+import AdminQnaCreate from "./pages/AdminQnaCreate";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
@@ -88,6 +89,10 @@ const App = () => (
                     <Route
                       path="policy/create"
                       element={<AdminPolicyCreate />}
+                    />
+                    <Route
+                      path="qna/create"
+                      element={<AdminQnaCreate />}
                     />
                     <Route path="mypage" element={<MyPage />} />
                     <Route path="login" element={<LoginPage />} />

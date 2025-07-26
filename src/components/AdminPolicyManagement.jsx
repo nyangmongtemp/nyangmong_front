@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/pagination";
 import { getAdminTermsList } from "../../configs/api-utils";
 
-const AdminQnaManagement = () => {
+const AdminPolicyManagement = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -33,16 +33,16 @@ const AdminQnaManagement = () => {
   };
 
   useEffect(() => {
-    fetchQnaData();
+    fetchPolicyData();
   }, [currentPage, searchTerm]);
 
-  const fetchQnaData = async () => {
+  const fetchPolicyData = async () => {
     setLoading(true);
     try {
-      const result = await getAdminTermsList('qna', currentPage - 1, 10, searchTerm);
+      const result = await getAdminTermsList('policy', currentPage - 1, 10, searchTerm);
       setData(result);
     } catch (error) {
-      setError(error.message || "Q&A 조회에 실패했습니다.");
+      setError(error.message || "개인정보처리방침 조회에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ const AdminQnaManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Q&A 관리</h3>
+        <h3 className="text-lg font-medium text-gray-900">개인정보처리방침 관리</h3>
       </div>
 
       <div className="flex justify-between items-center">
@@ -96,28 +96,24 @@ const AdminQnaManagement = () => {
               </div>
             </div>
             <div className="divide-y">
-              {data.content.map((qna, index) => (
+              {data.content.map((policy, index) => (
                 <div
-                  key={qna.termsId}
+                  key={policy.termsId}
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => {
-                    // TODO: 상세 모달 열기
-                    console.log("Q&A 상세 보기:", qna.termsId);
-                  }}
                 >
                   <div className="grid grid-cols-6 gap-4 text-sm">
                     <span className="text-gray-500">
                       {(currentPage - 1) * 10 + index + 1}
                     </span>
                     <span className="text-blue-600 hover:underline truncate">
-                      {qna.title}
+                      {policy.title}
                     </span>
                     <span className="truncate">
-                      {qna.content.replace(/<[^>]*>/g, '')}
+                      {policy.content.replace(/<[^>]*>/g, '')}
                     </span>
-                    <span>{qna.adminName}</span>
-                    <span>{formatDate(qna.createAt)}</span>
-                    <span>{formatDate(qna.updateAt)}</span>
+                    <span>{policy.adminName}</span>
+                    <span>{formatDate(policy.createAt)}</span>
+                    <span>{formatDate(policy.updateAt)}</span>
                   </div>
                 </div>
               ))}
@@ -170,7 +166,7 @@ const AdminQnaManagement = () => {
             </div>
             <Button 
               className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => navigate("/admin/qna/create")}
+              onClick={() => navigate("/admin/policy/create")}
             >
               생성
             </Button>
@@ -181,4 +177,4 @@ const AdminQnaManagement = () => {
   );
 };
 
-export default AdminQnaManagement; 
+export default AdminPolicyManagement; 

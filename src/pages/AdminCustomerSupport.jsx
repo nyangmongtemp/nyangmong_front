@@ -3,12 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminInquiryManagement from "../components/AdminInquiryManagement";
 import AdminTermsManagement from "../components/AdminTermsManagement";
+import AdminPolicyManagement from "../components/AdminPolicyManagement";
 import AdminQnaManagement from "../components/AdminQnaManagement";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 
 const AdminCustomerSupport = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState("inquiry");
+
   useEffect(() => {
     const forceEmailChange = sessionStorage.getItem("forceEmailChange");
     if (forceEmailChange) {
@@ -16,7 +20,13 @@ const AdminCustomerSupport = () => {
       navigate("/admin/mypage", { replace: true });
       return;
     }
-  }, [navigate]);
+
+    // URL 파라미터에서 탭 값 읽기
+    const tabParam = searchParams.get("tab");
+    if (tabParam && ["inquiry", "terms", "policy", "qna"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [navigate, searchParams]);
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -27,7 +37,7 @@ const AdminCustomerSupport = () => {
               <h1 className="text-2xl font-bold text-gray-900">고객센터</h1>
             </div>
 
-            <Tabs defaultValue="inquiry" className="w-full p-3" style={{ paddingBottom: '0px' }}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full p-3" style={{ paddingBottom: '0px' }}>
               <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1">
                 <TabsTrigger
                   value="inquiry"
@@ -64,14 +74,7 @@ const AdminCustomerSupport = () => {
               </TabsContent>
 
               <TabsContent value="policy" className="p-6">
-                <div className="text-center py-12">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    개인정보처리방침 관리
-                  </h3>
-                  <p className="text-gray-500">
-                    개인정보처리방침 관리 기능이 준비 중입니다.
-                  </p>
-                </div>
+                <AdminPolicyManagement />
               </TabsContent>
 
               <TabsContent value="qna" className="p-6">
