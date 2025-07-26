@@ -100,6 +100,7 @@ const AdminPolicyManagement = () => {
                 <div
                   key={policy.termsId}
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/admin/policy/${policy.termsId}`)}
                 >
                   <div className="grid grid-cols-6 gap-4 text-sm">
                     <span className="text-gray-500">
