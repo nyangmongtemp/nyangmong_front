@@ -1,22 +1,61 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useNavigate } from "react-router-dom";
-import AdminSidebar from "../components/AdminSidebar";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createAdminTerms } from "../../configs/api-utils";
+import CKEditorWrapper from "@/components/CKEditorWrapper";
+import AdminSidebar from "@/components/AdminSidebar";
 
 const AdminPolicyCreate = () => {
   const navigate = useNavigate();
-  const [policyData, setPolicyData] = useState({
+  const [formData, setFormData] = useState({
     title: "",
-    content: ""
+    content: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    // 정책 저장 로직
-    console.log("정책 저장:", policyData);
-    navigate('/admin/support');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // 유효성 검사
+    if (!formData.title.trim()) {
+      alert("제목을 입력해주세요.");
+      return;
+    }
+
+    if (!formData.content.trim() || formData.content === "<p><br></p>") {
+      alert("내용을 입력해주세요.");
+      return;
+    }
+
+    // 확인 다이얼로그
+    if (!window.confirm("개인정보처리방침을 등록하시겠습니까?")) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await createAdminTerms("policy", formData);
+      
+      alert("개인정보처리방침이 등록되었습니다.");
+      
+      navigate("/admin/support?tab=policy");
+    } catch (error) {
+      console.error("개인정보처리방침 등록 오류:", error);
+      alert("개인정보처리방침 등록 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (window.confirm("작성 중인 내용이 사라집니다. 정말 나가시겠습니까?")) {
+      navigate("/admin/support?tab=policy");
+    }
   };
 
   return (
@@ -26,35 +65,75 @@ const AdminPolicyCreate = () => {
         <div className="p-8">
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="p-6 border-b">
-              <h1 className="text-2xl font-bold text-gray-900">제목 입력 칸</h1>
+              <h1 className="text-2xl font-bold text-gray-900">고객센터</h1>
             </div>
-
-            <div className="p-6 space-y-6">
-              <div>
-                <Input
-                  placeholder="제목 입력"
-                  value={policyData.title}
-                  onChange={(e) => setPolicyData({...policyData, title: e.target.value})}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="border rounded-lg p-4 min-h-[400px] bg-gray-50">
-                <div className="text-center py-8">
-                  <p className="text-gray-600 text-lg">텍스트 에디터</p>
-                  <p className="text-gray-500 text-sm mt-2">
-                    (이용약관처럼 기존 내용을 불러올 필요 X)
-                  </p>
+            
+            <div className="p-6">
+              <div className="mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                  
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={isSubmitting}
+                  >
+                    ← 뒤로가기
+                  </Button>
                 </div>
-              </div>
 
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleSubmit}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  등록하기
-                </Button>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>개인정보처리방침 등록</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div>
+                        <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                          제목
+                        </Label>
+                        <Input
+                          id="title"
+                          value={formData.title}
+                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          placeholder="제목을 입력하세요"
+                          className="mt-1"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="block text-sm font-medium text-gray-700 mb-2">
+                          내용
+                        </Label>
+                        <CKEditorWrapper
+                          value={formData.content}
+                          onChange={(data) => setFormData({ ...formData, content: data })}
+                          placeholder="내용을 입력하세요"
+                          minHeight={400}
+                          maxHeight={400}
+                        />
+                      </div>
+
+                      <div className="flex justify-end space-x-3 pt-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCancel}
+                          disabled={isSubmitting}
+                        >
+                          취소
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="bg-blue-600 hover:bg-blue-700"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "등록 중..." : "등록"}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>

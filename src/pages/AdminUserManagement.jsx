@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import AdminSidebar from "@/components/AdminSidebar";
-import { Input } from "@/components/ui/input";
+import { useNavigate, Link } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 import { getAdminUserList } from "../../configs/api-utils";
 
 const AdminUserManagement = () => {
@@ -88,7 +96,8 @@ const AdminUserManagement = () => {
             </div>
             {/* 헤더 */}
             <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-6 gap-4 text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-7 gap-4 text-sm font-medium text-gray-700">
+                <div>번호</div>
                 <div>이름(닉네임)</div>
                 <div>이메일</div>
                 <div>계정 활성화</div>
@@ -101,13 +110,16 @@ const AdminUserManagement = () => {
             <div className="divide-y divide-gray-200">
               {loading && <div className="p-4 text-center">로딩중...</div>}
               {!loading && data?.content?.length === 0 && <div className="p-4 text-center">사용자가 없습니다.</div>}
-              {!loading && data?.content?.map((user) => (
+              {!loading && data?.content?.map((user, index) => (
                 <Link
                   key={user.userId}
                   to={`/admin/users/${user.userId}`}
                   className="flex items-center p-4 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex-1 grid grid-cols-6 gap-2">
+                  <div className="flex-1 grid grid-cols-7 gap-2">
+                    <div className="text-sm text-gray-500">
+                      {(currentPage - 1) * 10 + index + 1}
+                    </div>
                     <div className="text-sm text-gray-900 w-32 truncate">{user.userName}({user.nickname})</div>
                     <div className="text-sm text-gray-900 w-40 truncate">{user.email}</div>
                     <div className="text-sm w-24 text-center">
@@ -123,17 +135,48 @@ const AdminUserManagement = () => {
               ))}
             </div>
             {/* 페이징 */}
-            {data?.totalPages > 1 && (
-              <div className="flex justify-center space-x-2 py-4">
-                {Array.from({ length: data.totalPages }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`px-3 py-1 rounded border ${idx + 1 === data.number + 1 ? "bg-blue-500 text-white" : "bg-white text-gray-700 border-gray-300"}`}
-                    onClick={() => setCurrentPage(idx + 1)}
-                  >
-                    {idx + 1}
-                  </button>
-                ))}
+            {data && (
+              <div className="flex justify-center py-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+
+                    {Array.from({ length: Math.max(1, data.totalPages) }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          className={`cursor-pointer ${
+                            currentPage === page 
+                              ? "bg-blue-500 text-white border-blue-500" 
+                              : "bg-white text-gray-700 border-gray-300"
+                          }`}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(Math.min(data.totalPages, currentPage + 1))}
+                        className={
+                          currentPage === data.totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </div>

@@ -317,13 +317,100 @@ export const getAdminInquiryDetail = async (informId) => {
 
 export const patchAdminInquiryReply = async (informId, reply) => {
   const adminToken = sessionStorage.getItem("adminToken");
-  const response = await apiUtils.put(
+  const response = await apiUtils.patch(
     `/admin-service/admin/inform/${informId}`,
     { reply },
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,
         'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const getAdminTermsLastPost = async () => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/terms/lastPost`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const createAdminTerms = async (category, data) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.post(
+    `/admin-service/admin/${category}`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.result;
+};
+
+export const updateAdminTerms = async (category, id, data) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.patch(
+    `/admin-service/admin/${category}/${id}`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const getAdminTermsList = async (category, page = 1, size = 10, searchWord = "") => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("size", size);
+  if (searchWord) params.append("searchWord", searchWord);
+
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/${category}/list?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+};
+
+export const getAdminTermsDetail = async (category, id) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/${category}/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+};
+
+export const deleteAdminTerms = async (category, id) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.delete(
+    `/admin-service/admin/${category}/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
       },
     }
   );

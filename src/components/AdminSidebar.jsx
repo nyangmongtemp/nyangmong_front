@@ -64,29 +64,29 @@ const AdminSidebar = () => {
           {menuItems
             .filter(item => !item.roles || item.roles.includes(adminRole))
             .map((item) => (
-              <button
-                key={item.path}
-                onClick={() => handleMenuClick(item.path)}
-                className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-lg border transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {item.title}
-              </button>
-            ))}
+            <button
+              key={item.path}
+              onClick={() => handleMenuClick(item.path)}
+              className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                location.pathname === item.path
+                  ? "bg-blue-50 text-blue-700 border border-blue-200"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {item.title}
+            </button>
+          ))}
         </nav>
       </div>
       {/* 하단 버튼 영역 */}
       <div className="px-6 pb-6 space-y-3">
         {isLoggedIn && (
-          <button
-            onClick={() => handleMenuClick("/admin/mypage")}
-            className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition"
-          >
-            마이페이지
-          </button>
+        <button
+          onClick={() => handleMenuClick("/admin/mypage")}
+          className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition"
+        >
+          마이페이지
+        </button>
         )}
         {isLoggedIn ? (
           <button

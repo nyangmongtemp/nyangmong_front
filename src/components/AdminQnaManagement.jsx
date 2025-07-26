@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/pagination";
 import { getAdminTermsList } from "../../configs/api-utils";
 
-const AdminPolicyManagement = () => {
+const AdminQnaManagement = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -33,16 +33,16 @@ const AdminPolicyManagement = () => {
   };
 
   useEffect(() => {
-    fetchPolicyData();
+    fetchQnaData();
   }, [currentPage, searchTerm]);
 
-  const fetchPolicyData = async () => {
+  const fetchQnaData = async () => {
     setLoading(true);
     try {
-      const result = await getAdminTermsList('policy', currentPage - 1, 10, searchTerm);
+      const result = await getAdminTermsList('qna', currentPage - 1, 10, searchTerm);
       setData(result);
     } catch (error) {
-      setError(error.message || "개인정보처리방침 조회에 실패했습니다.");
+      setError(error.message || "Q&A 조회에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -68,13 +68,13 @@ const AdminPolicyManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">개인정보처리방침 관리</h3>
+        <h3 className="text-lg font-medium text-gray-900">Q&A 관리</h3>
       </div>
 
       <div className="flex justify-between items-center">
         <div className="flex-1 max-w-md">
           <Input
-            placeholder="제목, 내용 검색"
+            placeholder="검색어 입력 (이름, 제목)"
             value={searchTerm}
             onChange={handleSearch}
             className="w-full"
@@ -96,25 +96,31 @@ const AdminPolicyManagement = () => {
               </div>
             </div>
             <div className="divide-y">
-              {data.content.map((policy, index) => (
+              {data.content.map((qna, index) => (
                 <div
-                  key={policy.termsId}
+                  key={qna.termsId}
                   className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => navigate(`/admin/policy/${policy.termsId}`)}
+                  onClick={() => {
+                    // TODO: 상세 모달 열기
+                    console.log("Q&A 상세 보기:", qna.termsId);
+                  }}
                 >
                   <div className="grid grid-cols-6 gap-4 text-sm">
                     <span className="text-gray-500">
                       {(currentPage - 1) * 10 + index + 1}
                     </span>
-                    <span className="text-blue-600 hover:underline truncate">
-                      {policy.title}
+                    <span 
+                      className="text-blue-600 hover:underline truncate cursor-pointer"
+                      onClick={() => navigate(`/admin/qna/${qna.termsId}`)}
+                    >
+                      {qna.title}
                     </span>
                     <span className="truncate">
-                      {policy.content.replace(/<[^>]*>/g, '')}
+                      {qna.content.replace(/<[^>]*>/g, '')}
                     </span>
-                    <span>{policy.adminName}</span>
-                    <span>{formatDate(policy.createAt)}</span>
-                    <span>{formatDate(policy.updateAt)}</span>
+                    <span>{qna.adminName}</span>
+                    <span>{formatDate(qna.createAt)}</span>
+                    <span>{formatDate(qna.updateAt)}</span>
                   </div>
                 </div>
               ))}
@@ -167,7 +173,7 @@ const AdminPolicyManagement = () => {
             </div>
             <Button 
               className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => navigate("/admin/policy/create")}
+              onClick={() => navigate("/admin/qna/create")}
             >
               생성
             </Button>
@@ -178,4 +184,4 @@ const AdminPolicyManagement = () => {
   );
 };
 
-export default AdminPolicyManagement; 
+export default AdminQnaManagement; 
