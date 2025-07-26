@@ -116,13 +116,13 @@ const AdminMyPage = () => {
   // 이메일 변경 성공 시 로그아웃 및 세션스토리지 비우기
   const handleEmailChangeSuccess = (newEmail) => {
     sessionStorage.clear();
-    window.location.href = "/admin/login";
+    window.location.href = "/admin";
   };
   // 비밀번호 변경 성공 시 안내 (추후 AlertDialog 등으로 안내 가능)
   const handlePwChangeSuccess = () => {
     alert("비밀번호가 성공적으로 변경되었습니다. 다시 로그인 해주세요.");
     sessionStorage.clear();
-    window.location.href = "/admin/login";
+    window.location.href = "/admin";
   };
 
   // 추가: handleUpdate 함수 구현
@@ -150,7 +150,7 @@ const AdminMyPage = () => {
         sessionStorage.removeItem("adminRole");
         sessionStorage.removeItem("forceEmailChange");
         alert("수정이 완료되었습니다. 다시 로그인 해주세요.");
-        window.location.href = "/admin/login";
+        window.location.href = "/admin";
       } else {
         alert(res.data?.statusMessage || "수정에 실패했습니다.");
       }
