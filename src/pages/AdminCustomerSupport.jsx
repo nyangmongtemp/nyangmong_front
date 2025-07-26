@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminInquiryManagement from "../components/AdminInquiryManagement";
 import AdminTermsManagement from "../components/AdminTermsManagement";
+import AdminQnaManagement from "../components/AdminQnaManagement";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -26,8 +27,8 @@ const AdminCustomerSupport = () => {
               <h1 className="text-2xl font-bold text-gray-900">고객센터</h1>
             </div>
 
-            <Tabs defaultValue="inquiry" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1 m-6 mb-0">
+            <Tabs defaultValue="inquiry" className="w-full p-3">
+              <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1">
                 <TabsTrigger
                   value="inquiry"
                   className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"
@@ -74,31 +75,7 @@ const AdminCustomerSupport = () => {
               </TabsContent>
 
               <TabsContent value="qna" className="p-6">
-                <div className="space-y-4">
-                  <div className="border rounded-lg">
-                    <div className="bg-gray-50 px-4 py-3 border-b">
-                      <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-700">
-                        <span>제목</span>
-                        <span>내용</span>
-                        <span>작성자</span>
-                        <span>생성일자</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="grid grid-cols-4 gap-4 text-sm">
-                        <span>1번 Q&A</span>
-                        <span>회원가입 오류 발생 관련 공지</span>
-                        <span>도진호</span>
-                        <span>2025.06.24 12:47</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                      생성 버튼
-                    </button>
-                  </div>
-                </div>
+                <AdminQnaManagement />
               </TabsContent>
             </Tabs>
           </div>

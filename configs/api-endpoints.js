@@ -73,6 +73,7 @@ export const API_ENDPOINTS = {
     POLICIES: "/admin-service/policies",
     TERMS_DETAIL: "/admin-service/admin/terms/lastPost",
     TERMS_COMMON: (category) => `/admin-service/admin/${category}`,
+    TERMS_LIST: (category) => `/admin-service/admin/${category}/list`,
     LOGS: "/admin-service/logs",
     LOG_LIST: "/admin-service/admin/log/list",
     INFORM_LIST: "/admin-service/admin/inform/list",
