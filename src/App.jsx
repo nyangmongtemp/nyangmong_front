@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import Board from "./pages/Board";
 import PostDetail from "./pages/PostDetail";
@@ -28,6 +29,10 @@ import UserMyPage from "./pages/UserMyPage";
 import AdminCustomerSupport from "./pages/AdminCustomerSupport";
 import AdminBannerManagement from "./pages/AdminBannerManagement";
 import AdminPolicyCreate from "./pages/AdminPolicyCreate";
+import AdminQnaCreate from "./pages/AdminQnaCreate";
+import AdminQnaDetail from "./pages/AdminQnaDetail";
+import AdminPolicyDetail from "./pages/AdminPolicyDetail";
+import AdminInquiryDetail from "./pages/AdminInquiryDetail";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
 import { AuthProvider } from "./context/UserContext";
@@ -38,6 +43,22 @@ import TestMap from "./components/testMap.jsx";
 
 const queryClient = new QueryClient();
 
+// 관리자 로그아웃 이벤트 처리를 위한 컴포넌트
+const AdminLogoutHandler = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleAdminLogout = () => {
+      navigate("/admin");
+    };
+
+    window.addEventListener("adminLogout", handleAdminLogout);
+    return () => window.removeEventListener("adminLogout", handleAdminLogout);
+  }, [navigate]);
+
+  return null;
+};
+
 const App = () => (
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
@@ -45,6 +66,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AdminLogoutHandler />
           <Routes>
             {/* User routes */}
             <Route path="/" element={<Index />} />
@@ -88,6 +110,22 @@ const App = () => (
                     <Route
                       path="policy/create"
                       element={<AdminPolicyCreate />}
+                    />
+                    <Route
+                      path="qna/create"
+                      element={<AdminQnaCreate />}
+                    />
+                    <Route
+                      path="qna/:id"
+                      element={<AdminQnaDetail />}
+                    />
+                    <Route
+                      path="policy/:id"
+                      element={<AdminPolicyDetail />}
+                    />
+                    <Route
+                      path="inquiry/:id"
+                      element={<AdminInquiryDetail />}
                     />
                     <Route path="mypage" element={<MyPage />} />
                     <Route path="login" element={<LoginPage />} />

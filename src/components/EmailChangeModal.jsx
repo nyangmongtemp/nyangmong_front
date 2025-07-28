@@ -84,7 +84,7 @@ const EmailChangeModal = ({ open, onOpenChange, onSuccess }) => {
       sessionStorage.removeItem("forceEmailChange");
       // 성공 시 로그아웃 및 메인 이동
       sessionStorage.clear();
-      window.location.href = "/admin/login";
+      window.location.href = "/admin";
       onSuccess && onSuccess(newEmail);
       onOpenChange(false);
     } catch (e) {
