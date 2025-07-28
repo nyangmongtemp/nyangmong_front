@@ -19,6 +19,7 @@ import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, MAIN, USER } from "../../configs/host-config";
 import { Card as BorderCard } from "@/components/ui/card";
 import { AiFillHeart } from "react-icons/ai";
+import ReportButton from "./ReportButton";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -687,6 +688,13 @@ const CommentSection = ({
                             답글
                           </Button>
                         )}
+                      {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                      {nowLoggedUserId !== comment.userId && (
+                        <ReportButton
+                          category="comment"
+                          accusedUserId={comment.userId}
+                        />
+                      )}
                     </div>
                   )}
                   {/* 답글 입력창: replyTo가 현재 commentId일 때만 노출 */}
@@ -845,6 +853,14 @@ const CommentSection = ({
                                           <Trash2 className="w-3 h-3" />
                                         </Button>
                                       </div>
+                                    )}
+                                  {/* 대댓글 신고 버튼: 본인 대댓글이 아니면 노출 */}
+                                  {isLoggedIn &&
+                                    nowLoggedUserId !== reply.userId && (
+                                      <ReportButton
+                                        category="comment"
+                                        accusedUserId={reply.userId}
+                                      />
                                     )}
                                 </div>
                               </div>

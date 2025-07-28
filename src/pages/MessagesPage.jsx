@@ -24,6 +24,7 @@ import NewChatModal from "@/components/NewChatModal";
 import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
+import ReportButton from "../components/ReportButton";
 
 const MessagesPage = () => {
   const navigate = useNavigate();
@@ -272,6 +273,7 @@ const MessagesPage = () => {
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
+                                    {/* 신고 버튼 추가 */}
                                   </div>
                                 </div>
                                 <div className="flex items-center space-x-2 mb-2">
