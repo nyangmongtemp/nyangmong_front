@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import Board from "./pages/Board";
 import PostDetail from "./pages/PostDetail";
@@ -42,6 +43,22 @@ import TestMap from "./components/testMap.jsx";
 
 const queryClient = new QueryClient();
 
+// 관리자 로그아웃 이벤트 처리를 위한 컴포넌트
+const AdminLogoutHandler = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleAdminLogout = () => {
+      navigate("/admin");
+    };
+
+    window.addEventListener("adminLogout", handleAdminLogout);
+    return () => window.removeEventListener("adminLogout", handleAdminLogout);
+  }, [navigate]);
+
+  return null;
+};
+
 const App = () => (
   <AuthProvider>
     <QueryClientProvider client={queryClient}>
@@ -49,6 +66,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AdminLogoutHandler />
           <Routes>
             {/* User routes */}
             <Route path="/" element={<Index />} />

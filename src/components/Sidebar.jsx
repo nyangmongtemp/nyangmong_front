@@ -22,7 +22,13 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, SSE, USER, BOARD } from "../../configs/host-config";
+import {
+  API_BASE_URL,
+  SSE,
+  USER,
+  BOARD,
+  MAIN,
+} from "../../configs/host-config";
 import { API_ENDPOINTS } from "../../configs/api-endpoints";
 import { useAuth } from "../context/UserContext";
 import PasswordResetForm from "./PasswordResetForm";
@@ -45,6 +51,7 @@ const Sidebar = () => {
   } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
+  const [banners, setBanners] = useState([]); // 광고 배너 상태 추가
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [popularPosts, setPopularPosts] = useState([]);
@@ -137,10 +144,26 @@ const Sidebar = () => {
     "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
   ];
 
-  const adImages = [
-    "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-  ];
+  // 광고 배너 목록 API 연동
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await axiosInstance.get(
+          `${API_BASE_URL}${MAIN}/screen/banner/list`
+        );
+        // order 오름차순 정렬
+        const sorted = (res.data.result || []).sort(
+          (a, b) => a.order - b.order
+        );
+        setBanners(sorted);
+        setCurrentAdSlide(0); // 새로 받아오면 첫 슬라이드로
+      } catch (error) {
+        setBanners([]);
+        console.error("광고 배너 불러오기 실패:", error);
+      }
+    };
+    fetchBanners();
+  }, []);
 
   const handleKakaoLogin = () => {
     console.log("카카오 로그인 버튼 클릭!");
@@ -753,29 +776,40 @@ const Sidebar = () => {
         </CardHeader>
         <CardContent className="p-4">
           <div className="relative">
-            <img
-              src={adImages[currentAdSlide]}
-              alt="광고"
-              className="w-full h-32 object-cover rounded-lg"
-            />
-            <button
-              onClick={() =>
-                setCurrentAdSlide(
-                  (prev) => (prev - 1 + adImages.length) % adImages.length
-                )
-              }
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() =>
-                setCurrentAdSlide((prev) => (prev + 1) % adImages.length)
-              }
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            {banners.length > 0 ? (
+              <>
+                <img
+                  src={banners[currentAdSlide].image}
+                  alt="광고"
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                {/* 제목 노출 제거됨 */}
+                <button
+                  onClick={() =>
+                    setCurrentAdSlide(
+                      (prev) => (prev - 1 + banners.length) % banners.length
+                    )
+                  }
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
+                  disabled={banners.length <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentAdSlide((prev) => (prev + 1) % banners.length)
+                  }
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
+                  disabled={banners.length <= 1}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <div className="w-full h-32 flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
+                광고 배너가 없습니다.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

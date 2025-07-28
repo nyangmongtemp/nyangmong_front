@@ -29,7 +29,7 @@ const AdminSidebar = () => {
     sessionStorage.removeItem("adminName");
     sessionStorage.removeItem("adminRole");
     setLogoutTrigger((prev) => !prev); // 강제 리렌더
-    navigate("/admin/login");
+    navigate("/admin");
   };
 
   // 사이드바 메뉴 클릭 핸들러
@@ -62,7 +62,7 @@ const AdminSidebar = () => {
 
         <nav className="space-y-2">
           {menuItems
-            .filter(item => !item.roles || item.roles.includes(adminRole))
+            .filter((item) => !item.roles || item.roles.includes(adminRole))
             .map((item) => (
             <button
               key={item.path}

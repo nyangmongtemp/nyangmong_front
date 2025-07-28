@@ -111,6 +111,9 @@ export const AdminProvider = ({ children }) => {
     setRole("");
     setIsFirst(false);
     setIsLoggedIn(false);
+
+    // 관리자 로그아웃 시 /admin으로 이동하는 커스텀 이벤트 발생
+    window.dispatchEvent(new CustomEvent("adminLogout"));
   };
 
   return (
