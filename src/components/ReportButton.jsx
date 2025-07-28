@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, USER } from "../../configs/host-config";
+import { Flag } from "lucide-react";
 
 const ReportButton = ({ category, accusedUserId }) => {
   const [open, setOpen] = useState(false);
@@ -41,13 +42,13 @@ const ReportButton = ({ category, accusedUserId }) => {
       <Button
         variant="ghost"
         size="sm"
-        className="text-red-500 hover:bg-red-50 border border-red-500 rounded-md"
+        className="text-red-500 hover:bg-red-50 border border-transparent rounded-md px-2 py-1 text-xs"
         onClick={(e) => {
           e.stopPropagation();
           setOpen(true);
         }}
       >
-        신고
+        <Flag className="w-4 h-4" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xs">

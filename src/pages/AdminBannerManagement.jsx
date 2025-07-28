@@ -19,6 +19,7 @@ import {
 
 const AdminBannerManagement = () => {
   const bannerUrl = `${API_BASE_URL}${ADMIN}/banner`;
+  const { logout } = useAdmin();
   const navigate = useNavigate();
   const token = sessionStorage.getItem("adminToken");
   useEffect(() => {
@@ -33,6 +34,7 @@ const AdminBannerManagement = () => {
     if (role !== "BOSS" && role !== "CONTENT") {
       alert("접근 권한이 없습니다.");
       // 권한 없으면 메인 화면으로 이동
+      logout();
       navigate("/admin/", { replace: true });
       return;
     }
@@ -80,6 +82,13 @@ const AdminBannerManagement = () => {
         setEditCount(response.data); // 모달 열 때 초기값 세팅
       } catch (error) {
         console.error("배너 개수 요청 에러:", error);
+        if (
+          error.response.status === 401 &&
+          error.response.data === "EXPIRED_TOKEN"
+        ) {
+          alert("토큰이 만료되었습니다.");
+          navigate("/admin/login", { replace: true });
+        }
       }
     };
     fetchBannerCount();
