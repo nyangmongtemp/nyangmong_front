@@ -2,6 +2,18 @@ import axios from "axios";
 import { API_BASE_URL, USER } from "./host-config";
 import { decrypt } from "../src/hooks/use-encode";
 
+// 날짜 포맷 함수
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const HH = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${MM}-${dd} ${HH}:${mm}`;
+};
+
 // ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
   // 개발 환경에서는 프록시를 사용하므로 baseURL을 빈 문자열로 설정
@@ -65,6 +77,35 @@ axiosInstance.interceptors.response.use(
     if (error.response?.data?.message === "NO_LOGIN") {
       console.log("Not logged in — skipping token refresh.");
       return Promise.reject(error);
+    }
+
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.code === "ACCOUNT-007"
+    ) {
+      console.log(error);
+
+      alert("아이디 혹은 패스워드를 다시 확인해 주세요.");
+    }
+
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.code === "ACCOUNT-005"
+    ) {
+      console.log(error);
+
+      alert("로그인 5회 실패로 30분간 로그인이 불가능합니다.");
+    }
+
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "NOT_ALLOWED_USER"
+    ) {
+      console.log(error);
+
+      const time = formatDate(error.response?.data?.message);
+
+      alert(`${time} 까지 이용이 불가능합니다.`);
     }
 
     // 401 Unauthorized 에러일 경우 (토큰 만료)
