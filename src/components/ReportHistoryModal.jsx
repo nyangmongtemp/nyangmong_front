@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { getUserReportHistory } from "../../configs/api-utils";
+import { getUserReportHistory, patchReportConfirm } from "../../configs/api-utils";
 
 const getCategoryLabel = (category) => {
   switch (category) {
@@ -101,7 +101,15 @@ const ReportHistoryModal = ({ isOpen, onClose, userId }) => {
                         <span className="font-normal whitespace-pre-line">{report.content}</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      if (!window.confirm("신고 기록을 확인하셨으면 확인 아니라면 취소를 클릭해주세요.(확인 시 신고 기록이 삭제됩니다.)")) return;
+                      try {
+                        await patchReportConfirm(report.reportId);
+                        setReportHistory((prev) => prev.filter((r) => r.reportId !== report.reportId));
+                      } catch (e) {
+                        alert("신고 확인 중 오류가 발생했습니다");
+                      }
+                    }}>
                       신고 확인
                     </Button>
                   </div>

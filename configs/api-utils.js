@@ -429,3 +429,17 @@ export const getUserReportHistory = async (userId) => {
   );
   return response.result;
 }; 
+
+export const patchReportConfirm = async (reportId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.patch(
+    `/admin-service/admin/report/${reportId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
