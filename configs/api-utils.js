@@ -416,3 +416,16 @@ export const deleteAdminTerms = async (category, id) => {
   );
   return response.result;
 }; 
+
+export const getUserReportHistory = async (userId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/user/report/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
