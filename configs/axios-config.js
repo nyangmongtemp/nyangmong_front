@@ -120,10 +120,10 @@ axiosInstance.interceptors.response.use(
           // 관리자 토큰 만료 시
           console.log("관리자 토큰 만료 - 관리자 로그아웃 처리");
           sessionStorage.clear();
-          localStorage.removeItem("admin_token");
-          localStorage.removeItem("admin_id");
-          localStorage.removeItem("admin_role");
-          localStorage.removeItem("admin_isFirst");
+          sessionStorage.removeItem("admin_token");
+          sessionStorage.removeItem("admin_id");
+          sessionStorage.removeItem("admin_role");
+          sessionStorage.removeItem("admin_isFirst");
 
           // 사용자에게 알림
           if (typeof window !== "undefined") {
