@@ -35,6 +35,8 @@ import AdminPolicyDetail from "./pages/AdminPolicyDetail";
 import AdminInquiryDetail from "./pages/AdminInquiryDetail";
 import MessagesPage from "./pages/MessagesPage";
 import CustomerServicePage from "./pages/CustomerServicePage";
+import CustomerPrivacyDetail from "./pages/CustomerPrivacyDetail";
+import CustomerQnADetail from "./pages/CustomerQnADetail";
 import { AuthProvider } from "./context/UserContext";
 import ChildDetail from "./pages/ChildDetail";
 import { AdminProvider } from "./context/AdminContext";
@@ -90,6 +92,14 @@ const App = () => (
             <Route path="/mypage" element={<UserMyPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/customer-service" element={<CustomerServicePage />} />
+            <Route
+              path="/customer-privacy-detail/:id"
+              element={<CustomerPrivacyDetail />}
+            />
+            <Route
+              path="/customer-qna-detail/:id"
+              element={<CustomerQnADetail />}
+            />
             {/* Admin routes wrapped with AdminProvider */}
             <Route
               path="/admin/*"
@@ -111,18 +121,9 @@ const App = () => (
                       path="policy/create"
                       element={<AdminPolicyCreate />}
                     />
-                    <Route
-                      path="qna/create"
-                      element={<AdminQnaCreate />}
-                    />
-                    <Route
-                      path="qna/:id"
-                      element={<AdminQnaDetail />}
-                    />
-                    <Route
-                      path="policy/:id"
-                      element={<AdminPolicyDetail />}
-                    />
+                    <Route path="qna/create" element={<AdminQnaCreate />} />
+                    <Route path="qna/:id" element={<AdminQnaDetail />} />
+                    <Route path="policy/:id" element={<AdminPolicyDetail />} />
                     <Route
                       path="inquiry/:id"
                       element={<AdminInquiryDetail />}
