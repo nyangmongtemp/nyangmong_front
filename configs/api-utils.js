@@ -443,3 +443,17 @@ export const patchReportConfirm = async (reportId) => {
   );
   return response.result;
 }; 
+
+export const patchUserBan = async (userId, releaseAt) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.patch(
+    `/admin-service/admin/ban/${userId}`,
+    { releaseAt },
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
