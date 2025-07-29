@@ -209,7 +209,7 @@ const UserMyPage = () => {
 
     try {
       const response = await axiosInstance.get(
-        `${API_BASE_URL}${BOARD}/mypage/${category}`,
+        `${API_BASE_URL}${BOARD}/list/${category}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

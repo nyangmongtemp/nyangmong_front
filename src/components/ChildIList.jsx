@@ -47,7 +47,7 @@ const ChildIList = () => {
     setLoading(true);
     setError(null);
     axiosInstance
-      .get(`${API_BASE_URL}${BOARD}/introduction/list`, {
+      .get(`${API_BASE_URL}${BOARD}/list/INTRODUCTION`, {
         params: { page: 0, size: 1000 }, // 충분히 크게!
       })
       .then((res) => {
