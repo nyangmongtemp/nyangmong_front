@@ -11,7 +11,14 @@ import ImageCropModal from "./ImageCropModal";
 import axios from "axios";
 import { ADMIN, API_BASE_URL } from "../../configs/host-config";
 
-const BannerDetailModal = ({ isOpen, onClose, banner, onUpdate, onDelete }) => {
+const BannerDetailModal = ({
+  isOpen,
+  onClose,
+  banner,
+  onUpdate,
+  onDelete,
+  onRefresh,
+}) => {
   const [bannerName, setBannerName] = useState("");
   const [bannerImage, setBannerImage] = useState("");
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
@@ -99,6 +106,10 @@ const BannerDetailModal = ({ isOpen, onClose, banner, onUpdate, onDelete }) => {
       if (response.status === 200) {
         alert("노출이 취소 되었습니다");
         onClose();
+        // 성공 시 배너 목록 갱신
+        if (onRefresh) {
+          await onRefresh();
+        }
       }
     } catch (error) {
       console.error("노출 취소 요청 에러:", error);
