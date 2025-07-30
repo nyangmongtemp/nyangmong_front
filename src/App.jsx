@@ -24,7 +24,6 @@ import AdminManagerManagement from "./pages/AdminManagerManagement";
 import AdminLogManagement from "./pages/AdminLogManagement";
 import AdminBoardManagement from "./pages/AdminBoardManagement";
 import AdminAdvertisementManagement from "./pages/AdminAdvertisementManagement";
-import MyPage from "./pages/MyPage";
 import MyPage from "./pages/AdminMyPage.jsx";
 import LoginPage from "./pages/LoginPage";
 import UserMyPage from "./pages/UserMyPage";
