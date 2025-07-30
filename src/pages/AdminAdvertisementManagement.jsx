@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,71 +13,87 @@ import AdminSidebar from "../components/AdminSidebar";
 import AdvertisementDetailModal from "../components/AdvertisementDetailModal";
 import AdvertisementCreateModal from "../components/AdvertisementCreateModal";
 import AdvertisementModifyModal from "../components/AdvertisementModifyModal";
+import { useAdmin } from "../context/AdminContext";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, ADMIN } from "../../configs/host-config";
 
 const AdminAdvertisementManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("createdAt_desc");
+  const [sortOrder, setSortOrder] = useState("id_asc");
   const [displayCount, setDisplayCount] = useState();
+  const [ads, setAds] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const { role, isLoggedIn } = useAdmin();
+  const [showActiveOnly, setShowActiveOnly] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  // 광고 목록 조회 함수
+  const fetchAds = async (page = 0) => {
+    const role = sessionStorage.getItem("adminRole");
+    if (role !== "BOSS") return;
 
-  const [ads, setAds] = useState([
-    {
-      id: 1,
-      title: "광고 1",
-      createdAt: "2025-07-01",
-      updatedAt: "2025-07-10",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 2,
-      title: "광고 2",
-      createdAt: "2025-07-02",
-      updatedAt: "2025-07-11",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 3,
-      title: "광고 3",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 4,
-      title: "광고 4",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 5,
-      title: "광고 5",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 6,
-      title: "광고 6",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      confirmed: "false",
-      active: "true",
-    },
-    {
-      id: 7,
-      title: "광고 7",
-      createdAt: "2025-07-03",
-      updatedAt: "2025-07-12",
-      confirmed: "false",
-      active: "true",
-    },
-  ]);
+    const token = sessionStorage.getItem("adminToken");
 
+    const requestBody = {
+      title: searchTerm,
+      active: showActiveOnly === null ? null : showActiveOnly,
+      startDate: startDate && startDate !== "" ? startDate : null,
+      endDate: endDate && endDate !== "" ? endDate : null,
+      sort: sortOrder,
+    };
+
+    const requestParams = {
+      page: page + 1,
+      size: 10,
+    };
+
+    console.log("📤 요청 파라미터:", { ...requestBody, ...requestParams });
+
+    try {
+      const response = await axiosInstance.post(
+        `${API_BASE_URL}${ADMIN}/ads/search`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          params: requestParams,
+        }
+      );
+
+      const { content, totalPages, number } = response.data.result;
+
+      // ✅ 응답 데이터 정확히 반영
+      setAds(content);
+      setCurrentPage(number);
+      setTotalPages(totalPages);
+
+      console.log("✅ 서버 응답:", response.data);
+    } catch (error) {
+      console.error("❌ 광고 목록 조회 실패", error);
+      alert("광고 목록을 불러오지 못했습니다.");
+    }
+  };
+
+  // 검색어, 정렬, 활성화, 날짜 변경 로그
+  useEffect(() => {
+    console.log("🔄 필터 변경 감지됨:", {
+      searchTerm,
+      sortOrder,
+      showActiveOnly,
+      startDate,
+      endDate,
+    });
+    fetchAds(0);
+  }, [searchTerm, showActiveOnly, , sortOrder, startDate, endDate]);
+  // 임시로 클라이언트 필터링 (서버 필터링 문제 시 사용)
+  const filteredAds = showActiveOnly
+    ? ads.filter((ad) => ad.active === true)
+    : ads;
+
+  // 모달 상태 및 선택 광고 상태
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
@@ -113,6 +129,10 @@ const AdminAdvertisementManagement = () => {
     setAds(newOrder);
   };
 
+  const handlePageChange = (page) => {
+    fetchAds(page);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -125,7 +145,8 @@ const AdminAdvertisementManagement = () => {
 
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <div className="text-gray-800 font-medium">
-                노출 광고 수: <span className="font-bold">{ads.length}</span>개
+                노출 광고 수:{" "}
+                <span className="font-bold">{filteredAds.length}</span>개
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-700">광고 개수 변경</span>
@@ -146,30 +167,70 @@ const AdminAdvertisementManagement = () => {
 
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2 flex-1 max-w-md">
-                  <Input
-                    placeholder="검색어 입력"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    검색
-                  </Button>
+                {/* 🔍 상단 필터 영역 */}
+                <div className="flex justify-between items-center mb-4 gap-2">
+                  {/* 🔍 왼쪽: 검색 + 활성화 토글 */}
+                  <div className="flex gap-2 flex-1">
+                    <Input
+                      placeholder="검색어 입력"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="flex-grow"
+                    />
+                    <Button
+                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={() => fetchAds(0)}
+                    >
+                      검색
+                    </Button>
+                    <Select
+                      onValueChange={(value) =>
+                        setShowActiveOnly(
+                          value === "true"
+                            ? true
+                            : value === "false"
+                            ? false
+                            : null
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="전체 상태" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="null">전체</SelectItem>
+                        <SelectItem value="true">활성</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* 📅 오른쪽: 날짜 필터 */}
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-36"
+                    />
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-36"
+                    />
+                  </div>
                 </div>
                 <Select value={sortOrder} onValueChange={setSortOrder}>
                   <SelectTrigger className="ml-4 w-40">
                     <SelectValue placeholder="정렬조건" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="createdAt_desc">
+                    <SelectItem value="createAt_desc">
                       생성일자 최신순
                     </SelectItem>
-                    <SelectItem value="createdAt_asc">
+                    <SelectItem value="createAt_asc">
                       생성일자 오래된순
                     </SelectItem>
-                    <SelectItem value="order_desc">순서 내림차순</SelectItem>
-                    <SelectItem value="order_asc">순서 오름차순</SelectItem>
                     <SelectItem value="id_desc">아이디 내림차순</SelectItem>
                     <SelectItem value="id_asc">아이디 오름차순</SelectItem>
                   </SelectContent>
@@ -190,44 +251,51 @@ const AdminAdvertisementManagement = () => {
             </div>
 
             <div className="px-4 space-y-2">
-              {ads
-                .filter((ad) =>
-                  (ad.title || "")
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-                )
-                .map((ad) => (
-                  <div
-                    key={ad.id}
-                    className="grid grid-cols-7 gap-4 items-center border-b py-2 text-sm"
-                  >
-                    <div>{ad.id}</div>
-                    <div>{ad.title}</div>
-                    <div>{ad.createdAt}</div>
-                    <div>{ad.updatedAt}</div>
-                    <div>{ad.confirmed}</div>
-                    <div>{ad.active}</div>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedAd(ad);
-                          setIsModifyModalOpen(true); // 수정 모달 열기
-                        }}
-                      >
-                        수정
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDetailClick(ad)}
-                      >
-                        상세 보기
-                      </Button>
-                    </div>
+              {filteredAds.map((ad) => (
+                <div
+                  key={ad.id}
+                  className="grid grid-cols-7 gap-4 items-center border-b py-2 text-sm"
+                >
+                  <div>{ad.id}</div>
+                  <div>{ad.title}</div>
+                  <div>{new Date(ad.createdAt).toLocaleDateString()}</div>
+                  <div>{new Date(ad.updatedAt).toLocaleDateString()}</div>
+                  <div>{ad.confirmed ? "예" : "아니오"}</div>
+                  <div>{ad.active ? "활성" : "비활성"}</div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedAd(ad);
+                        setIsModifyModalOpen(true);
+                      }}
+                    >
+                      수정
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDetailClick(ad)}
+                    >
+                      상세 보기
+                    </Button>
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+
+            {/* 페이지네이션 */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <Button
+                  key={i}
+                  variant={i === currentPage ? "default" : "outline"}
+                  onClick={() => handlePageChange(i)}
+                >
+                  {i + 1}
+                </Button>
+              ))}
             </div>
 
             <div className="flex justify-end px-4 py-6">
@@ -242,7 +310,7 @@ const AdminAdvertisementManagement = () => {
         </div>
       </div>
 
-      {/* 모달 */}
+      {/* 모달들 */}
       <AdvertisementDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
@@ -260,7 +328,7 @@ const AdminAdvertisementManagement = () => {
       <AdvertisementModifyModal
         isOpen={isModifyModalOpen}
         onClose={() => setIsModifyModalOpen(false)}
-        ad={selectedAd} // 배열이 아니라 선택된 광고만 전달
+        ad={selectedAd}
         onOrderUpdate={handleOrderUpdate}
       />
     </div>
