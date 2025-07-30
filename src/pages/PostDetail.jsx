@@ -109,15 +109,7 @@ const PostDetail = () => {
           content: data.content,
           author: data.nickname,
           userId: data.userid,
-          createdAt: data.createdat
-            ? new Date(data.createdat).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "날짜 정보 없음",
+          createdAt: data.createdat,
           views: data.viewcount,
           likes: 0, // 백엔드에 likes 필드가 없으므로 기본값 0
           thumbnailimage: data.thumbnailimage,
