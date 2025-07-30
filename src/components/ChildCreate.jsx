@@ -35,13 +35,14 @@ const ChildCreate = () => {
   useEffect(() => {
     if (isEdit) {
       axiosInstance
-        .get(`${API_BASE_URL}${BOARD}/detail/introduction/${id}`)
+        .get(`${API_BASE_URL}${BOARD}/detail/INTRODUCTION/${id}`)
         .then((res) => {
           let data = res.data.result || res.data.data || res.data;
           if (Array.isArray(data)) data = data[0];
           setFormData({
             title: data.title,
             description: data.content,
+            category: data.type,
           });
           if (data.thumbnailImage || data.thumbnailimage) {
             setThumbnail({
@@ -105,6 +106,7 @@ const ChildCreate = () => {
       new Blob(
         [
           JSON.stringify({
+            category: "INTRODUCTION",
             title: formData.title,
             content: formData.description,
           }),
@@ -117,7 +119,7 @@ const ChildCreate = () => {
     try {
       if (isEdit) {
         await axiosInstance.put(
-          `${API_BASE_URL}${BOARD}/introduction/modify/${id}`,
+          `${API_BASE_URL}${BOARD}/INTRODUCTION/modify/${id}`,
           formDataToSend,
           {
             headers: {
@@ -132,7 +134,7 @@ const ChildCreate = () => {
         window.location.reload();
       } else {
         await axiosInstance.post(
-          `${API_BASE_URL}${BOARD}/introduction/create`,
+          `${API_BASE_URL}${BOARD}/create`,
           formDataToSend,
           {
             headers: {

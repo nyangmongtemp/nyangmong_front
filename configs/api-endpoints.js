@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
   // 유기동물 관련
   STRAY_ANIMAL: {
     LIST: "/animalboard-service/stray-animal-board/list",
+    MAIN: "/animalboard-service/stray-animal-board/main",
     DETAIL: (id) => `/animalboard-service/stray-animal-board/${id}`,
     CREATE: "/animalboard-service/stray-animal-board/create",
     UPDATE: (id) => `/animalboard-service/stray-animal-board/${id}`,
@@ -64,12 +65,18 @@ export const API_ENDPOINTS = {
   // 관리자 관련
   ADMIN: {
     USERS: "/admin-service/users",
-    USER_DETAIL: (id) => `/admin-service/users/${id}`,
+    USER_DETAIL: (id) => `/admin-service/admin/user/detail/${id}`,
+    USER_LIST: "/admin-service/admin/user/list",
     BOARDS: "/admin-service/boards",
     INQUIRIES: "/admin-service/inquiries",
     BANNERS: "/admin-service/banners",
     POLICIES: "/admin-service/policies",
+    TERMS_DETAIL: "/admin-service/admin/terms/lastPost",
+    TERMS_COMMON: (category) => `/admin-service/admin/${category}`,
+    TERMS_LIST: (category) => `/admin-service/admin/${category}/list`,
     LOGS: "/admin-service/logs",
+    LOG_LIST: "/admin-service/admin/log/list",
+    INFORM_LIST: "/admin-service/admin/inform/list",
   },
 
   // 고객 지원

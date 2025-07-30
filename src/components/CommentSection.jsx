@@ -19,6 +19,7 @@ import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, MAIN, USER } from "../../configs/host-config";
 import { Card as BorderCard } from "@/components/ui/card";
 import { AiFillHeart } from "react-icons/ai";
+import ReportButton from "./ReportButton";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -239,7 +240,6 @@ const CommentSection = ({
   const handleReplySubmit = async (commentId) => {
     if (!replyText.trim()) return;
     try {
-      // TODO: 답글 API 구현 시 활성화
       console.log("답글 작성:", commentId, replyText);
       const response = await axiosInstance.post(
         `${API_BASE_URL}${MAIN}/reply/create`,
@@ -248,16 +248,22 @@ const CommentSection = ({
           content: replyText,
         }
       );
+
+      // 답글 생성 성공 시 즉시 상태 업데이트
+      const newReply = response.data?.result || response.data;
+      if (newReply) {
+        setRepliesByCommentId((prev) => ({
+          ...prev,
+          [commentId]: [...(prev[commentId] || []), newReply],
+        }));
+      }
+
       setReplyText("");
       setReplyTo(null);
-
-      // 답글 생성 후 해당 댓글의 답글 목록을 다시 조회
-      fetchReplies(commentId);
+      alert("답글이 생성되었습니다.");
 
       // 댓글 개수 업데이트
       fetchCommentLikeCount();
-
-      alert("답글이 생성되었습니다.");
     } catch (err) {
       console.error("답글 작성 실패:", err);
       alert("답글 작성에 실패했습니다.");
@@ -415,15 +421,23 @@ const CommentSection = ({
         }
       );
       console.log(response);
-      alert("대댓글이 생성되었습니다.");
+
+      // 대댓글 생성 성공 시 즉시 상태 업데이트
+      const newReply = response.data?.result || response.data;
+      if (newReply) {
+        setRepliesByCommentId((prev) => ({
+          ...prev,
+          [parentCommentId]: [...(prev[parentCommentId] || []), newReply],
+        }));
+      }
+
       setReplyInputs((prev) => ({ ...prev, [parentCommentId]: "" }));
-      // 대댓글 목록 새로고침
-      fetchReplies(parentCommentId);
-      // 컴포넌트 전체 데이터 새로고침
-      fetchComments(page, false);
+      alert("대댓글이 생성되었습니다.");
+
+      // 댓글 개수 업데이트
       fetchCommentLikeCount();
-      fetchIsLiked();
     } catch (err) {
+      console.error("대댓글 작성 실패:", err);
       alert("대댓글 작성에 실패했습니다.");
     }
   };
@@ -442,17 +456,23 @@ const CommentSection = ({
         }
       );
       console.log(response);
+
+      // 대댓글 수정 성공 시 즉시 상태 업데이트
+      setRepliesByCommentId((prev) => ({
+        ...prev,
+        [parentCommentId]:
+          prev[parentCommentId]?.map((reply) =>
+            reply.replyId === replyId
+              ? { ...reply, content: replyEditText }
+              : reply
+          ) || [],
+      }));
+
       setReplyEdit((prev) => ({ ...prev, [replyId]: false }));
       setReplyEditText("");
-      // 대댓글 목록 새로고침
-      fetchReplies(parentCommentId);
-      // 컴포넌트 전체 데이터 새로고침
-      fetchComments(page, false);
-      fetchCommentLikeCount();
-      fetchIsLiked();
+      alert("대댓글이 수정되었습니다.");
     } catch (err) {
-      console.log(err);
-
+      console.error("대댓글 수정 실패:", err);
       alert("대댓글 수정에 실패했습니다.");
     }
   };
@@ -464,14 +484,19 @@ const CommentSection = ({
         `${API_BASE_URL}${MAIN}/reply/delete/${replyId}`
       );
       console.log(response);
+
+      // 대댓글 삭제 성공 시 즉시 상태 업데이트
+      setRepliesByCommentId((prev) => ({
+        ...prev,
+        [parentCommentId]:
+          prev[parentCommentId]?.filter((reply) => reply.replyId !== replyId) ||
+          [],
+      }));
+
       alert("대댓글 삭제가 완료되었습니다.");
-      // 대댓글 목록 새로고침
-      fetchReplies(parentCommentId);
-      // 컴포넌트 전체 데이터 새로고침
-      fetchComments(page, false);
       fetchCommentLikeCount();
-      fetchIsLiked();
     } catch (err) {
+      console.error("대댓글 삭제 실패:", err);
       alert("대댓글 삭제에 실패했습니다.");
     }
   };
@@ -687,6 +712,13 @@ const CommentSection = ({
                             답글
                           </Button>
                         )}
+                      {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                      {nowLoggedUserId !== comment.userId && (
+                        <ReportButton
+                          category="comment"
+                          accusedUserId={comment.userId}
+                        />
+                      )}
                     </div>
                   )}
                   {/* 답글 입력창: replyTo가 현재 commentId일 때만 노출 */}
@@ -698,7 +730,7 @@ const CommentSection = ({
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyPress={(e) =>
                           handleKeyPress(e, () =>
-                            handleReplySubmit(comment.commentId)
+                            handleReplyCreate(comment.commentId)
                           )
                         }
                         className="resize-none border-orange-200 focus:border-orange-400"
@@ -845,6 +877,14 @@ const CommentSection = ({
                                           <Trash2 className="w-3 h-3" />
                                         </Button>
                                       </div>
+                                    )}
+                                  {/* 대댓글 신고 버튼: 본인 대댓글이 아니면 노출 */}
+                                  {isLoggedIn &&
+                                    nowLoggedUserId !== reply.userId && (
+                                      <ReportButton
+                                        category="comment"
+                                        accusedUserId={reply.userId}
+                                      />
                                     )}
                                 </div>
                               </div>

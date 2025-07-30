@@ -6,6 +6,7 @@ import { API_BASE_URL, USER } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
 import { useNavigate } from "react-router-dom";
+import ReportButton from "./ReportButton";
 
 const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
   const [messages, setMessages] = useState([]);
@@ -113,12 +114,18 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold flex-1">
           {messages.length > 0 &&
             (messages[0].requestNickname === messages[0].nickname1
               ? messages[0].nickname2
               : messages[0].nickname1)}
         </h2>
+        {/* 신고 버튼을 우측 끝에 배치 */}
+        {receiverId && (
+          <div className="ml-auto">
+            <ReportButton category="chat" accusedUserId={receiverId} />
+          </div>
+        )}
       </div>
 
       {/* 메시지 목록 */}

@@ -41,6 +41,7 @@ const PasswordResetForm = ({ onClose }) => {
       alert("인증 코드가 이메일로 발송되었습니다.");
     } catch (error) {
       console.error("이메일 발송 실패:", error);
+      alert(error.response?.message);
     }
   };
 
@@ -58,6 +59,7 @@ const PasswordResetForm = ({ onClose }) => {
 
       alert("임시비밀번호가 이메일로 전송되었습니다.");
     } catch (error) {
+      alert(error.response?.message);
       console.error("인증 실패:", error);
     }
   };
@@ -76,6 +78,7 @@ const PasswordResetForm = ({ onClose }) => {
       alert("임시 비밀번호가 이메일로 발송되었습니다.");
       onClose();
     } catch (error) {
+      alert(error.response?.message);
       console.error("임시 비밀번호 발급 실패:", error);
     }
   };

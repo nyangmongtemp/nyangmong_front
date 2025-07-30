@@ -88,7 +88,7 @@ const EmailChangeForm = ({ currentEmail }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label className="text-sm font-medium flex items-center">
             <Mail className="w-4 h-4 mr-2" />
             현재 이메일
@@ -100,7 +100,7 @@ const EmailChangeForm = ({ currentEmail }) => {
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label
             htmlFor="newEmail"
             className="text-sm font-medium flex items-center"
@@ -118,7 +118,7 @@ const EmailChangeForm = ({ currentEmail }) => {
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-4">
           <Label className="text-sm font-medium flex items-center">
             <Mail className="w-4 h-4 mr-2" />
             이메일 인증

@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAdmin } from "../context/AdminContext";
 
 const AdminSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [logoutTrigger, setLogoutTrigger] = useState(false); // 상태 추가
+  const { isFirst } = useAdmin();
 
+  // 현재 관리자 role을 sessionStorage에서 읽어옴
+  const adminRole = sessionStorage.getItem("adminRole");
+
+  // roles: BOSS(전체), CONTENT(일부), CUSTOMER(고객센터만)
   const menuItems = [
     { title: "사용자 관리", path: "/admin/users" },
     { title: "관리자 관리", path: "/admin/managers" },
@@ -14,6 +20,12 @@ const AdminSidebar = () => {
     { title: "배너 관리", path: "/admin/banner" },
     { title: "광고 관리", path: "/admin/advertisement" },
     { title: "고객센터", path: "/admin/support" },
+    { title: "사용자 관리", path: "/admin/users", roles: ["BOSS", "CONTENT"] },
+    { title: "관리자 관리", path: "/admin/managers", roles: ["BOSS"] },
+    { title: "로그 관리", path: "/admin/logs", roles: ["BOSS", "CONTENT"] },
+    { title: "게시판 관리", path: "/admin/boards", roles: ["BOSS", "CONTENT"] },
+    { title: "배너 관리", path: "/admin/banner", roles: ["BOSS", "CONTENT"] },
+    { title: "고객센터", path: "/admin/support", roles: ["BOSS", "CUSTOMER"] },
   ];
 
   // 로그인 상태 확인
@@ -24,14 +36,24 @@ const AdminSidebar = () => {
     sessionStorage.removeItem("adminName");
     sessionStorage.removeItem("adminRole");
     setLogoutTrigger((prev) => !prev); // 강제 리렌더
-    navigate("/admin/login");
+    navigate("/admin");
+  };
+
+  // 사이드바 메뉴 클릭 핸들러
+  const handleMenuClick = (path) => {
+    if (isFirst) {
+      alert("이메일 변경을 먼저 완료해야 합니다.");
+      navigate("/admin/mypage");
+      return;
+    }
+    navigate(path);
   };
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 pt-20">
       <div className="flex items-center space-x-2">
         <button
-          onClick={() => navigate("/admin")}
+          onClick={() => handleMenuClick("/admin")}
           className="flex items-center space-x-2 px-8 py-2"
         >
           <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
@@ -46,29 +68,33 @@ const AdminSidebar = () => {
         <h2 className="text-xl font-bold text-gray-800 mb-6">관리자 메뉴</h2>
 
         <nav className="space-y-2">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`block px-4 py-3 text-sm font-medium rounded-lg border transition-colors ${
-                location.pathname === item.path
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {item.title}
-            </Link>
-          ))}
+          {menuItems
+            .filter((item) => !item.roles || item.roles.includes(adminRole))
+            .map((item) => (
+              <button
+                key={item.path}
+                onClick={() => handleMenuClick(item.path)}
+                className={`block w-full text-left px-4 py-3 text-sm font-medium rounded-lg border transition-colors ${
+                  location.pathname === item.path
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {item.title}
+              </button>
+            ))}
         </nav>
       </div>
       {/* 하단 버튼 영역 */}
       <div className="px-6 pb-6 space-y-3">
-        <button
-          onClick={() => navigate("/admin/mypage")}
-          className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition"
-        >
-          마이페이지
-        </button>
+        {isLoggedIn && (
+          <button
+            onClick={() => handleMenuClick("/admin/mypage")}
+            className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition"
+          >
+            마이페이지
+          </button>
+        )}
         {isLoggedIn ? (
           <button
             onClick={handleLogout}

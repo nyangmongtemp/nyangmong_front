@@ -1,5 +1,18 @@
 import axios from "axios";
 import { API_BASE_URL, USER } from "./host-config";
+import { decrypt } from "../src/hooks/use-encode";
+
+// 날짜 포맷 함수
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const HH = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${MM}-${dd} ${HH}:${mm}`;
+};
 
 // ✅ Axios 인스턴스 생성
 const axiosInstance = axios.create({
@@ -14,7 +27,9 @@ const axiosInstance = axios.create({
 // ✅ 요청 인터셉터 설정
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    // 관리자 토큰 우선, 없으면 유저 토큰
+    const token =
+      sessionStorage.getItem("adminToken") || localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -64,27 +79,61 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.code === "ACCOUNT-007"
+    ) {
+      console.log(error);
+
+      alert("아이디 혹은 패스워드를 다시 확인해 주세요.");
+    }
+
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.code === "ACCOUNT-005"
+    ) {
+      console.log(error);
+
+      alert("로그인 5회 실패로 30분간 로그인이 불가능합니다.");
+    }
+
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "NOT_ALLOWED_USER"
+    ) {
+      console.log(error);
+
+      const time = formatDate(error.response?.data?.message);
+
+      alert(`${time} 까지 이용이 불가능합니다.`);
+    }
+
     // 401 Unauthorized 에러일 경우 (토큰 만료)
     if (
       error.response?.status === 401 &&
       (error.response?.data?.msg === "EXPIRED_TOKEN" ||
-        error.response?.msg === "EXPIRED_TOKEN") &&
+        error.response?.data === "EXPIRED_TOKEN") &&
       !originalRequest._retry
     ) {
       console.log("401 Unauthorized — trying token refresh...");
       originalRequest._retry = true;
 
       try {
-        const email = localStorage.getItem("email");
-        if (!email) {
+        const encryptedEmail = localStorage.getItem("email");
+        if (!encryptedEmail) {
           throw new Error("No email in localStorage");
         }
-        console.log("리스페시발동");
+        // email 디코딩
+        const email = await decrypt(encryptedEmail);
+        console.log("리프레시발동");
+        console.log(email);
 
         // Refresh token 요청
         const res = await axios.post(`${API_BASE_URL}${USER}/refresh`, {
-          userEmail: email,
+          email: email,
         });
+
+        console.log(res);
 
         const newToken = res.data.result.token;
         localStorage.setItem("token", newToken);
@@ -105,13 +154,33 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
 
-        // 토큰 갱신 실패 시 로그아웃 처리
-        localStorage.clear();
+        // 관리자 토큰인지 확인
+        const adminToken = sessionStorage.getItem("adminToken");
 
-        // 사용자에게 알림
-        if (typeof window !== "undefined") {
-          alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
-          window.location.href = "/";
+        if (adminToken) {
+          // 관리자 토큰 만료 시
+          console.log("관리자 토큰 만료 - 관리자 로그아웃 처리");
+          sessionStorage.clear();
+          sessionStorage.removeItem("admin_token");
+          sessionStorage.removeItem("admin_id");
+          sessionStorage.removeItem("admin_role");
+          sessionStorage.removeItem("admin_isFirst");
+
+          // 사용자에게 알림
+          if (typeof window !== "undefined") {
+            alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
+            window.location.href = "/admin";
+          }
+        } else {
+          // 일반 사용자 토큰 만료 시
+          console.log("일반 사용자 토큰 만료 - 사용자 로그아웃 처리");
+          localStorage.clear();
+
+          // 사용자에게 알림
+          if (typeof window !== "undefined") {
+            alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+            window.location.href = "/";
+          }
         }
 
         return Promise.reject(refreshError);

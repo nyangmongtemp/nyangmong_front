@@ -1,156 +1,107 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import Header from "@/components/Header";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminSidebar from "@/components/AdminSidebar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAdminUserDetail } from "../../configs/api-utils";
 import ReportHistoryModal from "@/components/ReportHistoryModal";
 
 const AdminUserDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  // 임시 사용자 데이터
-  const userData = {
-    id: id,
-    name: "사용자 이름",
-    email: "user@example.com",
-    phone: "010-1234-5678",
-    address: "서울시 강남구",
-    joinDate: "2024-01-15",
-    lastLogin: "2024-06-25",
-    status: "활성화",
-    reportCount: 3,
-    posts: 25,
-    comments: 87,
-  };
+  useEffect(() => {
+    // 권한 체크: BOSS, CONTENT만 접근 가능
+    const adminRole = sessionStorage.getItem("adminRole");
+    if (adminRole !== "BOSS" && adminRole !== "CONTENT") {
+      alert("접근 권한이 없습니다.");
+      navigate("/admin", { replace: true });
+      return;
+    }
+    setLoading(true);
+    getAdminUserDetail(id)
+      .then(setData)
+      .catch((e) => setError(e.message || "상세 조회 실패"))
+      .finally(() => setLoading(false));
+  }, [id, navigate]);
+
+  if (loading) return <div className="p-8">로딩중...</div>;
+  if (error) return <div className="p-8 text-red-500">{error}</div>;
+  if (!data) return <div className="p-8">데이터가 없습니다.</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminSidebar />
-
       <div className="ml-80 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">
-              사용자 상세 정보
-            </h1>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsReportModalOpen(true)}
-              >
-                신고 이력
-              </Button>
+        <div className="max-w-xl mx-auto bg-white rounded-lg shadow-sm border p-8">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">사용자 상세 정보</h1>
+          <div className="space-y-4">
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">이름</span>
+              <span>{data.userName}</span>
             </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">이메일</span>
+              <span>{data.email}</span>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>기본 정보</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    사용자 이름
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.name}
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">닉네임</span>
+              <span>{data.nickname}</span>
                   </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">주소</span>
+              <span>{data.address || "-"}</span>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    이메일
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.email}
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">전화번호</span>
+              <span>{data.phone || "-"}</span>
                   </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">소셜ID</span>
+              <span>{data.socialId || "-"}</span>
                 </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">소셜 Provider</span>
+              <span>{data.socialProvider || "-"}</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    전화번호
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.phone}
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">계정 활성화</span>
+              <span>{data.active ? "활성화" : "비활성화"}</span>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    주소
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.address}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    가입일자
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.joinDate}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    최근 접속일
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.lastLogin}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    계정 상태
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        userData.status === "활성화"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium text-gray-600">신고횟수</span>
+              <span>
+                {data.reportCount}
+                <button
+                  className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                  onClick={() => setIsReportModalOpen(true)}
                     >
-                      {userData.status}
+                  신고이력 보기
+                </button>
                     </span>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    신고 횟수
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.reportCount}회
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    작성 글 수
-                  </label>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {userData.posts}개
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-600">정지횟수</span>
+              <span>{data.pauseCount}</span>
         </div>
       </div>
-
       <ReportHistoryModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
         userId={id}
       />
+          <div className="mt-8 flex justify-end">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={() => navigate(-1)}
+            >
+              목록으로
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

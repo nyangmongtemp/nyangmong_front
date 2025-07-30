@@ -25,17 +25,17 @@ import PasswordChangeForm from "@/components/PasswordChangeForm";
 import EmailChangeForm from "@/components/EmailChangeForm";
 import PostsList from "@/components/PostsList";
 import CommentsList from "@/components/CommentsList";
-import LikedPostsList from "@/components/LikedPostsList";
 import TabNavigation from "@/components/TabNavigation";
 import { useUserPageData } from "@/hooks/useUserPageData";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, USER, MAIN } from "../../configs/host-config";
+import { API_BASE_URL, USER, MAIN, BOARD } from "../../configs/host-config";
 
 const UserMyPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0); // 0부터 시작하도록 변경
+  const [selectedBoard, setSelectedBoard] = useState("질문");
   const itemsPerPage = 10;
   const { token, email, isLoggedIn, logout, isSocial } = useAuth();
 
@@ -115,8 +115,6 @@ const UserMyPage = () => {
       // 닉네임, 전화번호, 주소를 JSON 문자열로 만들고 Blob으로 변환
       const userJson = JSON.stringify({
         nickname: formData.nickname,
-        phone: formData.phone,
-        address: formData.address,
       });
       const userBlob = new Blob([userJson], { type: "application/json" });
 
@@ -156,9 +154,20 @@ const UserMyPage = () => {
 
   const [myPosts, setMyPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
-  const [likedPosts, setLikedPosts] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 전체 페이지 수 계산 (API 응답에서 받아온 totalPages 활용)
+  const [totalPages, setTotalPages] = useState(1);
+
+  // 게시판별 카테고리 매핑
+  const boardCategoryMap = {
+    질문: "question",
+    후기: "review",
+    자유: "free",
+    소개: "introduction",
+    분양: "adoption",
+  };
 
   const getDisplayData = () => {
     let data = [];
@@ -169,15 +178,12 @@ const UserMyPage = () => {
       case "comments":
         data = myComments;
         break;
-      case "likes":
-        data = likedPosts;
-        break;
       default:
         return [];
     }
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return data.slice(startIndex, startIndex + itemsPerPage);
+    // data가 배열이 아니면 빈 배열 반환
+    if (!Array.isArray(data)) return [];
+    return data; // slice 제거
   };
 
   const getTotalPages = () => {
@@ -189,13 +195,53 @@ const UserMyPage = () => {
       case "comments":
         totalItems = myComments.length;
         break;
-      case "likes":
-        totalItems = likedPosts.length;
-        break;
       default:
         totalItems = 0;
     }
     return Math.ceil(totalItems / itemsPerPage);
+  };
+
+  // 게시판별 내 게시물 데이터 가져오기
+  const fetchMyPostsByCategory = async (category) => {
+    if (!token) return;
+
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${BOARD}/list/${category}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            page: currentPage,
+            size: itemsPerPage,
+          },
+        }
+      );
+
+      console.log(`${category} 게시판 내 게시물 응답:`, response);
+      // result가 배열이거나, result.content가 배열인 경우만 저장
+      setMyPosts(
+        Array.isArray(response.data.result)
+          ? response.data.result
+          : Array.isArray(response.data.result?.content)
+          ? response.data.result.content
+          : []
+      );
+      // totalPages도 저장
+      if (
+        response.data.result &&
+        typeof response.data.result.totalPages === "number"
+      ) {
+        setTotalPages(response.data.result.totalPages);
+      } else {
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error(`${category} 게시판 내 게시물 조회 실패:`, error);
+      setMyPosts([]);
+      setTotalPages(1);
+    }
   };
 
   // activeTab이 변경될 때마다 해당하는 데이터 가져오기
@@ -204,15 +250,16 @@ const UserMyPage = () => {
 
     switch (activeTab) {
       case "posts":
-        // TODO: 내 게시글 데이터 가져오기
-        break;
-      case "likes":
-        // TODO: 좋아요한 게시글 데이터 가져오기
+        // 선택된 게시판의 카테고리로 데이터 가져오기
+        const category = boardCategoryMap[selectedBoard];
+        if (category) {
+          fetchMyPostsByCategory(category);
+        }
         break;
       default:
         break;
     }
-  }, [activeTab, currentPage, token]);
+  }, [activeTab, selectedBoard, currentPage, token]);
 
   // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
@@ -265,15 +312,47 @@ const UserMyPage = () => {
     }
 
     if (activeTab === "posts") {
-      return <PostsList posts={displayData} />;
+      return (
+        <div className="space-y-6">
+          {/* 게시판 선택 버튼들 */}
+          <div className="flex flex-wrap gap-3">
+            {["질문", "후기", "소개", "자유", "분양"].map((board) => (
+              <button
+                key={board}
+                onClick={() => {
+                  setSelectedBoard(board);
+                  setCurrentPage(0);
+                  // fetchMyPostsByCategory 호출 제거
+                }}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  selectedBoard === board
+                    ? "bg-orange-500 text-white shadow-md"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-orange-300"
+                }`}
+              >
+                {board} 게시판
+              </button>
+            ))}
+          </div>
+
+          {/* 선택된 게시판 표시 */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              {selectedBoard} 게시판의 내 게시물
+            </h3>
+            <p className="text-blue-600 text-sm">
+              현재 {selectedBoard} 게시판에서 작성한 게시물을 확인할 수
+              있습니다.
+            </p>
+          </div>
+
+          <PostsList category={boardCategoryMap[selectedBoard]} />
+        </div>
+      );
     }
 
     if (activeTab === "comments") {
       return <CommentsList />;
-    }
-
-    if (activeTab === "likes") {
-      return <LikedPostsList posts={displayData} />;
     }
   };
 
@@ -306,7 +385,13 @@ const UserMyPage = () => {
             {/* 탭 메뉴 */}
             <TabNavigation
               activeTab={activeTab}
-              setActiveTab={setActiveTab}
+              setActiveTab={(tab) => {
+                setActiveTab(tab);
+                setCurrentPage(0);
+                if (tab === "posts") {
+                  setSelectedBoard("질문");
+                }
+              }}
               setCurrentPage={setCurrentPage}
             />
 
