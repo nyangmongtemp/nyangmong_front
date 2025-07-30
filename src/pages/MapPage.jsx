@@ -84,8 +84,12 @@ const MapPage = () => {
         )
         .then((res) => {
           const districts = res.data?.result || [];
-          setGroomingDistrictOptions(districts);
-          setSelectedGroomingDistrict(districts[0] || "");
+          // 가나다순으로 정렬
+          const sortedDistricts = districts.sort((a, b) =>
+            a.localeCompare(b, "ko")
+          );
+          setGroomingDistrictOptions(sortedDistricts);
+          setSelectedGroomingDistrict(sortedDistricts[0] || "");
           console.log("미용실 지역 리스트 응답:", res);
         })
         .catch((err) => {
@@ -371,11 +375,15 @@ const MapPage = () => {
         .then((res) => {
           console.log("동물병원 category 응답:", res);
           const categoryData = res.data?.result || res.data || [];
-          setHospitalCategoryOptions(categoryData);
+          // 가나다순으로 정렬
+          const sortedCategoryData = categoryData.sort((a, b) =>
+            a.localeCompare(b, "ko")
+          );
+          setHospitalCategoryOptions(sortedCategoryData);
 
           // 첫 번째 값으로 기본값 설정
-          if (categoryData.length > 0) {
-            setSelectedHospitalCategory(categoryData[0]);
+          if (sortedCategoryData.length > 0) {
+            setSelectedHospitalCategory(sortedCategoryData[0]);
           }
         })
         .catch((err) => {
