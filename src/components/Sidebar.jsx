@@ -51,7 +51,7 @@ const Sidebar = () => {
   } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [currentEventSlide, setCurrentEventSlide] = useState(0);
-  const [banners, setBanners] = useState([]); // 광고 배너 상태 추가
+  const [ads, setAds] = useState([]); // 광고 상태 추가
   const [currentAdSlide, setCurrentAdSlide] = useState(0);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [popularPosts, setPopularPosts] = useState([]);
@@ -144,25 +144,21 @@ const Sidebar = () => {
     "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
   ];
 
-  // 광고 배너 목록 API 연동
+  // 광고 목록 API 연동
   useEffect(() => {
-    const fetchBanners = async () => {
+    const fetchAds = async () => {
       try {
         const res = await axiosInstance.get(
-          `${API_BASE_URL}${MAIN}/screen/banner/list`
+          `${API_BASE_URL}${MAIN}/ads/display`
         );
-        // order 오름차순 정렬
-        const sorted = (res.data.result || []).sort(
-          (a, b) => a.order - b.order
-        );
-        setBanners(sorted);
+        setAds(res.data.result || []);
         setCurrentAdSlide(0); // 새로 받아오면 첫 슬라이드로
       } catch (error) {
-        setBanners([]);
-        console.error("광고 배너 불러오기 실패:", error);
+        setAds([]);
+        console.error("광고 불러오기 실패:", error);
       }
     };
-    fetchBanners();
+    fetchAds();
   }, []);
 
   const handleKakaoLogin = () => {
@@ -261,9 +257,7 @@ const Sidebar = () => {
     const fetchPopularPosts = async () => {
       setLoading(true);
       try {
-        const res = await axiosInstance.get(
-          `${API_BASE_URL}${BOARD}/information/popular`
-        );
+        const res = await axiosInstance.get(`${API_BASE_URL}${BOARD}/popular`);
         //console.log("인기 게시글 API 응답:", res.data);
         const posts = res.data || [];
         const mappedPosts = posts.map((item, index) => ({
@@ -776,10 +770,10 @@ const Sidebar = () => {
         </CardHeader>
         <CardContent className="p-4">
           <div className="relative">
-            {banners.length > 0 ? (
+            {ads.length > 0 ? (
               <>
                 <img
-                  src={banners[currentAdSlide].image}
+                  src={ads[currentAdSlide].image}
                   alt="광고"
                   className="w-full h-32 object-cover rounded-lg"
                 />
@@ -787,20 +781,20 @@ const Sidebar = () => {
                 <button
                   onClick={() =>
                     setCurrentAdSlide(
-                      (prev) => (prev - 1 + banners.length) % banners.length
+                      (prev) => (prev - 1 + ads.length) % ads.length
                     )
                   }
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-                  disabled={banners.length <= 1}
+                  disabled={ads.length <= 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() =>
-                    setCurrentAdSlide((prev) => (prev + 1) % banners.length)
+                    setCurrentAdSlide((prev) => (prev + 1) % ads.length)
                   }
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-                  disabled={banners.length <= 1}
+                  disabled={ads.length <= 1}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
