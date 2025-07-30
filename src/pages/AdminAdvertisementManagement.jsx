@@ -20,13 +20,62 @@ const AdminAdvertisementManagement = () => {
   const [displayCount, setDisplayCount] = useState();
 
   const [ads, setAds] = useState([
-    { id: 1, title: "광고 1", createdAt: "2025-07-01", updatedAt: "2025-07-10", confirmed: "false", active: "true" },
-    { id: 2, title: "광고 2", createdAt: "2025-07-02", updatedAt: "2025-07-11", confirmed: "false", active: "true" },
-    { id: 3, title: "광고 3", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
-    { id: 4, title: "광고 4", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
-    { id: 5, title: "광고 5", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
-    { id: 6, title: "광고 6", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
-    { id: 7, title: "광고 7", createdAt: "2025-07-03", updatedAt: "2025-07-12", confirmed: "false", active: "true" },
+    {
+      id: 1,
+      title: "광고 1",
+      createdAt: "2025-07-01",
+      updatedAt: "2025-07-10",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 2,
+      title: "광고 2",
+      createdAt: "2025-07-02",
+      updatedAt: "2025-07-11",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 3,
+      title: "광고 3",
+      createdAt: "2025-07-03",
+      updatedAt: "2025-07-12",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 4,
+      title: "광고 4",
+      createdAt: "2025-07-03",
+      updatedAt: "2025-07-12",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 5,
+      title: "광고 5",
+      createdAt: "2025-07-03",
+      updatedAt: "2025-07-12",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 6,
+      title: "광고 6",
+      createdAt: "2025-07-03",
+      updatedAt: "2025-07-12",
+      confirmed: "false",
+      active: "true",
+    },
+    {
+      id: 7,
+      title: "광고 7",
+      createdAt: "2025-07-03",
+      updatedAt: "2025-07-12",
+      confirmed: "false",
+      active: "true",
+    },
   ]);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -40,7 +89,9 @@ const AdminAdvertisementManagement = () => {
   };
 
   const handleAdUpdate = (updatedAd) => {
-    setAds((prev) => prev.map((ad) => (ad.id === updatedAd.id ? updatedAd : ad)));
+    setAds((prev) =>
+      prev.map((ad) => (ad.id === updatedAd.id ? updatedAd : ad))
+    );
   };
 
   const handleAdCreate = (newAd) => {
@@ -102,15 +153,21 @@ const AdminAdvertisementManagement = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full"
                   />
-                  <Button className="bg-blue-600 hover:bg-blue-700">검색</Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    검색
+                  </Button>
                 </div>
                 <Select value={sortOrder} onValueChange={setSortOrder}>
                   <SelectTrigger className="ml-4 w-40">
                     <SelectValue placeholder="정렬조건" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="createdAt_desc">생성일자 최신순</SelectItem>
-                    <SelectItem value="createdAt_asc">생성일자 오래된순</SelectItem>
+                    <SelectItem value="createdAt_desc">
+                      생성일자 최신순
+                    </SelectItem>
+                    <SelectItem value="createdAt_asc">
+                      생성일자 오래된순
+                    </SelectItem>
                     <SelectItem value="order_desc">순서 내림차순</SelectItem>
                     <SelectItem value="order_asc">순서 오름차순</SelectItem>
                     <SelectItem value="id_desc">아이디 내림차순</SelectItem>
@@ -135,7 +192,9 @@ const AdminAdvertisementManagement = () => {
             <div className="px-4 space-y-2">
               {ads
                 .filter((ad) =>
-                  (ad.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+                  (ad.title || "")
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
                 )
                 .map((ad) => (
                   <div
