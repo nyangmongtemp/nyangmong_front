@@ -16,12 +16,14 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import ImageCropModal from "./ImageCropModal";
+import axios from "axios";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, ADMIN } from "../../configs/host-config";
 
 const AdvertisementCreateModal = ({
   isOpen,
   onClose,
   ad,
-  onCreate,
   onUpdate,
   onDelete,
 }) => {
@@ -34,9 +36,8 @@ const AdvertisementCreateModal = ({
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [dateError, setDateError] = useState("");
-  const fileInputRef = useRef(null);
   const [isRequired, setIsRequired] = useState(false);
-  const [isActive, setIsActive] = useState(true);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (ad) {
@@ -77,29 +78,74 @@ const AdvertisementCreateModal = ({
     setIsCropModalOpen(false);
   };
 
-  const handleSave = () => {
-    if (startDate && endDate && endDate < startDate) {
-      setDateError("종료일은 시작일보다 빠를 수 없습니다.");
+  const handleSave = async () => {
+    const token = sessionStorage.getItem("adminToken");
+    console.log("사용중인 토큰:", token);
+    if (!token) {
+      alert("관리자 인증이 필요합니다.");
       return;
     }
-    setDateError("");
 
-    const payload = {
-      title: adTitle,
-      description: adDes,
-      link: adLink, // ✅ payload에 추가
-      image_url: adImage,
-      startDate,
-      endDate,
-    };
-
-    if (ad) {
-      onUpdate?.({ ...ad, ...payload });
-    } else {
-      onCreate?.(payload);
+    if (!adTitle || !adDes || !adLink || !startDate || !endDate) {
+      alert("모든 필드를 입력해주세요.");
+      return;
     }
 
-    onClose();
+    // Base64 이미지를 Blob으로 변환
+    const dataURLtoFile = (dataUrl, filename) => {
+      const arr = dataUrl.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    };
+
+    const adData = {
+      title: adTitle,
+      description: adDes,
+      linkUrl: adLink,
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
+      isRequired,
+    };
+
+    const formData = new FormData();
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(adData)], { type: "application/json" })
+    );
+
+    if (adImage?.startsWith("data:image/")) {
+      const imageFile = dataURLtoFile(adImage, "adImage.png");
+      formData.append("image", imageFile);
+    }
+
+    try {
+      const response = await axiosInstance.post(
+        `${API_BASE_URL}${ADMIN}/ads`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            //"Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("✅ 광고 등록 성공:", response.data);
+      alert("광고가 성공적으로 등록되었습니다.");
+      onClose();
+      onUpdate();
+    } catch (error) {
+      console.error("❌ 광고 등록 오류:", error);
+      alert("광고 등록에 실패했습니다.");
+    }
   };
 
   const handleDelete = () => {
@@ -114,20 +160,19 @@ const AdvertisementCreateModal = ({
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              광고 등록
-            </DialogTitle>
-          </DialogHeader>
-          <DialogHeader>
-            <DialogTitle>광고 제목</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">광고 등록</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>광고 제목</DialogTitle>
+            </DialogHeader>
             <Input
               value={adTitle}
               onChange={(e) => setAdTitle(e.target.value)}
               placeholder="광고 제목을 입력하세요"
             />
+
             <DialogHeader>
               <DialogTitle>광고 설명</DialogTitle>
             </DialogHeader>
@@ -136,100 +181,94 @@ const AdvertisementCreateModal = ({
               onChange={(e) => setAdDes(e.target.value)}
               placeholder="설명을 입력하세요"
             />
+
             <DialogHeader>
               <DialogTitle>광고 링크 url</DialogTitle>
             </DialogHeader>
-
             <Input
               value={adLink}
-              onChange={(e) => setAdLink(e.target.value)} // ✅ 올바른 핸들러
+              onChange={(e) => setAdLink(e.target.value)}
               placeholder="링크 URL을 입력하세요"
             />
 
-            <div className="space-y-2">
+            <DialogHeader>
+              <DialogTitle>광고 시작일</DialogTitle>
+            </DialogHeader>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  {startDate
+                    ? format(startDate, "yyyy-MM-dd")
+                    : "시작일을 선택하세요"}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            <DialogHeader>
+              <DialogTitle>광고 종료일</DialogTitle>
+            </DialogHeader>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  {endDate
+                    ? format(endDate, "yyyy-MM-dd")
+                    : "종료일을 선택하세요"}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {dateError && <p className="text-red-500 text-sm">{dateError}</p>}
+
+            <div>
               <DialogHeader>
-                <DialogTitle>광고 시작일</DialogTitle>
+                <DialogTitle>광고 노출 필수 여부</DialogTitle>
               </DialogHeader>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    {startDate
-                      ? format(startDate, "yyyy-MM-dd")
-                      : "시작일을 선택하세요"}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
+              <div className="flex space-x-4 mt-2">
+                <label className="flex items-center space-x-1">
+                  <input
+                    type="radio"
+                    name="isRequired"
+                    value="true"
+                    checked={isRequired === true}
+                    onChange={() => setIsRequired(true)}
                   />
-                </PopoverContent>
-              </Popover>
-
-              <DialogHeader>
-                <DialogTitle>광고 종료일</DialogTitle>
-              </DialogHeader>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    {endDate
-                      ? format(endDate, "yyyy-MM-dd")
-                      : "종료일을 선택하세요"}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
+                  <span>예</span>
+                </label>
+                <label className="flex items-center space-x-1">
+                  <input
+                    type="radio"
+                    name="isRequired"
+                    value="false"
+                    checked={isRequired === false}
+                    onChange={() => setIsRequired(false)}
                   />
-                </PopoverContent>
-              </Popover>
-
-              {dateError && <p className="text-red-500 text-sm">{dateError}</p>}
-            </div>
-
-            <div className="space-y-4">
-              {/* 광고 노출 필수 여부 */}
-              <div>
-                <DialogHeader>
-                  <DialogTitle>광고 노출 필수 여부</DialogTitle>
-                </DialogHeader>
-                <div className="flex space-x-4 mt-2">
-                  <label className="flex items-center space-x-1">
-                    <input
-                      type="radio"
-                      name="isRequired"
-                      value="true"
-                      checked={isRequired === true}
-                      onChange={() => setIsRequired(true)}
-                    />
-                    <span>예</span>
-                  </label>
-                  <label className="flex items-center space-x-1">
-                    <input
-                      type="radio"
-                      name="isRequired"
-                      value="false"
-                      checked={isRequired === false}
-                      onChange={() => setIsRequired(false)}
-                    />
-                    <span>아니오</span>
-                  </label>
-                </div>
+                  <span>아니오</span>
+                </label>
               </div>
-
             </div>
 
             <div className="bg-gray-50 border rounded-lg h-48 flex items-center justify-center overflow-hidden">
@@ -251,7 +290,6 @@ const AdvertisementCreateModal = ({
               >
                 이미지 수정하기
               </Button>
-
               <div className="space-x-2">
                 {ad?.type === "custom" && (
                   <Button variant="destructive" onClick={handleDelete}>

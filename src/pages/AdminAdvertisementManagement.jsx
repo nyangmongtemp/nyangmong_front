@@ -87,7 +87,7 @@ const AdminAdvertisementManagement = () => {
       endDate,
     });
     fetchAds(0);
-  }, [searchTerm, showActiveOnly, , sortOrder, startDate, endDate]);
+  }, [searchTerm, showActiveOnly, sortOrder, startDate, endDate]);
   // 임시로 클라이언트 필터링 (서버 필터링 문제 시 사용)
   const filteredAds = showActiveOnly
     ? ads.filter((ad) => ad.active === true)
@@ -314,7 +314,7 @@ const AdminAdvertisementManagement = () => {
       <AdvertisementDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        ad={selectedAd}
+        adId={selectedAd?.id}
         onUpdate={handleAdUpdate}
         onDelete={handleAdDelete}
       />
