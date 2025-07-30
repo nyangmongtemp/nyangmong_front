@@ -101,15 +101,6 @@ const App = () => (
               path="/customer-qna-detail/:id"
               element={<CustomerQnADetail />}
             />
-            <Route path="/admin/logs" element={<AdminLogManagement />} />
-            <Route path="/admin/boards" element={<AdminBoardManagement />} />
-            <Route path="/admin/banner" element={<AdminBannerManagement />} />
-            <Route
-              path="/admin/advertisement"
-              element={<AdminAdvertisementManagement />}
-            />
-            <Route path="/admin/support" element={<AdminCustomerSupport />} />
-            {/* Admin routes wrapped with AdminProvider */}
             <Route
               path="/admin/*"
               element={
@@ -129,6 +120,10 @@ const App = () => (
                     <Route
                       path="policy/create"
                       element={<AdminPolicyCreate />}
+                    />
+                    <Route
+                      path="advertisement"
+                      element={<AdminAdvertisementManagement />}
                     />
                     <Route path="qna/create" element={<AdminQnaCreate />} />
                     <Route path="qna/:id" element={<AdminQnaDetail />} />
