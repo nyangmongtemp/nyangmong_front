@@ -115,8 +115,6 @@ const UserMyPage = () => {
       // 닉네임, 전화번호, 주소를 JSON 문자열로 만들고 Blob으로 변환
       const userJson = JSON.stringify({
         nickname: formData.nickname,
-        phone: formData.phone,
-        address: formData.address,
       });
       const userBlob = new Blob([userJson], { type: "application/json" });
 

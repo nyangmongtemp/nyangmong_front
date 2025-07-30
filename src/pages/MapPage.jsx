@@ -23,7 +23,7 @@ import {
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("event");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [festivalList, setFestivalList] = useState([]); // 행사정보 리스트
@@ -193,7 +193,6 @@ const MapPage = () => {
   const hospitalRegionOptions = cultureRegionOptions;
 
   const categories = [
-    { id: "all", name: "전체" },
     { id: "event", name: "행사정보" },
     { id: "culture", name: "반려동물 입장가능 문화시설" },
     { id: "hospital", name: "동물병원" },
@@ -517,33 +516,6 @@ const MapPage = () => {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               {/* 상단 검색 영역 */}
               <div className="p-6 border-b">
-                <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                  <Input
-                    placeholder="제목으로 검색"
-                    className="flex-1"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <Select
-                    value={selectedRegion}
-                    onValueChange={setSelectedRegion}
-                  >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="지역 선택" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((region) => (
-                        <SelectItem key={region.id} value={region.id}>
-                          {region.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto">
-                    검색
-                  </Button>
-                </div>
-
                 {/* 카테고리 버튼들 */}
                 <div className="mt-6">
                   <div className="flex flex-wrap gap-2">

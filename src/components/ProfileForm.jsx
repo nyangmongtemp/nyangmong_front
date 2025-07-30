@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,40 +118,6 @@ const ProfileForm = ({
                 value={formData.email}
                 readOnly
                 className="border-gray-300 bg-gray-100 cursor-not-allowed"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="phone"
-                className="text-sm font-medium flex items-center"
-              >
-                <Phone className="w-4 h-4 mr-2" />
-                전화번호
-              </Label>
-              <Input
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="border-gray-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label
-                htmlFor="address"
-                className="text-sm font-medium flex items-center"
-              >
-                <User className="w-4 h-4 mr-2" />
-                주소
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="border-gray-300"
               />
             </div>
 

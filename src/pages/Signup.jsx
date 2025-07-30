@@ -25,8 +25,6 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "",
-    address: "",
     agreeToTerms: false,
     agreeToPrivacy: false,
     agreeToMarketing: false,
@@ -95,6 +93,11 @@ const Signup = () => {
       console.log(res);
       setAuthCodeSent(true);
     } catch (error) {
+      if (error.response?.code === "ACCOUNT-005") {
+        alert("현재 이메일 인증이 제한된 이메일입니다.");
+      } else if (error.response?.code === "PARAM-006") {
+        alert("이미 가입된 이메일입니다.");
+      }
       console.log(error);
       setEmailSent(false);
     }
@@ -110,10 +113,16 @@ const Signup = () => {
           authCode: inputAuthCode,
         }
       );
-      console.log(res);
       setIsEmailVerified(true);
     } catch (error) {
       console.log(error);
+      if (error.response?.code === "ACCOUNT-010") {
+        alert("만료된 인증번호입니다.");
+      } else if (error.response?.code === "ACCOUNT-014") {
+        alert(error.response?.message);
+      } else if (error.response?.code === "ACCOUNT-009") {
+        alert(error.response?.message);
+      }
     }
   };
 
@@ -126,9 +135,7 @@ const Signup = () => {
       email: formData.email,
       password: formData.password,
       userName: formData.name,
-      phone: formData.phone,
       nickname: formData.nickname,
-      address: formData.address,
     });
 
     form.append("user", new Blob([userJson], { type: "application/json" }));
@@ -336,45 +343,6 @@ const Signup = () => {
                 </div>
               )}
 
-              {/* 전화번호 */}
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  전화번호
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="전화번호를 입력하세요"
-                    className="pl-10"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* 주소 */}
-              <div className="space-y-2">
-                <Label htmlFor="address" className="text-sm font-medium">
-                  주소
-                </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="address"
-                    name="address"
-                    placeholder="주소를 입력하세요"
-                    className="pl-10"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
               {/* 비밀번호 */}
               <div className="space-y-2">
                 <Label
@@ -461,19 +429,6 @@ const Signup = () => {
                     >
                       (보기)
                     </button>
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="agreeToMarketing"
-                    checked={formData.agreeToMarketing}
-                    onCheckedChange={(checked) =>
-                      handleCheckboxChange("agreeToMarketing")
-                    }
-                  />
-                  <Label htmlFor="agreeToMarketing" className="text-sm">
-                    마케팅 정보 수신에 동의합니다 (선택)
                   </Label>
                 </div>
               </div>
