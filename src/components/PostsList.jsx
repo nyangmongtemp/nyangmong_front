@@ -73,7 +73,7 @@ const PostsList = ({ userId, category }) => {
             setTotalElements(response.data.totalElements || 0);
           }
         } else {
-          url = `${API_BASE_URL}${BOARD}/mypage/${category}`;
+          url = `${API_BASE_URL}${BOARD}/list/${category}`;
           params = {
             page: currentPage,
             size: itemsPerPage,

@@ -41,9 +41,9 @@ const RecentPosts = () => {
       const fetchCategory = async (category, label, color) => {
         try {
           const res = await axiosInstance.get(
-            `${API_BASE_URL}${BOARD}/information/list`,
+            `${API_BASE_URL}${BOARD}/list/${category}`,
             {
-              params: { category, page: 0, size: 30 },
+              params: { page: 0, size: 30 },
             }
           );
           const content = res.data.content || res.data;

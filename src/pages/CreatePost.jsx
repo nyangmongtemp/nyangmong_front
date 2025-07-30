@@ -166,7 +166,7 @@ const CreatePost = () => {
 
       if (isEdit) {
         const response = await axiosInstance.put(
-          `${API_BASE_URL}${BOARD}/${type}/modify/${id}`,
+          `${API_BASE_URL}${BOARD}/${categoryMap[type]}/modify/${id}`,
           formData,
           {
             headers: {
@@ -179,9 +179,8 @@ const CreatePost = () => {
         alert("게시글이 수정되었습니다.");
         navigate(`/board/${type}`);
       } else {
-        // 실제 게시글 생성 요청 - 토큰을 여러 방식으로 전송
         const response = await axiosInstance.post(
-          `${API_BASE_URL}${BOARD}/information/create`,
+          `${API_BASE_URL}${BOARD}/create`,
           formData,
           {
             headers: {

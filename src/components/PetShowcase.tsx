@@ -24,7 +24,7 @@ const PetShowcase = () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get(
-          `${API_BASE_URL}${BOARD}/introduction/main`
+          `${API_BASE_URL}${BOARD}/main`
         );
         console.log(response);
 

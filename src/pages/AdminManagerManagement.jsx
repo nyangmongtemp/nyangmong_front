@@ -22,6 +22,7 @@ const AdminManagerManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState(null);
   const [managers, setManagers] = useState([]); // 실제 데이터로 대체
+  const [tempChanges, setTempChanges] = useState({}); // 임시 변경사항 저장
   const { role, isLoggedIn } = useAdmin();
   const navigate = useNavigate();
 
@@ -68,9 +69,37 @@ const AdminManagerManagement = () => {
     isLoggedIn
   );
 
-  const handleEdit = (manager) => {
-    setSelectedManager(manager);
-    setIsEditModalOpen(true);
+  const handleEdit = async (manager) => {
+    const changes = tempChanges[manager.adminId];
+
+    // 임시 변경사항이 있으면 확인 얼럿
+    if (
+      changes &&
+      (changes.role !== undefined || changes.active !== undefined)
+    ) {
+      const confirmMessage =
+        `다음 변경사항을 저장하시겠습니까?\n` +
+        `${
+          changes.role !== undefined
+            ? `권한: ${manager.role} → ${changes.role}\n`
+            : ""
+        }` +
+        `${
+          changes.active !== undefined
+            ? `활성화: ${manager.active ? "활성" : "비활성"} → ${
+                changes.active ? "활성" : "비활성"
+              }`
+            : ""
+        }`;
+
+      if (window.confirm(confirmMessage)) {
+        await handleSaveChanges(manager);
+      }
+    } else {
+      // 기존 수정 모달 열기
+      setSelectedManager(manager);
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleDelete = (manager) => {
@@ -78,16 +107,34 @@ const AdminManagerManagement = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // 드롭다운 변경 핸들러 추가
-  const handleRoleOrActiveChange = async (adminId, newRole, newActive) => {
+  // 드롭다운 변경 핸들러 수정 - 임시 저장만
+  const handleRoleOrActiveChange = (adminId, field, value) => {
+    setTempChanges((prev) => ({
+      ...prev,
+      [adminId]: {
+        ...prev[adminId],
+        [field]: value,
+      },
+    }));
+  };
+
+  // 수정 버튼 클릭 핸들러
+  const handleSaveChanges = async (manager) => {
+    const changes = tempChanges[manager.adminId];
+    if (!changes) {
+      alert("변경사항이 없습니다.");
+      return;
+    }
+
     try {
       const token = sessionStorage.getItem("adminToken");
       await axiosInstance.patch(
         `${API_BASE_URL}${ADMIN}/role-modify`,
         {
-          adminId,
-          role: newRole,
-          active: newActive,
+          adminId: manager.adminId,
+          role: changes.role || manager.role,
+          active:
+            changes.active !== undefined ? changes.active : manager.active,
         },
         {
           headers: {
@@ -96,11 +143,27 @@ const AdminManagerManagement = () => {
         }
       );
       alert("권한/활성화 상태가 수정되었습니다.");
+
+      // 성공 시 로컬 상태 업데이트
       setManagers((prev) =>
         prev.map((m) =>
-          m.adminId === adminId ? { ...m, role: newRole, active: newActive } : m
+          m.adminId === manager.adminId
+            ? {
+                ...m,
+                role: changes.role || m.role,
+                active:
+                  changes.active !== undefined ? changes.active : m.active,
+              }
+            : m
         )
       );
+
+      // 임시 변경사항 제거
+      setTempChanges((prev) => {
+        const newChanges = { ...prev };
+        delete newChanges[manager.adminId];
+        return newChanges;
+      });
     } catch (error) {
       alert("수정에 실패했습니다.");
     }
@@ -126,70 +189,103 @@ const AdminManagerManagement = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            {/* 관리자 목록 */}
-            <div className="p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {managers.map((manager) => (
-                  <div
-                    key={manager.adminId}
-                    className="flex flex-col bg-white border rounded-lg shadow p-5 h-full"
-                  >
-                    <div className="mb-2 font-semibold text-gray-800">
-                      {manager.name}
-                    </div>
-                    <div className="mb-2 text-gray-600">{manager.phone}</div>
-                    <div className="mb-2">
-                      <Select
-                        defaultValue={manager.role}
-                        onValueChange={(value) =>
-                          handleRoleOrActiveChange(
-                            manager.adminId,
-                            value,
-                            manager.active
-                          )
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="BOSS">BOSS</SelectItem>
-                          <SelectItem value="CUSTOMER">CUSTOMER</SelectItem>
-                          <SelectItem value="CONTENT">CONTENT</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="mb-2">
-                      <Select
-                        defaultValue={manager.active ? "활성" : "비활성"}
-                        onValueChange={(value) =>
-                          handleRoleOrActiveChange(
-                            manager.adminId,
-                            manager.role,
-                            value === "활성"
-                          )
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="활성">활성</SelectItem>
-                          <SelectItem value="비활성">비활성</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="mt-auto w-full"
-                      onClick={() => handleEdit(manager)}
-                    >
+            {/* 관리자 목록 테이블 */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      이름
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      전화번호
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      권한
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      활성화 상태
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       수정
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {managers.map((manager) => (
+                    <tr key={manager.adminId} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {manager.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {manager.phone}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <Select
+                          defaultValue={manager.role}
+                          value={
+                            tempChanges[manager.adminId]?.role || manager.role
+                          }
+                          onValueChange={(value) =>
+                            handleRoleOrActiveChange(
+                              manager.adminId,
+                              "role",
+                              value
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BOSS">BOSS</SelectItem>
+                            <SelectItem value="CUSTOMER">CUSTOMER</SelectItem>
+                            <SelectItem value="CONTENT">CONTENT</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <Select
+                          defaultValue={manager.active ? "활성" : "비활성"}
+                          value={
+                            tempChanges[manager.adminId]?.active !== undefined
+                              ? tempChanges[manager.adminId].active
+                                ? "활성"
+                                : "비활성"
+                              : manager.active
+                              ? "활성"
+                              : "비활성"
+                          }
+                          onValueChange={(value) =>
+                            handleRoleOrActiveChange(
+                              manager.adminId,
+                              "active",
+                              value === "활성"
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="활성">활성</SelectItem>
+                            <SelectItem value="비활성">비활성</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(manager)}
+                        >
+                          수정
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

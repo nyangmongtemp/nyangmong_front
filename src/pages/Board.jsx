@@ -131,9 +131,9 @@ const Board = () => {
           const category = categoryMap[type];
           if (category) {
             const res = await axiosInstance.get(
-              `${API_BASE_URL}${BOARD}/information/list`,
+              `${API_BASE_URL}${BOARD}/list/${category}`,
               {
-                params: { category, page: 0, size: 100 },
+                params: { page: 0, size: 100 },
               }
             );
             console.log(res);

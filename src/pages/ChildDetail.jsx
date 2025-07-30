@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Share2, Edit, Trash2 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { useAuth } from "@/context/UserContext";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
@@ -36,7 +37,7 @@ const ChildDetail = () => {
     setLoading(true);
     setError(null);
     axiosInstance
-      .get(`${API_BASE_URL}${BOARD}/detail/introduction/${id}`)
+      .get(`${API_BASE_URL}${BOARD}/detail/INTRODUCTION/${id}`)
       .then((res) => {
         let data = res.data.result || res.data.data || res.data;
         if (Array.isArray(data)) data = data[0];
@@ -76,11 +77,16 @@ const ChildDetail = () => {
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!post) return null;
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    window.alert("링크가 복사되었습니다!");
+  };
+
   const handleDelete = async () => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
       await axiosInstance.delete(
-        `${API_BASE_URL}${BOARD}/introduction/delete/${post.id || post.postId}`
+        `${API_BASE_URL}${BOARD}/INTRODUCTION/delete/${post.id || post.postId}`
       );
       alert("게시글이 삭제되었습니다.");
       navigate("/child/list");
@@ -107,28 +113,32 @@ const ChildDetail = () => {
                 <h1 className="text-2xl font-bold text-gray-800">
                   우리 아이 소개 상세
                 </h1>
-                {/* 작성자만 수정/삭제 버튼 노출 */}
-                {post.nickname &&
-                  userNickname &&
-                  post.nickname === userNickname && (
+                {/* 공유, 수정, 삭제 버튼 */}
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleShare}>
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                  {post && userNickname && post.nickname === userNickname && (
                     <>
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={() =>
                           navigate(`/child/edit/${post.id || post.postId}`)
                         }
                       >
-                        수정
+                        <Edit className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={handleDelete}
-                        style={{ marginLeft: 8 }}
                       >
-                        삭제
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </>
                   )}
+                </div>
               </CardHeader>
               <CardContent>
                 {thumbnail && (
