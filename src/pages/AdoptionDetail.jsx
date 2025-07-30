@@ -25,6 +25,7 @@ import CommentSection from "@/components/CommentSection";
 import { toast } from "@/components/ui/sonner";
 import { API_BASE_URL, USER } from "../../configs/host-config.js";
 import axiosInstance from "../../configs/axios-config.js";
+import ReportButton from "../components/ReportButton.jsx";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -145,7 +146,9 @@ const AdoptionDetail = () => {
             <div className="text-center">
               <p className="text-red-500 mb-4">{error}</p>
               <Button
-                onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                onClick={() =>
+                  navigate("/adoption", { state: { tab: "adoption" } })
+                }
                 variant="outline"
                 className="border-red-500 text-red-500 hover:bg-red-50"
               >
@@ -166,7 +169,12 @@ const AdoptionDetail = () => {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <p className="text-gray-500 mb-4">분양글을 찾을 수 없습니다.</p>
-              <Button onClick={() => navigate("/adoption", { state: { tab: "adoption" } })} variant="outline">
+              <Button
+                onClick={() =>
+                  navigate("/adoption", { state: { tab: "adoption" } })
+                }
+                variant="outline"
+              >
                 목록으로 돌아가기
               </Button>
             </div>
@@ -193,7 +201,9 @@ const AdoptionDetail = () => {
                   <div className="flex items-center space-x-4">
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                      onClick={() =>
+                        navigate("/adoption", { state: { tab: "adoption" } })
+                      }
                       className="flex items-center space-x-2"
                     >
                       <ArrowLeft className="h-4 w-4" />
@@ -205,20 +215,6 @@ const AdoptionDetail = () => {
                       <span>{post.title}</span>
                     </div>
                   </div>
-                  {isLoggedIn && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // 좋아요 기능 구현
-                        console.log("좋아요 클릭");
-                      }}
-                      className="flex items-center space-x-2"
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span>좋아요</span>
-                    </Button>
-                  )}
                 </div>
               </div>
 
@@ -243,6 +239,13 @@ const AdoptionDetail = () => {
                         <Heart className="h-4 w-4 text-pink-400" />
                         <span>{post.likes || 0}</span>
                       </div>
+                      {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                      {nowLoggedUserId !== post.userId && (
+                        <ReportButton
+                          category="board"
+                          accusedUserId={post.userId}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col items-end">

@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Share2, Edit, Trash2 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { useAuth } from "@/context/UserContext";
-import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { API_BASE_URL, BOARD, USER } from "../../configs/host-config";
 import CommentSection from "@/components/CommentSection";
+import ReportButton from "../components/ReportButton";
 
 const ChildDetail = () => {
   const { id } = useParams();
@@ -16,7 +17,8 @@ const ChildDetail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { nickname: userNickname } = useAuth();
+  const { nickname: userNickname, isLoggedIn } = useAuth();
+  const [nowLoggedUserId, setNowLoggedUserId] = useState(null);
 
   const IMAGE_BASE_URL = "http://localhost:8000/path/to/image/dir/"; // 실제 이미지 경로로 수정
 
@@ -32,6 +34,21 @@ const ChildDetail = () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   };
 
+  // 유저 ID 비동기 조회 함수 추가
+  const getNowLoggedUserId = async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
+      console.log(response);
+
+      setNowLoggedUserId(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("유저 ID 조회 실패:", err);
+      setNowLoggedUserId(null);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -39,6 +56,8 @@ const ChildDetail = () => {
     axiosInstance
       .get(`${API_BASE_URL}${BOARD}/detail/INTRODUCTION/${id}`)
       .then((res) => {
+        console.log(res);
+
         let data = res.data.result || res.data.data || res.data;
         if (Array.isArray(data)) data = data[0];
         setPost({
@@ -47,9 +66,9 @@ const ChildDetail = () => {
           title: data.title,
           content: data.content,
           nickname: data.nickname,
-          createdAt: data.createdAt || data.createAt,
+          createdAt: data.createdAt || data.createdat,
           updatedAt: data.updatedAt || data.updateAt,
-          viewCount: data.viewCount,
+          viewCount: data.viewcount,
           likes: data.likeCount,
           comments: data.commentCount,
           // 이미지 파일명만 내려올 경우 실제 URL로 변환
@@ -60,6 +79,7 @@ const ChildDetail = () => {
                 : IMAGE_BASE_URL + (data.thumbnailImage || data.thumbnailimage)
               : null,
         });
+        getNowLoggedUserId();
       })
       .catch((err) => {
         if (err.response?.status === 404) {
@@ -137,6 +157,13 @@ const ChildDetail = () => {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </>
+                  )}
+                  {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                  {nowLoggedUserId !== post.userId && (
+                    <ReportButton
+                      category="board"
+                      accusedUserId={post.userId}
+                    />
                   )}
                 </div>
               </CardHeader>
