@@ -79,7 +79,7 @@ const Sidebar = () => {
             "개"
           );
         } catch (error) {
-          console.error("❌ 알림 상태 복원 실패:", error);
+          console.error(" 알림 상태 복원 실패:", error);
           // 잘못된 데이터인 경우 제거
           localStorage.removeItem(`notifications_${email}`);
         }
@@ -172,7 +172,7 @@ const Sidebar = () => {
     );
   };
 
-  // ✅ 카카오 로그인 메시지 수신 처리
+  //  카카오 로그인 메시지 수신 처리
   useEffect(() => {
     const handleKakaoMessage = (event) => {
       if (

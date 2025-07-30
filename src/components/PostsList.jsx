@@ -176,7 +176,7 @@ const PostsList = ({ userId, category }) => {
                     {post.title}
                   </h4>
                   <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>조회 {post.views ?? post.viewCount ?? 0}</span>
+                    <span>조회 {post.views ?? post.viewcount ?? 0}</span>
                     <span className="flex items-center">
                       <Heart className="w-3 h-3 mr-1" />
                       {post.likes ?? post.likeCount ?? 0}

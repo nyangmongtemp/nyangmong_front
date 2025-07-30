@@ -47,6 +47,7 @@ const PasswordChangeForm = () => {
     } catch (error) {
       console.error("이메일 발송 실패:", error);
       setIsEmailSent(false);
+      alert(error.response?.message);
     } finally {
       setIsSending(false);
     }
@@ -71,6 +72,8 @@ const PasswordChangeForm = () => {
       setIsCodeVerified(true);
       alert("인증이 완료되었습니다.");
     } catch (error) {
+      alert(error.response?.message);
+
       console.error("인증 실패:", error);
     }
   };
@@ -115,6 +118,7 @@ const PasswordChangeForm = () => {
       logout();
       navigate("/");
     } catch (error) {
+      alert(error.response?.message);
       console.error("비밀번호 변경 실패:", error);
     }
   };

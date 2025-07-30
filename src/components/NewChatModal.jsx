@@ -61,8 +61,13 @@ const NewChatModal = ({ onSuccess }) => {
       alert("메시지가 전송되었습니다!");
       onSuccess();
     } catch (err) {
-      console.error("Failed to create chat:", err);
-      alert("메시지 전송에 실패했습니다.");
+      if (err.response?.status === 400) {
+        alert("본인에게는 메시지를 보낼 수 없습니다.");
+      } else if (err.response?.status === 404) {
+        alert("메시지를 보낼 수 없는 사용자입니다.");
+      } else {
+        alert("메시지 전송 중 오류가 발생하였습니다.");
+      }
     } finally {
       setLoading(false);
     }
