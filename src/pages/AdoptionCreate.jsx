@@ -22,7 +22,7 @@ import CKEditorWrapper from "@/components/CKEditorWrapper";
 // 기존 이미지 URL을 File로 변환하는 함수
 async function urlToFile(url, filename, mimeType) {
   // 확장자 추출
-  const ext = filename.split('.').pop().toLowerCase();
+  const ext = filename.split(".").pop().toLowerCase();
   let type = mimeType;
   if (!type || type === "") {
     if (ext === "jpg" || ext === "jpeg") type = "image/jpeg";
@@ -71,7 +71,8 @@ const AdoptionCreate = () => {
   useEffect(() => {
     if (isEdit) {
       setFetchLoading(true);
-      adoptionAPI.getAdoptionDetail(id)
+      adoptionAPI
+        .getAdoptionDetail(id)
         .then((data) => {
           setFormData({
             title: data.title || "",
@@ -84,7 +85,7 @@ const AdoptionCreate = () => {
             neutered: data.neuterYn || "",
             vaccinated: data.vaccine || "",
             fee: data.fee || "",
-            imageUrl: data.imageUrl || ""
+            imageUrl: data.imageUrl || "",
           });
           if (data.thumbnailImage || data.imageUrl) {
             setImagePreview(data.thumbnailImage || data.imageUrl);
@@ -110,7 +111,7 @@ const AdoptionCreate = () => {
     neutered: "",
     vaccinated: "",
     fee: "",
-    imageUrl: ""
+    imageUrl: "",
   });
 
   const categories = ["강아지", "고양이", "기타"];
@@ -118,12 +119,12 @@ const AdoptionCreate = () => {
   const genderOptions = [
     { label: "수컷", value: "M" },
     { label: "암컷", value: "F" },
-    { label: "미상", value: "Q" }
+    { label: "미상", value: "Q" },
   ];
   const neuteredOptions = [
     { label: "예", value: "Y" },
     { label: "아니오", value: "N" },
-    { label: "모름", value: "U" }
+    { label: "모름", value: "U" },
   ];
 
   const handleImageChange = (e) => {
@@ -132,14 +133,20 @@ const AdoptionCreate = () => {
       setOriginalImageType(file.type || "image/jpeg");
       setOriginalImageName(file.name || "thumbnail.jpg"); // 파일명 기억
       // 1. MIME 타입 체크
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/bmp",
+        "image/gif",
+      ];
       // 2. 확장자 체크
-      const allowedExts = ['jpg', 'jpeg', 'png', 'bmp', 'gif'];
-      const fileExt = file.name.split('.').pop().toLowerCase();
+      const allowedExts = ["jpg", "jpeg", "png", "bmp", "gif"];
+      const fileExt = file.name.split(".").pop().toLowerCase();
 
       if (
-        (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt))
-        || fileExt === ''
+        (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt)) ||
+        fileExt === ""
       ) {
         alert("이미지 파일(JPG, PNG, BMP, GIF)만 업로드 가능합니다.");
         return;
@@ -156,11 +163,11 @@ const AdoptionCreate = () => {
 
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
     // 원본 파일명과 타입을 사용해 File로 변환
-    const ext = originalImageType.split('/')[1] || 'jpg';
+    const ext = originalImageType.split("/")[1] || "jpg";
     let fileName = originalImageName;
     // 확장자가 없으면 붙여줌
-    if (fileName && !fileName.toLowerCase().endsWith('.' + ext)) {
-      fileName = fileName.replace(/\.[^/.]+$/, '') + '.' + ext;
+    if (fileName && !fileName.toLowerCase().endsWith("." + ext)) {
+      fileName = fileName.replace(/\.[^/.]+$/, "") + "." + ext;
     }
     const file = new File([croppedBlob], fileName, { type: originalImageType });
     setImagePreview(croppedImageUrl);
@@ -175,9 +182,9 @@ const AdoptionCreate = () => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -225,7 +232,11 @@ const AdoptionCreate = () => {
     let imageFile = selectedImage;
     if (!imageFile && imagePreview && isEdit) {
       // 기존 이미지 URL을 File로 변환 (확장자/type 강제 매칭 적용)
-      imageFile = await urlToFile(imagePreview, originalImageName, originalImageType);
+      imageFile = await urlToFile(
+        imagePreview,
+        originalImageName,
+        originalImageType
+      );
     }
     if (!imageFile) {
       alert("이미지는 필수입니다.");
@@ -243,12 +254,15 @@ const AdoptionCreate = () => {
       sexCode: formData.sex,
       neuterYn: formData.neutered,
       address: formData.address,
-      fee: formData.fee
+      fee: formData.fee,
     };
 
     // FormData 구성
     const form = new FormData();
-    form.append("animalRequest", new Blob([JSON.stringify(animalRequest)], { type: "application/json" }));
+    form.append(
+      "animalRequest",
+      new Blob([JSON.stringify(animalRequest)], { type: "application/json" })
+    );
     form.append("thumbnailImage", imageFile, imageFile.name);
 
     setLoading(true);
@@ -260,9 +274,13 @@ const AdoptionCreate = () => {
         alert("분양글이 성공적으로 수정되었습니다.");
         navigate("/adoption", { state: { tab: "adoption" } });
       } catch (error) {
-        console.error('분양글 수정 실패:', error);
+        console.error("분양글 수정 실패:", error);
         if (error.response) {
-          alert(`에러: ${error.response.status} - ${error.response.data?.message || '수정 실패'}`);
+          alert(
+            `에러: ${error.response.status} - ${
+              error.response.data?.message || "수정 실패"
+            }`
+          );
         } else if (error.message) {
           alert(`에러: ${error.message}`);
         } else {
@@ -279,10 +297,14 @@ const AdoptionCreate = () => {
       alert("분양글이 성공적으로 등록되었습니다.");
       navigate("/adoption", { state: { tab: "adoption" } });
     } catch (error) {
-      console.error('분양글 등록 실패:', error);
+      console.error("분양글 등록 실패:", error);
       if (error.response) {
         // axios 에러 응답
-        alert(`에러: ${error.response.status} - ${error.response.data?.message || '등록 실패'}`);
+        alert(
+          `에러: ${error.response.status} - ${
+            error.response.data?.message || "등록 실패"
+          }`
+        );
       } else if (error.message) {
         alert(`에러: ${error.message}`);
       } else {
@@ -325,7 +347,9 @@ const AdoptionCreate = () => {
             <div className="mb-6">
               <Button
                 variant="ghost"
-                onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                onClick={() =>
+                  navigate("/adoption", { state: { tab: "adoption" } })
+                }
                 className="flex items-center text-gray-600 hover:text-gray-800"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -340,7 +364,9 @@ const AdoptionCreate = () => {
                   {isEdit ? "분양글 수정" : "분양글 등록"}
                 </CardTitle>
                 <p className="text-gray-600">
-                  {isEdit ? "기존 정보를 수정할 수 있습니다." : "새로운 가족을 기다리는 반려동물을 등록해주세요."}
+                  {isEdit
+                    ? "기존 정보를 수정할 수 있습니다."
+                    : "새로운 가족을 기다리는 반려동물을 등록해주세요."}
                 </p>
               </CardHeader>
               <CardContent>
@@ -351,7 +377,9 @@ const AdoptionCreate = () => {
                     <Input
                       id="title"
                       value={formData.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
                       placeholder="분양글 제목을 입력하세요"
                       required
                     />
@@ -363,7 +391,9 @@ const AdoptionCreate = () => {
                       <Label htmlFor="petCategory">반려동물 종류 *</Label>
                       <Select
                         value={formData.petCategory}
-                        onValueChange={(value) => handleInputChange("petCategory", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("petCategory", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="종류를 선택하세요" />
@@ -383,7 +413,9 @@ const AdoptionCreate = () => {
                       <Input
                         id="petKind"
                         value={formData.petKind}
-                        onChange={(e) => handleInputChange("petKind", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("petKind", e.target.value)
+                        }
                         placeholder="예: 믹스견"
                       />
                     </div>
@@ -393,7 +425,9 @@ const AdoptionCreate = () => {
                       <Label htmlFor="sex">성별 *</Label>
                       <Select
                         value={formData.sex}
-                        onValueChange={(value) => handleInputChange("sex", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("sex", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="성별을 선택하세요" />
@@ -413,7 +447,9 @@ const AdoptionCreate = () => {
                       <Input
                         id="age"
                         value={formData.age}
-                        onChange={(e) => handleInputChange("age", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("age", e.target.value)
+                        }
                         placeholder="예: 2살, 6개월"
                       />
                     </div>
@@ -423,8 +459,10 @@ const AdoptionCreate = () => {
                       <Input
                         id="fee"
                         value={formData.fee}
-                        onChange={(e) => handleInputChange("fee", e.target.value)}
-                        placeholder="예: 20만원"
+                        onChange={(e) =>
+                          handleInputChange("fee", e.target.value)
+                        }
+                        placeholder="예: 20"
                       />
                     </div>
 
@@ -433,7 +471,9 @@ const AdoptionCreate = () => {
                       <Input
                         id="address"
                         value={formData.address}
-                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("address", e.target.value)
+                        }
                         placeholder="지역을 입력하세요 (예: 서울 강남구)"
                         required
                       />
@@ -444,7 +484,9 @@ const AdoptionCreate = () => {
                       <Label htmlFor="neutered">중성화 *</Label>
                       <Select
                         value={formData.neutered}
-                        onValueChange={(value) => handleInputChange("neutered", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("neutered", value)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="중성화 여부를 선택하세요" />
@@ -464,7 +506,9 @@ const AdoptionCreate = () => {
                       <Input
                         id="vaccinated"
                         value={formData.vaccinated}
-                        onChange={(e) => handleInputChange("vaccinated", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("vaccinated", e.target.value)
+                        }
                         placeholder="예방접종 상태여부를 입력하세요."
                       />
                     </div>
@@ -546,7 +590,9 @@ const AdoptionCreate = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                      onClick={() =>
+                        navigate("/adoption", { state: { tab: "adoption" } })
+                      }
                     >
                       취소
                     </Button>
@@ -560,8 +606,10 @@ const AdoptionCreate = () => {
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           {isEdit ? "수정 중..." : "등록 중..."}
                         </>
+                      ) : isEdit ? (
+                        "분양글 수정"
                       ) : (
-                        isEdit ? "분양글 수정" : "분양글 등록"
+                        "분양글 등록"
                       )}
                     </Button>
                   </div>
@@ -604,4 +652,4 @@ const AdoptionCreate = () => {
   );
 };
 
-export default AdoptionCreate; 
+export default AdoptionCreate;
