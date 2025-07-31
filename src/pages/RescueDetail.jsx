@@ -51,7 +51,13 @@ const RescueDetail = () => {
       try {
         setLoading(true);
         console.log('API 호출 시작:', id);
-        const data = await strayAnimalAPI.getStrayAnimalDetail(id);
+        const response = await strayAnimalAPI.getStrayAnimalDetail(id);
+        console.log('유기동물 상세 응답:', response);
+        console.log('응답 타입:', typeof response);
+        console.log('응답 키들:', Object.keys(response || {}));
+        
+        // API 응답에서 result 객체를 추출하여 설정
+        const data = response.result || response;
         console.log('유기동물 상세 데이터:', data);
         console.log('데이터 타입:', typeof data);
         console.log('데이터 키들:', Object.keys(data || {}));

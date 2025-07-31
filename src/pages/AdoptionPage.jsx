@@ -203,16 +203,17 @@ const AdoptionPage = () => {
         return;
       }
 
-      // API 응답 형식에 맞게 데이터 추출
-      setStrayAnimals(response.content || response.data || response || []);
+      // API 응답 형식에 맞게 데이터 추출 (result 객체 안에 content가 있음)
+      const resultData = response.result || response;
+      setStrayAnimals(resultData.content || resultData.data || resultData || []);
 
-      if (response.pageable) {
+      if (resultData.pageable) {
         // API는 0-based, UI는 1-based로 변환
-        setCurrentPage(response.pageable.pageNumber);
-        setPageSize(response.pageable.pageSize);
+        setCurrentPage(resultData.pageable.pageNumber);
+        setPageSize(resultData.pageable.pageSize);
       }
-      setTotalPages(response.totalPages || 0);
-      setTotalElements(response.totalElements || 0);
+      setTotalPages(resultData.totalPages || 0);
+      setTotalElements(resultData.totalElements || 0);
     } catch (err) {
       console.error("유기동물 목록 조회 실패:", err);
       setError("유기동물 목록을 불러오는데 실패했습니다.");

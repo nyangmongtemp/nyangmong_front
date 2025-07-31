@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MapPin, Calendar } from "lucide-react";
@@ -7,6 +8,7 @@ import { API_BASE_URL } from "../../configs/host-config";
 import { API_ENDPOINTS } from "../../configs/api-endpoints";
 
 const AdoptionBoard = () => {
+  const navigate = useNavigate();
   const [adoptionPosts, setAdoptionPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,8 +30,12 @@ const AdoptionBoard = () => {
           `${API_BASE_URL}${API_ENDPOINTS.STRAY_ANIMAL.MAIN}`
         );
 
+        // API 응답에서 result 객체를 추출하여 설정
+        const resultData = response.data.result || response.data;
+        const animals = resultData.content || resultData || [];
+
         // API 응답을 컴포넌트에서 사용할 형태로 매핑
-        const mappedPosts = response.data.map((animal, index) => ({
+        const mappedPosts = animals.map((animal, index) => ({
           id: animal.desertionNo,
           title: `${animal.kindNm} 분양합니다`,
           image: animal.popfile1,
@@ -48,45 +54,6 @@ const AdoptionBoard = () => {
       } catch (err) {
         console.error("유기동물 데이터 조회 실패:", err);
         setError("유기동물 데이터를 불러오는데 실패했습니다.");
-        // 에러 시 기본 데이터 설정
-        setAdoptionPosts([
-          {
-            id: "469569202500525",
-            title: "골든 리트리버 분양합니다",
-            image: "http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2025/07/202507171907953.jpeg",
-            location: "세종특별자치시 전동면 미륵당1길 188",
-            age: "2022(년생)",
-            gender: "수컷",
-            price: "무료분양",
-            date: "2025.07.17",
-            neuterYn: "Y",
-            careTel: "010-4435-3720",
-          },
-          {
-            id: "469569202500524",
-            title: "믹스견 분양합니다",
-            image: "http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2025/07/202507152107738.jpeg",
-            location: "세종특별자치시 전동면 미륵당1길 188",
-            age: "2025(60일미만)(년생)",
-            gender: "암컷",
-            price: "무료분양",
-            date: "2025.07.15",
-            neuterYn: "N",
-            careTel: "010-4435-3720",
-          },
-          {
-            id: "469569202500523",
-            title: "믹스견 분양합니다",
-            image: "http://openapi.animal.go.kr/openapi/service/rest/fileDownloadSrvc/files/shelter/2025/07/202507152107439.jpeg",
-            location: "세종특별자치시 전동면 미륵당1길 188",
-            age: "2025(60일미만)(년생)",
-            gender: "수컷",
-            price: "무료분양",
-            date: "2025.07.15",
-            neuterYn: "N",
-            careTel: "010-4435-3720",
-          },
-        ]);
       } finally {
         setLoading(false);
       }
@@ -146,6 +113,7 @@ const AdoptionBoard = () => {
           <Card
             key={post.id}
             className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => navigate(`/rescue-detail/${post.id}`)}
           >
             <div className="relative">
               <img
