@@ -315,7 +315,7 @@ const AdoptionPage = () => {
           : adoptionSex === "암컷"
           ? "F"
           : "Q",
-        page + 1, // API는 1-based
+        page, // API는 0-based
         pageSize
       );
 
@@ -334,14 +334,15 @@ const AdoptionPage = () => {
         return;
       }
 
-      // API 응답 형식에 맞게 데이터 추출
-      setAdoptionPosts(response.content || response.data || response || []);
+      // API 응답 형식에 맞게 데이터 추출 (result 객체 안에 content가 있음)
+      const resultData = response.result || response;
+      setAdoptionPosts(resultData.content || resultData.data || resultData || []);
 
-      if (response.pageable) {
-        setAdoptionCurrentPage(response.pageable.pageNumber);
+      if (resultData.pageable) {
+        setAdoptionCurrentPage(resultData.pageable.pageNumber);
       }
-      setAdoptionTotalPages(response.totalPages || 0);
-      setAdoptionTotalElements(response.totalElements || 0);
+      setAdoptionTotalPages(resultData.totalPages || 0);
+      setAdoptionTotalElements(resultData.totalElements || 0);
     } catch (err) {
       console.error("분양게시판 목록 조회 실패:", err);
 
@@ -363,7 +364,7 @@ const AdoptionPage = () => {
   // 분양게시판 페이지 변경 함수
   const handleAdoptionPageChange = (page) => {
     setAdoptionCurrentPage(page);
-    fetchAdoptionPosts(page);
+    fetchAdoptionPosts(page + 1);
   };
 
   // 유기동물 데이터를 API 응답 형식에 맞게 변환하는 함수
