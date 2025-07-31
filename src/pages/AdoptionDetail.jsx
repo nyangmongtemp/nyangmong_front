@@ -98,7 +98,7 @@ const AdoptionDetail = () => {
         console.log("분양 상세 API 응답:", response);
         console.log("응답 타입:", typeof response);
         console.log("응답 키들:", Object.keys(response || {}));
-        
+
         // API 응답에서 result 객체를 추출하여 설정
         const postData = response.result || response;
         setPost(postData);
@@ -244,10 +244,7 @@ const AdoptionDetail = () => {
                         <Eye className="h-4 w-4" />
                         <span>{post.viewCount || post.views}</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Heart className="h-4 w-4 text-pink-400" />
-                        <span>{post.likes || 0}</span>
-                      </div>
+                      <div className="flex items-center space-x-2"></div>
                       {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
                       {nowLoggedUserId !== post.userId && (
                         <ReportButton
@@ -259,7 +256,9 @@ const AdoptionDetail = () => {
                   </div>
                   <div className="flex flex-col items-end">
                     <Badge className="bg-orange-500">
-                      {post.fee === 0 || post.fee === null || post.fee === undefined
+                      {post.fee === 0 ||
+                      post.fee === null ||
+                      post.fee === undefined
                         ? "무료분양"
                         : `${Number(post.fee).toLocaleString()}원`}
                     </Badge>
@@ -297,19 +296,19 @@ const AdoptionDetail = () => {
                         </select>
                       ) : (
                         // 로그인하지 않았거나 작성자가 아닌 경우: 텍스트로 표시
-                        <Badge 
+                        <Badge
                           className={`${
-                            post.reservationStatus === "R" 
-                              ? "bg-yellow-500" 
-                              : post.reservationStatus === "C" 
-                              ? "bg-gray-500" 
+                            post.reservationStatus === "R"
+                              ? "bg-yellow-500"
+                              : post.reservationStatus === "C"
+                              ? "bg-gray-500"
                               : "bg-green-500"
                           }`}
                         >
-                          {post.reservationStatus === "R" 
-                            ? "예약중" 
-                            : post.reservationStatus === "C" 
-                            ? "분양완료" 
+                          {post.reservationStatus === "R"
+                            ? "예약중"
+                            : post.reservationStatus === "C"
+                            ? "분양완료"
                             : "예약가능"}
                         </Badge>
                       )}
@@ -430,7 +429,9 @@ const AdoptionDetail = () => {
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
                         <p className="font-medium text-orange-600">
-                          {post.fee === 0 || post.fee === null || post.fee === undefined
+                          {post.fee === 0 ||
+                          post.fee === null ||
+                          post.fee === undefined
                             ? "무료분양"
                             : `${Number(post.fee).toLocaleString()}원`}
                         </p>
