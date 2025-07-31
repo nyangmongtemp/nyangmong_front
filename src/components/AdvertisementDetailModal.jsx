@@ -7,35 +7,28 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import axiosInstance from "../../configs/axios-config";
+import { API_BASE_URL, ADMIN } from "../../configs/host-config";
 
-const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
-  const [adId, setAdId] = useState("");
-  const [adName, setAdName] = useState("");
-  const [adDes, setAdDes] = useState("");
-  const [adLink, setAdLink] = useState("");
-  const [adImage, setAdImage] = useState("");
-  const [isRequired, setIsRequired] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [createdAt, setCreatedAt] = useState("");
-  const [updatedAt, setUpdatedAt] = useState("");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+const AdvertisementDetailModal = ({ isOpen, onClose, adId }) => {
+  const [ad, setAd] = useState(null);
 
   useEffect(() => {
-    if (ad) {
-      setAdId(ad.id ?? "");
-      setAdName(ad.name ?? "");
-      setAdDes(ad.description ?? "");
-      setAdLink(ad.link ?? "");
-      setAdImage(ad.imageUrl ?? "");
-      setIsRequired(ad.isRequired === true || ad.isRequired === "true");
-      setIsActive(ad.isActive === true || ad.isActive === "true");
-      setCreatedAt(ad.createdAt ? format(new Date(ad.createdAt), "yyyy-MM-dd") : "");
-      setUpdatedAt(ad.updatedAt ? format(new Date(ad.updatedAt), "yyyy-MM-dd") : "");
-      setStartDate(ad.startDate ? new Date(ad.startDate) : null);
-      setEndDate(ad.endDate ? new Date(ad.endDate) : null);
-    }
-  }, [ad]);
+    const fetchAdDetail = async () => {
+      if (!adId) return;
+      const token = sessionStorage.getItem("adminToken");
+      try {
+        const res = await axiosInstance.get(
+          `${API_BASE_URL}${ADMIN}/ads/${adId}`
+        );
+        setAd(res.data.result);
+      } catch (error) {
+        console.error("광고 상세 조회 실패:", error);
+      }
+    };
+
+    fetchAdDetail();
+  }, [adId]);
 
   if (!ad) return null;
 
@@ -50,7 +43,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">광고 아이디</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={adId}
+            value={ad.id ?? ""}
             readOnly
           />
         </div>
@@ -59,7 +52,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">광고 제목</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={adName}
+            value={ad.title ?? ""}
             readOnly
           />
         </div>
@@ -68,7 +61,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">광고 설명</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={adDes}
+            value={ad.description ?? ""}
             readOnly
           />
         </div>
@@ -77,7 +70,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">링크 URL</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={adLink}
+            value={ad.linkUrl ?? ""}
             readOnly
           />
         </div>
@@ -85,7 +78,11 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
         <div>
           <label className="font-medium">광고 시작일</label>
           <div className="flex items-center gap-2 border rounded px-2 py-1 bg-gray-100">
-            <span>{startDate ? format(startDate, "yyyy-MM-dd") : "-"}</span>
+            <span>
+              {ad.startDate
+                ? format(new Date(ad.startDate), "yyyy-MM-dd")
+                : "-"}
+            </span>
             <CalendarIcon className="h-4 w-4 opacity-50" />
           </div>
         </div>
@@ -93,7 +90,9 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
         <div>
           <label className="font-medium">광고 종료일</label>
           <div className="flex items-center gap-2 border rounded px-2 py-1 bg-gray-100">
-            <span>{endDate ? format(endDate, "yyyy-MM-dd") : "-"}</span>
+            <span>
+              {ad.endDate ? format(new Date(ad.endDate), "yyyy-MM-dd") : "-"}
+            </span>
             <CalendarIcon className="h-4 w-4 opacity-50" />
           </div>
         </div>
@@ -103,7 +102,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <input
             type="text"
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={isRequired ? "예" : "아니오"}
+            value={ad.confirmed ? "예" : "아니오"}
             readOnly
           />
         </div>
@@ -113,7 +112,7 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <input
             type="text"
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={isActive ? "예" : "아니오"}
+            value={ad.active ? "예" : "아니오"}
             readOnly
           />
         </div>
@@ -122,7 +121,9 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">생성일</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={createdAt}
+            value={
+              ad.createAt ? format(new Date(ad.createAt), "yyyy-MM-dd") : ""
+            }
             readOnly
           />
         </div>
@@ -131,15 +132,17 @@ const AdvertisementDetailModal = ({ isOpen, onClose, ad }) => {
           <label className="font-medium">수정일</label>
           <input
             className="w-full border rounded px-2 py-1 bg-gray-100"
-            value={updatedAt}
+            value={
+              ad.updateAt ? format(new Date(ad.updateAt), "yyyy-MM-dd") : ""
+            }
             readOnly
           />
         </div>
 
         <div className="bg-gray-50 border rounded-lg h-48 flex items-center justify-center overflow-hidden">
-          {adImage ? (
+          {ad.thumbnailImage ? (
             <img
-              src={adImage}
+              src={ad.thumbnailImage}
               alt="광고 이미지"
               className="max-w-full max-h-full object-contain"
             />

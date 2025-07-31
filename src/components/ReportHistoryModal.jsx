@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,28 +10,50 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { getUserReportHistory, patchReportConfirm, patchUserBan } from "../../configs/api-utils";
+import { useNavigate } from "react-router-dom";
+
+const getCategoryLabel = (category) => {
+  switch (category) {
+    case "COMMENT":
+      return "댓글/대댓글";
+    case "CHAT":
+      return "채팅";
+    case "BOARD":
+      return "게시글";
+    default:
+      return category;
+  }
+};
 
 const ReportHistoryModal = ({ isOpen, onClose, userId }) => {
   const [suspensionReason, setSuspensionReason] = useState("");
   const [suspensionDays, setSuspensionDays] = useState("");
+  const [reportHistory, setReportHistory] = useState([]);
+  const [accuseUserName, setAccuseUserName] = useState("");
+  const [accuseUserEmail, setAccuseUserEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // 임시 신고 이력 데이터
-  const reportHistory = [
-    {
-      id: 1,
-      date: "2024-06-20",
-      reporter: "신고자 이름",
-      reason: "부적절한 게시물 등록",
-      content: "신고자 이메일 / 신고 카테고리"
-    },
-    {
-      id: 2,
-      date: "2024-06-15",
-      reporter: "신고자 이름",
-      reason: "부적절한 게시물 등록",
-      content: "신고자 이메일 / 신고 카테고리"
-    }
-  ];
+  useEffect(() => {
+    if (!isOpen || !userId) return;
+    setLoading(true);
+    setError(null);
+    getUserReportHistory(userId)
+      .then((result) => {
+        setReportHistory(result || []);
+        if (result && result.length > 0) {
+          setAccuseUserName(result[0].accuseUserName || "");
+          setAccuseUserEmail(result[0].accuseUserEmail || "");
+        } else {
+          setAccuseUserName("");
+          setAccuseUserEmail("");
+        }
+      })
+      .catch((e) => setError(e.message || "신고 이력 조회 실패"))
+      .finally(() => setLoading(false));
+  }, [isOpen, userId]);
 
   const handleSubmit = () => {
     console.log("처리하기:", { suspensionReason, suspensionDays });
@@ -43,100 +65,117 @@ const ReportHistoryModal = ({ isOpen, onClose, userId }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>사용자의 신고 이력</DialogTitle>
+          <DialogTitle>
+            {accuseUserName && accuseUserEmail
+              ? `${accuseUserName}(${accuseUserEmail}) 사용자의 신고 이력`
+              : "사용자의 신고 이력"}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
           {/* 신고 이력 목록 */}
-          <div className="space-y-4">
-            {reportHistory.map((report) => (
-              <div key={report.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">{report.date}</div>
-                    <div className="font-medium mb-1">{report.reporter}</div>
-                    <div className="text-sm text-gray-800 mb-2">{report.reason}</div>
-                    <div className="text-sm text-gray-600">{report.content}</div>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto">
+            {loading ? (
+              <div className="text-center text-gray-500">불러오는 중...</div>
+            ) : error ? (
+              <div className="text-center text-red-500">{error}</div>
+            ) : reportHistory.length === 0 ? (
+              <div className="text-center text-gray-400">신고 이력이 없습니다.</div>
+            ) : (
+              reportHistory.map((report) => (
+                <div key={report.reportId} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <div className="text-base text-gray-600 mb-1">
+                        <span className="font-semibold">신고날짜: </span>
+                        {report.createAt?.slice(0, 16).replace("T", " ")}
+                      </div>
+                      <div className="text-base mb-1">
+                        <span className="font-semibold">신고자: </span>
+                        <span className="font-normal">{report.reportUserName} ({report.reportUserEmail})</span>
+                      </div>
+                      <div className="text-base mb-1">
+                        <span className="font-semibold">신고 콘텐츠: </span>
+                        <span className="font-normal">{getCategoryLabel(report.category)}</span>
+                      </div>
+                      <div className="text-base">
+                        <span className="font-semibold">신고 내용: </span>
+                        <span className="font-normal whitespace-pre-line">{report.content}</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      if (!window.confirm("신고 기록을 확인하셨으면 확인 아니라면 취소를 클릭해주세요.(확인 시 신고 기록이 삭제됩니다.)")) return;
+                      try {
+                        await patchReportConfirm(report.reportId);
+                        setReportHistory((prev) => prev.filter((r) => r.reportId !== report.reportId));
+                      } catch (e) {
+                        alert("신고 확인 중 오류가 발생했습니다");
+                      }
+                    }}>
+                      신고 확인
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm">
-                    신고 확인
-                  </Button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="border-t pt-6">
             <div className="grid grid-cols-2 gap-6">
-              {/* 정지사유 선택 */}
-              <div>
-                <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                  정지사유 카테고리 선택
-                </Label>
-                <Select value={suspensionReason} onValueChange={setSuspensionReason}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="정지사유를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inappropriate-content">부적절한 콘텐츠</SelectItem>
-                    <SelectItem value="spam">스팸 행위</SelectItem>
-                    <SelectItem value="harassment">괴롭힘</SelectItem>
-                    <SelectItem value="fraud">사기 행위</SelectItem>
-                    <SelectItem value="other">기타</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* 정지 일수 선택 */}
               <div>
                 <Label className="text-sm font-medium text-gray-700 mb-3 block">
                   정지 일수 (라디오버튼)
                 </Label>
-                <RadioGroup value={suspensionDays} onValueChange={setSuspensionDays}>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1" id="1day" />
-                      <Label htmlFor="1day" className="text-sm">1일</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="3" id="3days" />
-                      <Label htmlFor="3days" className="text-sm">3일</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="7" id="7days" />
-                      <Label htmlFor="7days" className="text-sm">7일</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="15" id="15days" />
-                      <Label htmlFor="15days" className="text-sm">15일</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="30" id="30days" />
-                      <Label htmlFor="30days" className="text-sm">30일</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="permanent" id="permanent" />
-                      <Label htmlFor="permanent" className="text-sm">무기한</Label>
-                    </div>
+                <RadioGroup value={suspensionDays} onValueChange={setSuspensionDays} className="flex flex-row gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="1" id="1day" />
+                    <Label htmlFor="1day" className="text-base">1일</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="3" id="3days" />
+                    <Label htmlFor="3days" className="text-base">3일</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="7" id="7days" />
+                    <Label htmlFor="7days" className="text-base">7일</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="15" id="15days" />
+                    <Label htmlFor="15days" className="text-base">15일</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="30" id="30days" />
+                    <Label htmlFor="30days" className="text-base">30일</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="permanent" id="permanent" />
+                    <Label htmlFor="permanent" className="text-base">무기한</Label>
                   </div>
                 </RadioGroup>
               </div>
             </div>
 
             <div className="text-right mt-6">
-              <Button onClick={handleSubmit} disabled={!suspensionReason || !suspensionDays}>
+              <Button onClick={async () => {
+                if (!suspensionDays) {
+                  alert("정지 일수를 선택해주세요");
+                  return;
+                }
+                if (!window.confirm(`${accuseUserName} 사용자님을 정지시키겠습니까?`)) return;
+                try {
+                  const days = suspensionDays === "permanent" ? 999 : Number(suspensionDays);
+                  // 신고이력 중 첫 번째의 accusedUserId 사용 (여러개면 UI에서 선택 필요)
+                  const accusedUserId = reportHistory[0]?.accusedUserId;
+                  await patchUserBan(accusedUserId, days);
+                  alert("정지 완료");
+                  navigate("/admin/users");
+                } catch (e) {
+                  alert("정지 처리 중 오류가 발생했습니다.");
+                }
+              }} disabled={reportHistory.length === 0}>
                 처리하기
               </Button>
-            </div>
-          </div>
-
-          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-            <div className="text-sm text-gray-600 mb-2">
-              <span className="font-medium">사용자의 신고 처리에관한니다. → 더불공을 부정적?</span>
-            </div>
-            <div className="text-xs text-gray-500">
-              지 현재누구니다. 속성은, 들구 되의 설정 접굴에글입니다. 프로필없을 내용인그 옹습니다. 옵 고르 허위 정보보이아누없을.
-              보화이잇년 프로필무트 옵습니다 옴습니다.
             </div>
           </div>
         </div>

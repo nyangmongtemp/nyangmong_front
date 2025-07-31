@@ -21,7 +21,7 @@ const axiosInstance = axios.create({
   headers: {
     // "Content-Type": "application/json",
   },
-  timeout: 10000, // 10초 타임아웃 설정
+  timeout: 15000, // 10초 타임아웃 설정
 });
 
 // ✅ 요청 인터셉터 설정

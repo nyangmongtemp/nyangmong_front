@@ -65,6 +65,12 @@ const AdoptionDetail = () => {
 
   // 유저 ID 비동기 조회 함수 추가
   const getNowLoggedUserId = async () => {
+    // 로그인하지 않은 경우 조회하지 않음
+    if (!isLoggedIn) {
+      setNowLoggedUserId(null);
+      return null;
+    }
+
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
       console.log(response);
@@ -92,9 +98,12 @@ const AdoptionDetail = () => {
         console.log("분양 상세 API 응답:", response);
         console.log("응답 타입:", typeof response);
         console.log("응답 키들:", Object.keys(response || {}));
-        setPost(response);
+        
+        // API 응답에서 result 객체를 추출하여 설정
+        const postData = response.result || response;
+        setPost(postData);
         getNowLoggedUserId();
-        console.log("post 상태 설정 완료:", response);
+        console.log("post 상태 설정 완료:", postData);
       } catch (err) {
         console.error("분양 상세 조회 실패:", err);
         setError("분양글을 불러오는데 실패했습니다.");
@@ -250,9 +259,9 @@ const AdoptionDetail = () => {
                   </div>
                   <div className="flex flex-col items-end">
                     <Badge className="bg-orange-500">
-                      {post.fee === 0
+                      {post.fee === 0 || post.fee === null || post.fee === undefined
                         ? "무료분양"
-                        : `${post.fee.toLocaleString()}원`}
+                        : `${Number(post.fee).toLocaleString()}원`}
                     </Badge>
                     {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
                     {isLoggedIn && post && nowLoggedUserId === post.userId && (
@@ -403,9 +412,9 @@ const AdoptionDetail = () => {
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
                         <p className="font-medium text-orange-600">
-                          {post.fee === 0
+                          {post.fee === 0 || post.fee === null || post.fee === undefined
                             ? "무료분양"
-                            : `${post.fee.toLocaleString()}원`}
+                            : `${Number(post.fee).toLocaleString()}원`}
                         </p>
                       </div>
                     </div>
