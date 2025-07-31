@@ -203,16 +203,17 @@ const AdoptionPage = () => {
         return;
       }
 
-      // API 응답 형식에 맞게 데이터 추출
-      setStrayAnimals(response.content || response.data || response || []);
+      // API 응답 형식에 맞게 데이터 추출 (result 객체 안에 content가 있음)
+      const resultData = response.result || response;
+      setStrayAnimals(resultData.content || resultData.data || resultData || []);
 
-      if (response.pageable) {
+      if (resultData.pageable) {
         // API는 0-based, UI는 1-based로 변환
-        setCurrentPage(response.pageable.pageNumber);
-        setPageSize(response.pageable.pageSize);
+        setCurrentPage(resultData.pageable.pageNumber);
+        setPageSize(resultData.pageable.pageSize);
       }
-      setTotalPages(response.totalPages || 0);
-      setTotalElements(response.totalElements || 0);
+      setTotalPages(resultData.totalPages || 0);
+      setTotalElements(resultData.totalElements || 0);
     } catch (err) {
       console.error("유기동물 목록 조회 실패:", err);
       setError("유기동물 목록을 불러오는데 실패했습니다.");
@@ -436,6 +437,8 @@ const AdoptionPage = () => {
       views: post.viewCount || 0,
       likes: post.likeCount || 0, // API에 없으므로 기본값
       comments: post.commentCount || 0, // API에 없으므로 기본값
+      // 예약상태 정보 추가
+      reservationStatus: post.reservationStatus || "A",
       // 추가 정보
       content: post.content,
       petCategory: post.petCategory,
@@ -491,6 +494,24 @@ const AdoptionPage = () => {
         {!isRescue && post.price === "무료분양" && (
           <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500">
             무료분양
+          </Badge>
+        )}
+        {/* 분양게시판일 때만 예약상태 뱃지 표시 */}
+        {!isRescue && (
+          <Badge 
+            className={`absolute top-2 right-2 ${
+              post.reservationStatus === "R" 
+                ? "bg-yellow-500 hover:bg-yellow-500" 
+                : post.reservationStatus === "C" 
+                ? "bg-gray-500 hover:bg-gray-500" 
+                : "bg-green-500 hover:bg-green-500"
+            }`}
+          >
+            {post.reservationStatus === "R" 
+              ? "예약중" 
+              : post.reservationStatus === "C" 
+              ? "분양완료" 
+              : "예약가능"}
           </Badge>
         )}
       </div>

@@ -20,7 +20,8 @@ import CommentSection from "@/components/CommentSection";
 import axiosInstance from "../../configs/axios-config";
 import axios from "axios";
 import { useAuth } from "../context/UserContext";
-import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { API_BASE_URL, BOARD, USER } from "../../configs/host-config";
+import ReportButton from "../components/ReportButton";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -41,10 +42,26 @@ const PostDetail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [nowLoggedUserId, setNowLoggedUserId] = useState(null);
 
   // 댓글도 실제 데이터로 연동하려면 별도 상태 필요
   const [comments, setComments] = useState([]);
-  const { nickname: userNickname } = useAuth();
+  const { nickname: userNickname, isLoggedIn } = useAuth();
+
+  // 유저 ID 비동기 조회 함수 추가
+  const getNowLoggedUserId = async () => {
+    try {
+      const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
+      console.log(response);
+
+      setNowLoggedUserId(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("유저 ID 조회 실패:", err);
+      setNowLoggedUserId(null);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (!type || !id) {
@@ -92,20 +109,14 @@ const PostDetail = () => {
           content: data.content,
           author: data.nickname,
           userId: data.userid,
-          createdAt: data.createdat
-            ? new Date(data.createdat).toLocaleDateString("ko-KR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "날짜 정보 없음",
+          createdAt: data.createdat,
           views: data.viewcount,
           likes: 0, // 백엔드에 likes 필드가 없으므로 기본값 0
           thumbnailimage: data.thumbnailimage,
           category: data.category,
         };
+
+        getNowLoggedUserId();
 
         console.log("매핑된 데이터:", mappedData);
 
@@ -242,6 +253,13 @@ const PostDetail = () => {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </>
+                    )}
+                    {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                    {nowLoggedUserId !== post.userId && (
+                      <ReportButton
+                        category="board"
+                        accusedUserId={post.userId}
+                      />
                     )}
                   </div>
                 </div>

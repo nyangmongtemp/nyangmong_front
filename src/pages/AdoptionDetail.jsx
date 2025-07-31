@@ -25,6 +25,7 @@ import CommentSection from "@/components/CommentSection";
 import { toast } from "@/components/ui/sonner";
 import { API_BASE_URL, USER } from "../../configs/host-config.js";
 import axiosInstance from "../../configs/axios-config.js";
+import ReportButton from "../components/ReportButton.jsx";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -97,7 +98,7 @@ const AdoptionDetail = () => {
         console.log("분양 상세 API 응답:", response);
         console.log("응답 타입:", typeof response);
         console.log("응답 키들:", Object.keys(response || {}));
-        
+
         // API 응답에서 result 객체를 추출하여 설정
         const postData = response.result || response;
         setPost(postData);
@@ -154,7 +155,9 @@ const AdoptionDetail = () => {
             <div className="text-center">
               <p className="text-red-500 mb-4">{error}</p>
               <Button
-                onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                onClick={() =>
+                  navigate("/adoption", { state: { tab: "adoption" } })
+                }
                 variant="outline"
                 className="border-red-500 text-red-500 hover:bg-red-50"
               >
@@ -175,7 +178,12 @@ const AdoptionDetail = () => {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <p className="text-gray-500 mb-4">분양글을 찾을 수 없습니다.</p>
-              <Button onClick={() => navigate("/adoption", { state: { tab: "adoption" } })} variant="outline">
+              <Button
+                onClick={() =>
+                  navigate("/adoption", { state: { tab: "adoption" } })
+                }
+                variant="outline"
+              >
                 목록으로 돌아가기
               </Button>
             </div>
@@ -202,7 +210,9 @@ const AdoptionDetail = () => {
                   <div className="flex items-center space-x-4">
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/adoption", { state: { tab: "adoption" } })}
+                      onClick={() =>
+                        navigate("/adoption", { state: { tab: "adoption" } })
+                      }
                       className="flex items-center space-x-2"
                     >
                       <ArrowLeft className="h-4 w-4" />
@@ -214,20 +224,6 @@ const AdoptionDetail = () => {
                       <span>{post.title}</span>
                     </div>
                   </div>
-                  {isLoggedIn && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // 좋아요 기능 구현
-                        console.log("좋아요 클릭");
-                      }}
-                      className="flex items-center space-x-2"
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span>좋아요</span>
-                    </Button>
-                  )}
                 </div>
               </div>
 
@@ -239,7 +235,7 @@ const AdoptionDetail = () => {
                       {post.title}
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>작성자: {post.nickName}</span>
+                      <span>작성자: {post.nickname}</span>
                       <span>
                         작성일:{" "}
                         {new Date(post.createAt).toLocaleDateString("ko-KR")}
@@ -248,21 +244,28 @@ const AdoptionDetail = () => {
                         <Eye className="h-4 w-4" />
                         <span>{post.viewCount || post.views}</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Heart className="h-4 w-4 text-pink-400" />
-                        <span>{post.likes || 0}</span>
-                      </div>
+                      <div className="flex items-center space-x-2"></div>
+                      {/* 신고 버튼: 본인 댓글이 아니면 노출 */}
+                      {nowLoggedUserId !== post.userId && (
+                        <ReportButton
+                          category="board"
+                          accusedUserId={post.userId}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col items-end">
                     <Badge className="bg-orange-500">
-                      {post.fee === 0 || post.fee === null || post.fee === undefined
+                      {post.fee === 0 ||
+                      post.fee === null ||
+                      post.fee === undefined
                         ? "무료분양"
                         : `${Number(post.fee).toLocaleString()}원`}
                     </Badge>
-                    {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
-                    {isLoggedIn && post && nowLoggedUserId === post.userId && (
-                      <div className="mt-2">
+                    {/* 예약상태 표시 */}
+                    <div className="mt-2">
+                      {isLoggedIn && post && nowLoggedUserId === post.userId ? (
+                        // 로그인한 사용자가 작성자인 경우: 셀렉트박스
                         <select
                           className="border rounded px-2 py-1 text-sm"
                           value={post.reservationStatus || "A"}
@@ -291,8 +294,25 @@ const AdoptionDetail = () => {
                             </option>
                           ))}
                         </select>
-                      </div>
-                    )}
+                      ) : (
+                        // 로그인하지 않았거나 작성자가 아닌 경우: 텍스트로 표시
+                        <Badge
+                          className={`${
+                            post.reservationStatus === "R"
+                              ? "bg-yellow-500"
+                              : post.reservationStatus === "C"
+                              ? "bg-gray-500"
+                              : "bg-green-500"
+                          }`}
+                        >
+                          {post.reservationStatus === "R"
+                            ? "예약중"
+                            : post.reservationStatus === "C"
+                            ? "분양완료"
+                            : "예약가능"}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -409,7 +429,9 @@ const AdoptionDetail = () => {
                       <div>
                         <span className="text-sm text-gray-600">책임비</span>
                         <p className="font-medium text-orange-600">
-                          {post.fee === 0 || post.fee === null || post.fee === undefined
+                          {post.fee === 0 ||
+                          post.fee === null ||
+                          post.fee === undefined
                             ? "무료분양"
                             : `${Number(post.fee).toLocaleString()}원`}
                         </p>

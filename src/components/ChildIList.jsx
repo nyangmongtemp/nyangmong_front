@@ -247,19 +247,15 @@ const ChildIList = () => {
                             </span>
                           </div>
                           <div className="flex justify-between text-sm text-gray-500">
-                            <span>조회수: {pet.viewCount || pet.views}</span>
+                            <span>
+                              조회수: {pet.viewCount || pet.viewcount}
+                            </span>
                             <span>
                               댓글: {pet.comments || pet.commentCount}
                             </span>
+                            <span>❤️ {pet.likeCount}</span>
                           </div>
-                          <div className="flex justify-between mt-3">
-                            <Button
-                              variant="outline"
-                              className="text-sm px-4 py-2 border-gray-300 hover:bg-gray-50"
-                            >
-                              좋아요 ❤️ {pet.likes}
-                            </Button>
-                          </div>
+                          <div className="flex justify-between mt-3"></div>
                         </div>
                       </div>
                     ))
