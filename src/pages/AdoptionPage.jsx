@@ -225,8 +225,8 @@ const AdoptionPage = () => {
   // 페이지 변경 함수 (서버 사이드, 1-based pagination)
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    // UI는 1-based, API 호출은 0-based로 변환
-    fetchStrayAnimals(page);
+    // UI는 1-based, API 호출은 1-based로 변환
+    fetchStrayAnimals(page + 1);
   };
 
   // 컴포넌트 마운트 시 데이터 로드
