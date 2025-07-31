@@ -416,3 +416,44 @@ export const deleteAdminTerms = async (category, id) => {
   );
   return response.result;
 }; 
+
+export const getUserReportHistory = async (userId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.get(
+    `/admin-service/admin/user/report/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const patchReportConfirm = async (reportId) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.patch(
+    `/admin-service/admin/report/${reportId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
+
+export const patchUserBan = async (userId, releaseAt) => {
+  const adminToken = sessionStorage.getItem("adminToken");
+  const response = await apiUtils.patch(
+    `/admin-service/admin/ban/${userId}`,
+    { releaseAt },
+    {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+      },
+    }
+  );
+  return response.result;
+}; 
