@@ -256,6 +256,15 @@ const CommentSection = ({
           ...prev,
           [commentId]: [...(prev[commentId] || []), newReply],
         }));
+
+        // 해당 댓글의 reply 값이 false였다면 true로 변경
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.commentId === commentId && !comment.reply
+              ? { ...comment, reply: true }
+              : comment
+          )
+        );
       }
 
       setReplyText("");
@@ -429,6 +438,15 @@ const CommentSection = ({
           ...prev,
           [parentCommentId]: [...(prev[parentCommentId] || []), newReply],
         }));
+
+        // 해당 댓글의 reply 값이 false였다면 true로 변경
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.commentId === parentCommentId && !comment.reply
+              ? { ...comment, reply: true }
+              : comment
+          )
+        );
       }
 
       setReplyInputs((prev) => ({ ...prev, [parentCommentId]: "" }));
@@ -486,12 +504,35 @@ const CommentSection = ({
       console.log(response);
 
       // 대댓글 삭제 성공 시 즉시 상태 업데이트
-      setRepliesByCommentId((prev) => ({
-        ...prev,
-        [parentCommentId]:
+      setRepliesByCommentId((prev) => {
+        const updatedReplies =
           prev[parentCommentId]?.filter((reply) => reply.replyId !== replyId) ||
-          [],
-      }));
+          [];
+
+        // 대댓글이 모두 삭제되었을 때 해당 댓글의 reply 값을 false로 변경
+        if (updatedReplies.length === 0) {
+          setComments((prevComments) =>
+            prevComments.map((comment) =>
+              comment.commentId === parentCommentId
+                ? { ...comment, reply: false }
+                : comment
+            )
+          );
+
+          // 대댓글 목록이 열려있다면 닫기
+          if (replyOpen[parentCommentId]) {
+            setReplyOpen((prevOpen) => ({
+              ...prevOpen,
+              [parentCommentId]: false,
+            }));
+          }
+        }
+
+        return {
+          ...prev,
+          [parentCommentId]: updatedReplies,
+        };
+      });
 
       alert("대댓글 삭제가 완료되었습니다.");
       fetchCommentLikeCount();

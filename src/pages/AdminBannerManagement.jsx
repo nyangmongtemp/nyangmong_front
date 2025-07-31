@@ -40,26 +40,28 @@ const AdminBannerManagement = () => {
     }
   }, [navigate]);
 
+  // 배너 리스트 조회 함수
+  const fetchBanners = async () => {
+    try {
+      const response = await axios.get(`${bannerUrl}/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // result 배열을 order 오름차순으로 정렬해서 setBanners
+      const sortedBanners = response.data.result.sort(
+        (a, b) => a.order - b.order
+      );
+      setBanners(sortedBanners);
+      console.log("배너 리스트 응답:", response.data);
+    } catch (error) {
+      console.error("배너 리스트 요청 에러:", error);
+    }
+  };
+
   useEffect(() => {
     if (!token) return;
-    // 페이지가 렌더링될 때 배너 리스트를 불러옴 (axios 사용)
-    const fetchBanners = async () => {
-      try {
-        const response = await axios.get(`${bannerUrl}/list`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        // result 배열을 order 오름차순으로 정렬해서 setBanners
-        const sortedBanners = response.data.result.sort(
-          (a, b) => a.order - b.order
-        );
-        setBanners(sortedBanners);
-        console.log("배너 리스트 응답:", response.data);
-      } catch (error) {
-        console.error("배너 리스트 요청 에러:", error);
-      }
-    };
+    // 페이지가 렌더링될 때 배너 리스트를 불러옴
     fetchBanners();
   }, [bannerUrl, token]);
 
@@ -188,7 +190,8 @@ const AdminBannerManagement = () => {
         },
       });
       console.log("배너 수정 응답:", response.data);
-      // 성공 시 배너 목록 갱신 등 추가 작업 필요시 여기에
+      // 성공 시 배너 목록 갱신
+      await fetchBanners();
     } catch (error) {
       console.error("배너 수정 요청 에러:", error);
     }
@@ -216,7 +219,8 @@ const AdminBannerManagement = () => {
         },
       });
       console.log("배너 등록 응답:", response.data);
-      // 성공 시 배너 목록 갱신 등 추가 작업 필요시 여기에
+      // 성공 시 배너 목록 갱신
+      await fetchBanners();
     } catch (error) {
       console.error("배너 등록 요청 에러:", error);
     }
@@ -231,9 +235,8 @@ const AdminBannerManagement = () => {
       });
       if (response.status === 200) {
         alert("배너 삭제가 완료되었습니다");
-        setBanners((prev) =>
-          prev.filter((banner) => (banner.bannerId || banner.id) !== bannerId)
-        );
+        // 성공 시 배너 목록 갱신
+        await fetchBanners();
       }
     } catch (error) {
       console.error("배너 삭제 요청 에러:", error);
@@ -249,7 +252,8 @@ const AdminBannerManagement = () => {
         },
       });
       console.log("배너 순서 수정 응답:", response.data);
-      // 성공 시 배너 목록 갱신 등 추가 작업 필요시 여기에
+      // 성공 시 배너 목록 갱신
+      await fetchBanners();
     } catch (error) {
       console.error("배너 순서 수정 요청 에러:", error);
     }
@@ -401,6 +405,7 @@ const AdminBannerManagement = () => {
         banner={selectedBanner}
         onUpdate={handleBannerUpdate}
         onDelete={handleBannerDelete}
+        onRefresh={fetchBanners}
       />
 
       <BannerCreateModal
@@ -458,6 +463,8 @@ const AdminBannerManagement = () => {
                   console.log("배너 개수 변경 응답:", response.data);
                   setBannerCount(editCount);
                   setIsCountModalOpen(false);
+                  // 성공 시 배너 목록 갱신
+                  await fetchBanners();
                 } catch (error) {
                   console.error("배너 개수 변경 요청 에러:", error);
                 }
@@ -547,6 +554,8 @@ const AdminBannerManagement = () => {
                               ) {
                                 alert("배너가 노출되었습니다");
                                 setIsExposeModalOpen(false);
+                                // 성공 시 배너 목록 갱신
+                                await fetchBanners();
                               }
                             } catch (error) {
                               console.error("배너 노출 등록 요청 에러:", error);

@@ -121,11 +121,19 @@ const NewChatModal = ({ onSuccess }) => {
                   onClick={() => handleUserSelect(user)}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                      <span className="text-orange-600 font-semibold">
-                        {user.nickname?.charAt(0) || user.email?.charAt(0)}
-                      </span>
-                    </div>
+                    {user.profileImage ? (
+                      <img
+                        src={user.profileImage}
+                        alt={user.nickname}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span className="text-orange-600 font-semibold">
+                          {user.nickname?.charAt(0) || user.email?.charAt(0)}
+                        </span>
+                      </div>
+                    )}
                     <div>
                       <div className="font-medium">{user.nickname}</div>
                       <div className="text-sm text-gray-500">
@@ -144,12 +152,20 @@ const NewChatModal = ({ onSuccess }) => {
         <div className="space-y-4">
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-orange-600 font-semibold text-lg">
-                  {selectedUser.nickname?.charAt(0) ||
-                    selectedUser.email?.charAt(0)}
-                </span>
-              </div>
+              {selectedUser.profileImage ? (
+                <img
+                  src={selectedUser.profileImage}
+                  alt={selectedUser.nickname}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                  <span className="text-orange-600 font-semibold text-lg">
+                    {selectedUser.nickname?.charAt(0) ||
+                      selectedUser.email?.charAt(0)}
+                  </span>
+                </div>
+              )}
               <div>
                 <div className="font-medium text-lg">
                   {selectedUser.nickname}

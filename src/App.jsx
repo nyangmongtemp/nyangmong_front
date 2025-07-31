@@ -23,6 +23,7 @@ import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminManagerManagement from "./pages/AdminManagerManagement";
 import AdminLogManagement from "./pages/AdminLogManagement";
 import AdminBoardManagement from "./pages/AdminBoardManagement";
+import AdminAdvertisementManagement from "./pages/AdminAdvertisementManagement";
 import MyPage from "./pages/AdminMyPage.jsx";
 import LoginPage from "./pages/LoginPage";
 import UserMyPage from "./pages/UserMyPage";
@@ -100,7 +101,6 @@ const App = () => (
               path="/customer-qna-detail/:id"
               element={<CustomerQnADetail />}
             />
-            {/* Admin routes wrapped with AdminProvider */}
             <Route
               path="/admin/*"
               element={
@@ -120,6 +120,10 @@ const App = () => (
                     <Route
                       path="policy/create"
                       element={<AdminPolicyCreate />}
+                    />
+                    <Route
+                      path="advertisement"
+                      element={<AdminAdvertisementManagement />}
                     />
                     <Route path="qna/create" element={<AdminQnaCreate />} />
                     <Route path="qna/:id" element={<AdminQnaDetail />} />
