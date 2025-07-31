@@ -235,7 +235,7 @@ const AdoptionDetail = () => {
                       {post.title}
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>작성자: {post.nickName}</span>
+                      <span>작성자: {post.nickname}</span>
                       <span>
                         작성일:{" "}
                         {new Date(post.createAt).toLocaleDateString("ko-KR")}
@@ -263,9 +263,10 @@ const AdoptionDetail = () => {
                         ? "무료분양"
                         : `${Number(post.fee).toLocaleString()}원`}
                     </Badge>
-                    {/* 예약상태 셀렉트박스 - 내가 쓴 글일 때만 노출 */}
-                    {isLoggedIn && post && nowLoggedUserId === post.userId && (
-                      <div className="mt-2">
+                    {/* 예약상태 표시 */}
+                    <div className="mt-2">
+                      {isLoggedIn && post && nowLoggedUserId === post.userId ? (
+                        // 로그인한 사용자가 작성자인 경우: 셀렉트박스
                         <select
                           className="border rounded px-2 py-1 text-sm"
                           value={post.reservationStatus || "A"}
@@ -294,8 +295,25 @@ const AdoptionDetail = () => {
                             </option>
                           ))}
                         </select>
-                      </div>
-                    )}
+                      ) : (
+                        // 로그인하지 않았거나 작성자가 아닌 경우: 텍스트로 표시
+                        <Badge 
+                          className={`${
+                            post.reservationStatus === "R" 
+                              ? "bg-yellow-500" 
+                              : post.reservationStatus === "C" 
+                              ? "bg-gray-500" 
+                              : "bg-green-500"
+                          }`}
+                        >
+                          {post.reservationStatus === "R" 
+                            ? "예약중" 
+                            : post.reservationStatus === "C" 
+                            ? "분양완료" 
+                            : "예약가능"}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
 

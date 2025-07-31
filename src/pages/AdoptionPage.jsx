@@ -436,6 +436,8 @@ const AdoptionPage = () => {
       views: post.viewCount || 0,
       likes: post.likeCount || 0, // API에 없으므로 기본값
       comments: post.commentCount || 0, // API에 없으므로 기본값
+      // 예약상태 정보 추가
+      reservationStatus: post.reservationStatus || "A",
       // 추가 정보
       content: post.content,
       petCategory: post.petCategory,
@@ -491,6 +493,24 @@ const AdoptionPage = () => {
         {!isRescue && post.price === "무료분양" && (
           <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500">
             무료분양
+          </Badge>
+        )}
+        {/* 분양게시판일 때만 예약상태 뱃지 표시 */}
+        {!isRescue && (
+          <Badge 
+            className={`absolute top-2 right-2 ${
+              post.reservationStatus === "R" 
+                ? "bg-yellow-500 hover:bg-yellow-500" 
+                : post.reservationStatus === "C" 
+                ? "bg-gray-500 hover:bg-gray-500" 
+                : "bg-green-500 hover:bg-green-500"
+            }`}
+          >
+            {post.reservationStatus === "R" 
+              ? "예약중" 
+              : post.reservationStatus === "C" 
+              ? "분양완료" 
+              : "예약가능"}
           </Badge>
         )}
       </div>
