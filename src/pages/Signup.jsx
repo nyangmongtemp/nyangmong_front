@@ -74,7 +74,7 @@ const Signup = () => {
 
     // 기존에 업로드한 파일 이름에서 확장자 추출
     const originalName = profileImage?.name || "cropped.png";
-    // ✅ Blob → File 변환하면서 이름 유지
+    //  Blob → File 변환하면서 이름 유지
     const croppedFile = new File([croppedBlob], originalName, {
       type: croppedBlob.type || "image/png", // fallback MIME type
     });
