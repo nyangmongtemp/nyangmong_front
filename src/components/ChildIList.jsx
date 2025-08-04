@@ -226,7 +226,7 @@ const ChildIList = () => {
                       >
                         <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                           <img
-                            src={pet.thumbnailImage || pet.image}
+                            src={pet.thumbnailImage || pet.thumbnailimage}
                             alt={pet.title}
                             className="w-full h-full object-cover"
                           />
