@@ -60,9 +60,9 @@ const CustomerServicePage = () => {
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="w-full"
+                className="w-full p-3"
               >
-                <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1 m-6 mb-0">
+                <TabsList className="grid w-full grid-cols-4 bg-gray-50 p-1">
                   <TabsTrigger
                     value="inquiry"
                     className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200"

@@ -28,6 +28,7 @@ import {
   USER,
   BOARD,
   MAIN,
+  TERMS,
 } from "../../configs/host-config";
 import { API_ENDPOINTS } from "../../configs/api-endpoints";
 import { useAuth } from "../context/UserContext";
@@ -60,6 +61,10 @@ const Sidebar = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]); // 알림 목록 저장
   const [showNotificationModal, setShowNotificationModal] = useState(false); // 알림 모달 표시
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
+  const [policyContent, setPolicyContent] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -179,7 +184,7 @@ const Sidebar = () => {
         event.data.type === "OAUTH_SUCCESS" &&
         event.data.provider === "KAKAO"
       ) {
-        console.log("✅ 카카오 로그인 성공!");
+        console.log(" 카카오 로그인 성공!");
         console.log(event);
         kakaoLogin(
           event.data.token,
@@ -472,6 +477,44 @@ const Sidebar = () => {
     clearNotificationsFromStorage(); // 모달 닫을 때 알림 상태 저장소에서 제거
   };
 
+  // 이용약관 가져오기
+  const handleTermsClick = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${TERMS}/terms/lastPost`
+      );
+      console.log("이용약관 응답:", response);
+
+      if (response.data && response.data.result) {
+        setTermsContent(response.data.result.content || "");
+      }
+      setShowTermsModal(true);
+    } catch (error) {
+      console.error("이용약관 조회 실패:", error);
+      setTermsContent("이용약관을 불러올 수 없습니다.");
+      setShowTermsModal(true);
+    }
+  };
+
+  // 정보처리방침 가져오기
+  const handlePolicyClick = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${TERMS}/policy/lastPost`
+      );
+      console.log("정보처리방침 응답:", response);
+
+      if (response.data && response.data.result) {
+        setPolicyContent(response.data.result.content || "");
+      }
+      setShowPolicyModal(true);
+    } catch (error) {
+      console.error("정보처리방침 조회 실패:", error);
+      setPolicyContent("정보처리방침을 불러올 수 없습니다.");
+      setShowPolicyModal(true);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 알림 모달 */}
@@ -527,6 +570,36 @@ const Sidebar = () => {
                 닫기
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 이용약관 모달 */}
+      <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">이용약관</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <div
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: termsContent }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 정보처리방침 모달 */}
+      <Dialog open={showPolicyModal} onOpenChange={setShowPolicyModal}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">정보처리방침</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <div
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: policyContent }}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -719,6 +792,22 @@ const Sidebar = () => {
                       >
                         <Lock className="h-4 w-4 mr-2" />
                         비밀번호 찾기
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleTermsClick}
+                        variant="outline"
+                        className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+                      >
+                        서비스이용약관
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handlePolicyClick}
+                        variant="outline"
+                        className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+                      >
+                        개인정보처리방침
                       </Button>
                     </div>
                   </div>

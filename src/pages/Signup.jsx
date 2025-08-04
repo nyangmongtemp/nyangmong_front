@@ -5,6 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   User,
   Mail,
   Lock,
@@ -41,6 +47,12 @@ const Signup = () => {
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState(null);
 
+  // 약관 모달 관련 상태
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
+  const [privacyContent, setPrivacyContent] = useState("");
+
   const navigate = useNavigate();
 
   // 입력 처리
@@ -52,6 +64,44 @@ const Signup = () => {
   // 체크박스 처리
   const handleCheckboxChange = (name) => {
     setFormData((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  // 이용약관 가져오기
+  const handleTermsClick = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${USER}/terms/terms/lastPost`
+      );
+      console.log("이용약관 응답:", response);
+
+      if (response.data && response.data.result) {
+        setTermsContent(response.data.result.content || "");
+      }
+      setShowTermsModal(true);
+    } catch (error) {
+      console.error("이용약관 조회 실패:", error);
+      setTermsContent("이용약관을 불러올 수 없습니다.");
+      setShowTermsModal(true);
+    }
+  };
+
+  // 개인정보 처리방침 가져오기
+  const handlePrivacyClick = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `${API_BASE_URL}${USER}/terms/policy/lastPost`
+      );
+      console.log("개인정보 처리방침 응답:", response);
+
+      if (response.data && response.data.result) {
+        setPrivacyContent(response.data.result.content || "");
+      }
+      setShowPrivacyModal(true);
+    } catch (error) {
+      console.error("개인정보 처리방침 조회 실패:", error);
+      setPrivacyContent("개인정보 처리방침을 불러올 수 없습니다.");
+      setShowPrivacyModal(true);
+    }
   };
 
   // 프로필 이미지 업로드 처리
@@ -74,7 +124,7 @@ const Signup = () => {
 
     // 기존에 업로드한 파일 이름에서 확장자 추출
     const originalName = profileImage?.name || "cropped.png";
-    // ✅ Blob → File 변환하면서 이름 유지
+    //  Blob → File 변환하면서 이름 유지
     const croppedFile = new File([croppedBlob], originalName, {
       type: croppedBlob.type || "image/png", // fallback MIME type
     });
@@ -405,6 +455,7 @@ const Signup = () => {
                     동의합니다
                     <button
                       type="button"
+                      onClick={handleTermsClick}
                       className="text-orange-500 hover:underline ml-1"
                     >
                       (보기)
@@ -425,6 +476,7 @@ const Signup = () => {
                     동의합니다
                     <button
                       type="button"
+                      onClick={handlePrivacyClick}
                       className="text-orange-500 hover:underline ml-1"
                     >
                       (보기)
@@ -469,6 +521,38 @@ const Signup = () => {
           imageSrc={imageToCrop}
           onCropComplete={handleCropComplete}
         />
+
+        {/* 이용약관 모달 */}
+        <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+          <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center">이용약관</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: termsContent }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* 개인정보 처리방침 모달 */}
+        <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
+          <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center">
+                개인정보 처리방침
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: privacyContent }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

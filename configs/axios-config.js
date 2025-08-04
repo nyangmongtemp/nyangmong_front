@@ -54,7 +54,7 @@ axiosInstance.interceptors.response.use(
   (response) => {
     // 응답 로깅 (개발 환경에서만)
     if (process.env.NODE_ENV === "development") {
-      console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+      console.log(` API Response: ${response.status} ${response.config.url}`);
     }
     return response;
   },
@@ -99,13 +99,15 @@ axiosInstance.interceptors.response.use(
 
     if (
       error.response?.status === 403 &&
-      error.response?.data?.code === "NOT_ALLOWED_USER"
+      error.response?.data?.code === "AUTHORITY-008"
     ) {
       console.log(error);
 
       const time = formatDate(error.response?.data?.message);
 
-      alert(`${time} 까지 이용이 불가능합니다.`);
+      alert(
+        `커뮤니티 이용 수칙 위반으로 인해 ${time} 까지 이용이 불가능합니다.`
+      );
     }
 
     // 401 Unauthorized 에러일 경우 (토큰 만료)

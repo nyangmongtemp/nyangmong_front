@@ -87,7 +87,7 @@ const AdvertisementModifyModal = ({
     const payload = {
       title: adTitle,
       description: adDes,
-      link: adLink, // ✅ payload에 추가
+      link: adLink, //  payload에 추가
       image_url: adImage,
       startDate,
       endDate,
@@ -114,9 +114,7 @@ const AdvertisementModifyModal = ({
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              광고 수정
-            </DialogTitle>
+            <DialogTitle className="text-2xl font-bold">광고 수정</DialogTitle>
           </DialogHeader>
           <DialogHeader>
             <DialogTitle>광고 제목</DialogTitle>
@@ -232,7 +230,7 @@ const AdvertisementModifyModal = ({
 
               {/* 활성화 여부 */}
               <div>
-                < DialogHeader>
+                <DialogHeader>
                   <DialogTitle>활성화 여부</DialogTitle>
                 </DialogHeader>
                 <div className="flex space-x-4 mt-2">

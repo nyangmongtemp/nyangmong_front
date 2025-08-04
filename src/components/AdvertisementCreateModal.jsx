@@ -126,6 +126,8 @@ const AdvertisementCreateModal = ({
       formData.append("image", imageFile);
     }
 
+    console.log(formData);
+
     try {
       const response = await axiosInstance.post(
         `${API_BASE_URL}${ADMIN}/ads`,
