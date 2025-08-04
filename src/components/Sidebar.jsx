@@ -799,7 +799,7 @@ const Sidebar = () => {
                         variant="outline"
                         className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
                       >
-                        이용약관
+                        서비스이용약관
                       </Button>
                       <Button
                         type="button"
@@ -807,7 +807,7 @@ const Sidebar = () => {
                         variant="outline"
                         className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
                       >
-                        정보처리방침
+                        개인정보처리방침
                       </Button>
                     </div>
                   </div>
