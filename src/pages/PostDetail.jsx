@@ -281,18 +281,6 @@ const PostDetail = () => {
                     dangerouslySetInnerHTML={{ __html: post.content }}
                   />
                 </div>
-
-                <div className="flex justify-between items-center">
-                  <Button
-                    onClick={handleLike}
-                    variant="outline"
-                    className="flex items-center gap-2 border-orange-300 text-orange-600 hover:bg-orange-50"
-                  >
-                    <Heart className="w-4 h-4" />
-                    좋아요 {post.likes}
-                  </Button>
-                  <div className="flex gap-2"></div>
-                </div>
               </CardContent>
             </Card>
 

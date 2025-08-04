@@ -179,7 +179,7 @@ const Sidebar = () => {
         event.data.type === "OAUTH_SUCCESS" &&
         event.data.provider === "KAKAO"
       ) {
-        console.log("✅ 카카오 로그인 성공!");
+        console.log(" 카카오 로그인 성공!");
         console.log(event);
         kakaoLogin(
           event.data.token,

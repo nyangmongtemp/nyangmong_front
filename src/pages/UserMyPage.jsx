@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, MessageCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -18,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProfileForm from "@/components/ProfileForm";
@@ -29,14 +30,32 @@ import TabNavigation from "@/components/TabNavigation";
 import { useUserPageData } from "@/hooks/useUserPageData";
 import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL, USER, MAIN, BOARD } from "../../configs/host-config";
+import {
+  API_BASE_URL,
+  USER,
+  MAIN,
+  BOARD,
+  ABS,
+} from "../../configs/host-config";
+
+// 날짜 포맷 함수 추가
+const formatDateTime = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+};
 
 const UserMyPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const [currentPage, setCurrentPage] = useState(0); // 0부터 시작하도록 변경
+  const [currentPage, setCurrentPage] = useState(1); // 1부터 시작하도록 변경 (CommentSection과 동일)
   const [selectedBoard, setSelectedBoard] = useState("질문");
-  const itemsPerPage = 10;
+  const itemsPerPage = 3;
   const { token, email, isLoggedIn, logout, isSocial } = useAuth();
 
   useEffect(() => {
@@ -187,56 +206,86 @@ const UserMyPage = () => {
   };
 
   const getTotalPages = () => {
-    let totalItems = 0;
     switch (activeTab) {
       case "posts":
-        totalItems = myPosts.length;
-        break;
+        return totalPages; // API에서 받아온 totalPages 사용
       case "comments":
-        totalItems = myComments.length;
-        break;
+        return Math.ceil(myComments.length / itemsPerPage);
       default:
-        totalItems = 0;
+        return 1;
     }
-    return Math.ceil(totalItems / itemsPerPage);
   };
 
-  // 게시판별 내 게시물 데이터 가져오기
+  // 게시판별 내 게시물 데이터 가져오기 (CommentSection과 동일한 페이징 방식)
   const fetchMyPostsByCategory = async (category) => {
     if (!token) return;
 
     try {
-      const response = await axiosInstance.get(
-        `${API_BASE_URL}${BOARD}/list/${category}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            page: currentPage,
-            size: itemsPerPage,
-          },
-        }
-      );
+      console.log("현재 페이지:", currentPage);
+
+      let response;
+
+      // adoption 카테고리인 경우 다른 API 엔드포인트 사용
+      if (category === "adoption") {
+        response = await axiosInstance.get(
+          `${API_BASE_URL}${ABS}/animal-board/mypage?page=${
+            currentPage - 1
+          }&size=${itemsPerPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        // 기존 방식으로 쿼리 파라미터 사용
+        response = await axiosInstance.get(
+          `${API_BASE_URL}${BOARD}/list/${category}?page=${currentPage}&size=${itemsPerPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
 
       console.log(`${category} 게시판 내 게시물 응답:`, response);
-      // result가 배열이거나, result.content가 배열인 경우만 저장
-      setMyPosts(
-        Array.isArray(response.data.result)
-          ? response.data.result
-          : Array.isArray(response.data.result?.content)
-          ? response.data.result.content
-          : []
-      );
-      // totalPages도 저장
+      console.log("응답 데이터 구조:", {
+        hasData: !!response.data,
+        hasResult: !!response.data?.result,
+        hasContent: !!response.data?.content,
+        resultType: typeof response.data?.result,
+        contentType: typeof response.data?.content,
+        totalPages:
+          response.data?.totalPages || response.data?.result?.totalPages,
+        currentPage: currentPage,
+        itemsPerPage: itemsPerPage,
+      });
+
+      // CommentSection과 동일한 응답 구조 처리
+      let newPosts = [];
+      let totalPages = 1;
+
       if (
+        response &&
+        response.data &&
         response.data.result &&
-        typeof response.data.result.totalPages === "number"
+        Array.isArray(response.data.result.content)
       ) {
-        setTotalPages(response.data.result.totalPages);
-      } else {
-        setTotalPages(1);
+        newPosts = response.data.result.content;
+        totalPages = response.data.result.totalPages || 1;
+      } else if (
+        response &&
+        response.data &&
+        Array.isArray(response.data.content)
+      ) {
+        newPosts = response.data.content;
+        totalPages = response.data.totalPages || 1;
       }
+
+      console.log("매핑된 게시물 데이터:", newPosts);
+      setMyPosts(newPosts);
+      setTotalPages(totalPages);
     } catch (error) {
       console.error(`${category} 게시판 내 게시물 조회 실패:`, error);
       setMyPosts([]);
@@ -321,8 +370,7 @@ const UserMyPage = () => {
                 key={board}
                 onClick={() => {
                   setSelectedBoard(board);
-                  setCurrentPage(0);
-                  // fetchMyPostsByCategory 호출 제거
+                  setCurrentPage(1);
                 }}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   selectedBoard === board
@@ -346,7 +394,57 @@ const UserMyPage = () => {
             </p>
           </div>
 
-          <PostsList category={boardCategoryMap[selectedBoard]} />
+          {/* 내 게시물 목록 */}
+          <Card className="border-gray-200 shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+              <CardTitle className="text-gray-800 flex items-center">
+                <MessageCircle className="w-5 h-5 mr-2" />
+                {selectedBoard} 게시판의 내 게시물 ({myPosts.length}개)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="space-y-1">
+                {myPosts.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">
+                    {selectedBoard} 게시판에 작성한 게시물이 없습니다.
+                  </div>
+                ) : (
+                  myPosts.map((post) => (
+                    <div
+                      key={post.postid}
+                      className="p-4 hover:bg-gray-50 transition-colors border-b last:border-b-0 cursor-pointer"
+                      onClick={() => {
+                        // 게시물 상세 페이지로 이동
+                        const category = boardCategoryMap[selectedBoard];
+                        navigate(`/detail/${category}/${post.postid}`);
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-medium text-sm text-gray-800">
+                              {post.title}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDateTime(post.createdat)}
+                            </span>
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              조회수: {post.viewcount || 0}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded break-words whitespace-pre-line">
+                            <div
+                              dangerouslySetInnerHTML={{ __html: post.content }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }
@@ -387,7 +485,7 @@ const UserMyPage = () => {
               activeTab={activeTab}
               setActiveTab={(tab) => {
                 setActiveTab(tab);
-                setCurrentPage(0);
+                setCurrentPage(1);
                 if (tab === "posts") {
                   setSelectedBoard("질문");
                 }
@@ -423,16 +521,18 @@ const UserMyPage = () => {
               </div>
             )}
 
-            {/* 페이지네이션 (프로필 탭이 아닐 때만 표시) */}
+            {/* 페이징 */}
             {activeTab !== "profile" && getTotalPages() > 1 && (
               <div className="mt-8 flex justify-center">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() =>
-                          setCurrentPage(Math.max(1, currentPage - 1))
-                        }
+                        onClick={() => {
+                          const newPage = Math.max(1, currentPage - 1);
+                          console.log("이전 페이지 클릭:", newPage);
+                          setCurrentPage(newPage);
+                        }}
                         className={
                           currentPage === 1
                             ? "pointer-events-none opacity-50"
@@ -457,7 +557,15 @@ const UserMyPage = () => {
                           )}
                           <PaginationItem>
                             <PaginationLink
-                              onClick={() => setCurrentPage(page)}
+                              onClick={() => {
+                                console.log(
+                                  "페이지 버튼 클릭:",
+                                  page,
+                                  "현재 페이지:",
+                                  currentPage
+                                );
+                                setCurrentPage(page);
+                              }}
                               isActive={currentPage === page}
                               className="cursor-pointer"
                             >
@@ -469,11 +577,14 @@ const UserMyPage = () => {
 
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() =>
-                          setCurrentPage(
-                            Math.min(getTotalPages(), currentPage + 1)
-                          )
-                        }
+                        onClick={() => {
+                          const newPage = Math.min(
+                            getTotalPages(),
+                            currentPage + 1
+                          );
+                          console.log("다음 페이지 클릭:", newPage);
+                          setCurrentPage(newPage);
+                        }}
                         className={
                           currentPage === getTotalPages()
                             ? "pointer-events-none opacity-50"
