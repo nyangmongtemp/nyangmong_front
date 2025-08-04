@@ -55,7 +55,7 @@ const UserMyPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentPage, setCurrentPage] = useState(1); // 1부터 시작하도록 변경 (CommentSection과 동일)
   const [selectedBoard, setSelectedBoard] = useState("질문");
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const { token, email, isLoggedIn, logout, isSocial } = useAuth();
 
   useEffect(() => {
