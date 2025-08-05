@@ -23,7 +23,7 @@ import AdminUserDetail from "./pages/AdminUserDetail";
 import AdminManagerManagement from "./pages/AdminManagerManagement";
 import AdminLogManagement from "./pages/AdminLogManagement";
 import AdminBoardManagement from "./pages/AdminBoardManagement";
-import AdminBoardDetailManagement from "./pages/adminBoardDetailManagement.jsx";
+import AdminBoardDetailManagement from "./pages/adminBoardDetailManagement";
 import AdminAdvertisementManagement from "./pages/AdminAdvertisementManagement";
 import MyPage from "./pages/AdminMyPage.jsx";
 import LoginPage from "./pages/LoginPage";
