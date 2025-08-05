@@ -74,6 +74,20 @@ export const AdminProvider = ({ children }) => {
     loadDecryptedAdmin();
   }, []);
 
+  // 토큰 만료 이벤트 감지
+  useEffect(() => {
+    const handleTokenExpired = () => {
+      console.log("AdminContext: 토큰 만료 이벤트 감지");
+      forceLogout();
+    };
+
+    window.addEventListener("adminTokenExpired", handleTokenExpired);
+
+    return () => {
+      window.removeEventListener("adminTokenExpired", handleTokenExpired);
+    };
+  }, []);
+
   const updateToken = (newToken) => {
     sessionStorage.setItem("adminToken", newToken);
     localStorage.setItem("admin_token", newToken);
@@ -83,10 +97,10 @@ export const AdminProvider = ({ children }) => {
   const login = async (token, adminId, role, isFirst) => {
     try {
       sessionStorage.setItem("adminToken", token);
-      localStorage.setItem("admin_token", token);
-      localStorage.setItem("admin_id", await encrypt(adminId));
-      localStorage.setItem("admin_role", await encrypt(role));
-      localStorage.setItem(
+      sessionStorage.setItem("admin_token", token);
+      sessionStorage.setItem("admin_id", await encrypt(adminId));
+      sessionStorage.setItem("admin_role", await encrypt(role));
+      sessionStorage.setItem(
         "admin_isFirst",
         await encrypt(isFirst ? "true" : "false")
       );
@@ -102,10 +116,10 @@ export const AdminProvider = ({ children }) => {
 
   const logout = () => {
     sessionStorage.removeItem("adminToken");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_id");
-    localStorage.removeItem("admin_role");
-    localStorage.removeItem("admin_isFirst");
+    sessionStorage.removeItem("admin_token");
+    sessionStorage.removeItem("admin_id");
+    sessionStorage.removeItem("admin_role");
+    sessionStorage.removeItem("admin_isFirst");
     setToken("");
     setAdminId("");
     setRole("");
@@ -114,6 +128,27 @@ export const AdminProvider = ({ children }) => {
 
     // 관리자 로그아웃 시 /admin으로 이동하는 커스텀 이벤트 발생
     window.dispatchEvent(new CustomEvent("adminLogout"));
+  };
+
+  // 토큰 만료 시 강제 로그아웃
+  const forceLogout = () => {
+    console.log("관리자 토큰 만료 - 강제 로그아웃 실행");
+
+    // 세션스토리지 완전 정리
+    sessionStorage.clear();
+
+    // 상태 초기화
+    setToken("");
+    setAdminId("");
+    setRole("");
+    setIsFirst(false);
+    setIsLoggedIn(false);
+
+    // 사용자에게 알림
+    alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
+
+    // 관리자 메인으로 이동
+    window.location.href = "/admin";
   };
 
   return (

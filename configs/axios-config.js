@@ -158,23 +158,16 @@ axiosInstance.interceptors.response.use(
 
         // 관리자 토큰인지 확인
         const adminToken = sessionStorage.getItem("adminToken");
+        const adminId = sessionStorage.getItem("admin_id");
 
-        if (adminToken) {
-          // 관리자 토큰 만료 시
-          console.log("관리자 토큰 만료 - 관리자 로그아웃 처리");
-          sessionStorage.clear();
-          sessionStorage.removeItem("admin_token");
-          sessionStorage.removeItem("admin_id");
-          sessionStorage.removeItem("admin_role");
-          sessionStorage.removeItem("admin_isFirst");
-
-          // 사용자에게 알림
+        if (adminToken || adminId) {
+          // 관리자 토큰 만료 시 - AdminContext에서 처리하도록 커스텀 이벤트 발생
+          console.log("관리자 토큰 만료 - AdminContext에서 처리");
           if (typeof window !== "undefined") {
-            alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
-            window.location.href = "/admin";
+            window.dispatchEvent(new CustomEvent("adminTokenExpired"));
           }
         } else {
-          // 일반 사용자 토큰 만료 시
+          // 일반 사용자 토큰 만료 시 - 기존 로직 유지
           console.log("일반 사용자 토큰 만료 - 사용자 로그아웃 처리");
           localStorage.clear();
 
