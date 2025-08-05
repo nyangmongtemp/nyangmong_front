@@ -23,9 +23,9 @@ if (clientHostName === "localhost" || clientHostName === "127.0.0.1") {
   // 같은 네트워크의 컴퓨터 IP로 백엔드 서버에 접근
   const currentHost = window.location.hostname;
   backendHostName = `http://${currentHost}:8000`;
-} else if (clientHostName === "playdatashop8917.store") {
+} else if (clientHostName === "nyangmong.com") {
   // 배포해서 현재 서비스 중
-  backendHostName = "https://api.playdatashop8917.store";
+  backendHostName = "https://api.nyangmong.com";
 }
 
 export const API_BASE_URL = backendHostName;
