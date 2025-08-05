@@ -318,7 +318,9 @@ const AdminBoardDetailManagement = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             상세 설명
           </h2>
-          <div className="text-gray-700 leading-relaxed">{post.content}</div>
+          <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            {post.content.replace(/<[^>]*>/g, "")}
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
