@@ -115,7 +115,9 @@ const CommentSection = ({
       setError(null);
 
       const response = await axiosInstance.post(
-        `${API_BASE_URL}${MAIN}/comment/list?page=${pageNum}&size=10&sort=createAt`,
+        `${API_BASE_URL}${MAIN}/comment/list?page=${
+          pageNum - 1
+        }&size=10&sort=createAt`,
         {
           category: category,
           contentId: postId,
