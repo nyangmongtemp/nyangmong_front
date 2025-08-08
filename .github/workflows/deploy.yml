@@ -37,7 +37,7 @@ jobs:
       - name: Create firebase-config.js from secret
         run: |
           mkdir -p config
-          echo "${{ secrets.FIREBASE_CONFIG }}" > config/firebase-config.js
+          echo "${{ secrets.FIREBASE_CONFIG }}" > configs/firebase-config.js
 
       - name: Build React App
         run: CI=false npm run build
