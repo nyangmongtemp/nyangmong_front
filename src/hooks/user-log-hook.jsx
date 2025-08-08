@@ -1,5 +1,5 @@
 // utils/analyticsUtils.js
-import { analytics, setUserId, logEvent } from "./firebase";
+import { analytics, setUserId, logEvent } from "../../configs/firebase-config";
 
 // 1) 사용자 구분용 UUID 관리
 export function getOrCreateUserUUID() {
