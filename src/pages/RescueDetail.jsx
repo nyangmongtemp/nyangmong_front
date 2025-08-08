@@ -285,7 +285,7 @@ const RescueDetail = () => {
                                 }`}
                               >
                                 <img
-                                  src={image}
+                                  src={`${API_BASE_URL}${ABS}/stray-animal-board/proxy-image?imageUrl=${image}`}
                                   alt={`${animal.kindNm || "유기동물"} ${
                                     index + 1
                                   }`}
