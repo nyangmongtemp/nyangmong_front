@@ -36,6 +36,10 @@ const Signup = () => {
     agreeToMarketing: false,
   });
 
+  // 비밀번호 유효성 검사 관련 상태
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
   const [authCodeSent, setAuthCodeSent] = useState(false);
   const [isEmailSent, setEmailSent] = useState(false);
   const [inputAuthCode, setInputAuthCode] = useState("");
@@ -55,10 +59,49 @@ const Signup = () => {
 
   const navigate = useNavigate();
 
+  // 비밀번호 유효성 검사 함수
+  const validatePassword = (password) => {
+    // 공백 제거 후 길이 확인
+    const trimmedPassword = password.replace(/\s/g, "");
+    if (trimmedPassword.length < 8) {
+      return "비밀번호는 공백 제외 8글자 이상이어야 합니다.";
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).+$/;
+    if (!passwordRegex.test(password)) {
+      return "비밀번호는 영문 대소문자 및 특수문자를 각각 1개 이상 포함해야 합니다.";
+    }
+    return "";
+  };
+
   // 입력 처리
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // 비밀번호 입력 시 실시간 유효성 검사
+    if (name === "password") {
+      const error = validatePassword(value);
+      setPasswordError(error);
+    }
+
+    // 비밀번호 확인 입력 시 일치 여부 검사
+    if (name === "confirmPassword") {
+      if (value !== formData.password) {
+        setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
+
+    // 비밀번호가 변경되었을 때 확인 비밀번호도 다시 검사
+    if (name === "password" && formData.confirmPassword) {
+      if (value !== formData.confirmPassword) {
+        setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
   };
 
   // 체크박스 처리
@@ -178,6 +221,20 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 비밀번호 유효성 검사
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setPasswordError(passwordError);
+      return;
+    }
+
+    // 비밀번호 확인 검사
+    if (formData.password !== formData.confirmPassword) {
+      setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
     const form = new FormData();
 
     // 객체를 JSON 문자열로 변환 후 append
@@ -408,12 +465,15 @@ const Signup = () => {
                     name="password"
                     type="password"
                     placeholder="비밀번호를 입력하세요"
-                    className="pl-10"
+                    className={`pl-10 ${passwordError ? "border-red-500" : ""}`}
                     value={formData.password}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
+                {passwordError && (
+                  <p className="text-sm text-red-500">{passwordError}</p>
+                )}
               </div>
 
               {/* 비밀번호 확인 */}
@@ -432,12 +492,17 @@ const Signup = () => {
                     name="confirmPassword"
                     type="password"
                     placeholder="비밀번호를 다시 입력하세요"
-                    className="pl-10"
+                    className={`pl-10 ${
+                      confirmPasswordError ? "border-red-500" : ""
+                    }`}
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
+                {confirmPasswordError && (
+                  <p className="text-sm text-red-500">{confirmPasswordError}</p>
+                )}
               </div>
 
               {/* 약관 동의 */}
