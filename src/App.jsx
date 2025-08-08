@@ -43,7 +43,7 @@ import ChildDetail from "./pages/ChildDetail";
 import { AdminProvider } from "./context/AdminContext";
 import MapPage from "./pages/MapPage.jsx";
 import AdminBoardDetailManagement from "./pages/AdminBoardDetailManagement";
-import { logUserEvent } from "./utils/analyticsUtils";
+import { logUserEvent } from "./hooks/user-log-hook";
 
 const queryClient = new QueryClient();
 
