@@ -1,7 +1,7 @@
 // utils/analyticsUtils.js
 import { analytics, setUserId, logEvent } from "../../configs/firebase-config";
 
-// 1) 사용자 구분용 UUID 관리
+// 1) 사용자 구분용 UUID 관리리리자로 끝나는말은
 export function getOrCreateUserUUID() {
   const key = "anonymous_user_uuid";
   let uuid = localStorage.getItem(key);
