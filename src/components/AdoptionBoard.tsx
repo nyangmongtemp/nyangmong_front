@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MapPin, Calendar } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
-import { API_BASE_URL } from "../../configs/host-config";
+import { API_BASE_URL, ABS } from "../../configs/host-config";
 import { API_ENDPOINTS } from "../../configs/api-endpoints";
 
 const AdoptionBoard = () => {
@@ -120,7 +120,7 @@ const AdoptionBoard = () => {
           >
             <div className="relative">
               <img
-                src={post.image}
+                src={`${API_BASE_URL}${ABS}/stray-animal-board/proxy-image?imageUrl=${post.image}`}
                 alt={post.title}
                 className="w-full h-72 object-cover"
               />
