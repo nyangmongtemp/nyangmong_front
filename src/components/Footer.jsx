@@ -19,22 +19,6 @@ const Footer = () => {
               반려동물과 함께하는 따뜻한 커뮤니티
             </p>
           </div>
-
-          {/* 링크 섹션 */}
-          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-            <Link
-              to="/customer/terms"
-              className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-            >
-              서비스이용약관
-            </Link>
-            <Link
-              to="/customer/privacy"
-              className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-            >
-              개인정보처리방침
-            </Link>
-          </div>
         </div>
 
         {/* 구분선 */}
@@ -43,12 +27,7 @@ const Footer = () => {
             <p className="text-gray-400 text-sm mb-2 md:mb-0">
               © 2024 사랑스러운 공유 공간. All rights reserved.
             </p>
-            <div className="flex space-x-4">
-              <span className="text-gray-400 text-sm">고객센터: 1234-5678</span>
-              <span className="text-gray-400 text-sm">
-                이메일: support@lovable.com
-              </span>
-            </div>
+            <div className="flex space-x-4"></div>
           </div>
         </div>
       </div>
