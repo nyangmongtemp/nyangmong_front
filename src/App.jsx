@@ -45,7 +45,7 @@ import MapPage from "./pages/MapPage.jsx";
 import AdminBoardDetailManagement from "./pages/AdminBoardDetailManagement";
 import { logUserEvent } from "./hooks/user-log-hook";
 import { Helmet } from "react-helmet-async";
-import { Footer } from "react-day-picker";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 
