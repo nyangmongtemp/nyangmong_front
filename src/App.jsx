@@ -43,6 +43,7 @@ import ChildDetail from "./pages/ChildDetail";
 import { AdminProvider } from "./context/AdminContext";
 import MapPage from "./pages/MapPage.jsx";
 import AdminBoardDetailManagement from "./pages/AdminBoardDetailManagement";
+import { logUserEvent } from "./utils/analyticsUtils";
 
 const queryClient = new QueryClient();
 
@@ -62,92 +63,112 @@ const AdminLogoutHandler = () => {
   return null;
 };
 
-const App = () => (
-  <AuthProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AdminLogoutHandler />
-          <Routes>
-            {/* User routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/board/:type" element={<Board />} />
-            <Route path="/post/:type/:id" element={<PostDetail />} />
-            <Route path="/detail/:type/:id" element={<PostDetail />} />
-            <Route path="/create-post/:type" element={<CreatePost />} />
-            <Route path="/edit/:type/:id" element={<CreatePost />} />
-            <Route path="/child/create" element={<ChildCreate />} />
-            <Route path="/child/list" element={<ChildIList />} />
-            <Route path="/board/introduction" element={<ChildIList />} />
-            <Route path="/detail/introduction/:id" element={<ChildDetail />} />
-            <Route path="/child/edit/:id" element={<ChildCreate />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/adoption" element={<AdoptionPage />} />
-            <Route path="/adoption/create" element={<AdoptionCreate />} />
-            <Route path="/adoption/update/:id" element={<AdoptionCreate />} />
-            <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
-            <Route path="/rescue-detail/:id" element={<RescueDetail />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/mypage" element={<UserMyPage />} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/customer-service" element={<CustomerServicePage />} />
-            <Route
-              path="/customer-privacy-detail/:id"
-              element={<CustomerPrivacyDetail />}
-            />
-            <Route
-              path="/customer-qna-detail/:id"
-              element={<CustomerQnADetail />}
-            />
-            <Route
-              path="/admin/*"
-              element={
-                <AdminProvider>
-                  <Routes>
-                    <Route path="" element={<AdminMain />} />
-                    <Route path="users" element={<AdminUserManagement />} />
-                    <Route path="users/:id" element={<AdminUserDetail />} />
-                    <Route
-                      path="managers"
-                      element={<AdminManagerManagement />}
-                    />
-                    <Route path="logs" element={<AdminLogManagement />} />
-                    <Route path="boards" element={<AdminBoardManagement />} />
-                    <Route
-                      path="board-detail/:type/:postId"
-                      element={<AdminBoardDetailManagement />}
-                    />
-                    <Route path="banner" element={<AdminBannerManagement />} />
-                    <Route path="support" element={<AdminCustomerSupport />} />
-                    <Route
-                      path="policy/create"
-                      element={<AdminPolicyCreate />}
-                    />
-                    <Route
-                      path="advertisement"
-                      element={<AdminAdvertisementManagement />}
-                    />
-                    <Route path="qna/create" element={<AdminQnaCreate />} />
-                    <Route path="qna/:id" element={<AdminQnaDetail />} />
-                    <Route path="policy/:id" element={<AdminPolicyDetail />} />
-                    <Route
-                      path="inquiry/:id"
-                      element={<AdminInquiryDetail />}
-                    />
-                    <Route path="mypage" element={<MyPage />} />
-                    <Route path="login" element={<LoginPage />} />
-                  </Routes>
-                </AdminProvider>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </AuthProvider>
-);
+const App = () => {
+  useEffect(() => {
+    logUserEvent("app_loaded");
+  }, []);
+  return (
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AdminLogoutHandler />
+            <Routes>
+              {/* User routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/board/:type" element={<Board />} />
+              <Route path="/post/:type/:id" element={<PostDetail />} />
+              <Route path="/detail/:type/:id" element={<PostDetail />} />
+              <Route path="/create-post/:type" element={<CreatePost />} />
+              <Route path="/edit/:type/:id" element={<CreatePost />} />
+              <Route path="/child/create" element={<ChildCreate />} />
+              <Route path="/child/list" element={<ChildIList />} />
+              <Route path="/board/introduction" element={<ChildIList />} />
+              <Route
+                path="/detail/introduction/:id"
+                element={<ChildDetail />}
+              />
+              <Route path="/child/edit/:id" element={<ChildCreate />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/adoption" element={<AdoptionPage />} />
+              <Route path="/adoption/create" element={<AdoptionCreate />} />
+              <Route path="/adoption/update/:id" element={<AdoptionCreate />} />
+              <Route path="/adoption-detail/:id" element={<AdoptionDetail />} />
+              <Route path="/rescue-detail/:id" element={<RescueDetail />} />
+              <Route path="/map" element={<MapPage />} />
+              <Route path="/mypage" element={<UserMyPage />} />
+              <Route path="/messages" element={<MessagesPage />} />
+              <Route
+                path="/customer-service"
+                element={<CustomerServicePage />}
+              />
+              <Route
+                path="/customer-privacy-detail/:id"
+                element={<CustomerPrivacyDetail />}
+              />
+              <Route
+                path="/customer-qna-detail/:id"
+                element={<CustomerQnADetail />}
+              />
+              <Route
+                path="/admin/*"
+                element={
+                  <AdminProvider>
+                    <Routes>
+                      <Route path="" element={<AdminMain />} />
+                      <Route path="users" element={<AdminUserManagement />} />
+                      <Route path="users/:id" element={<AdminUserDetail />} />
+                      <Route
+                        path="managers"
+                        element={<AdminManagerManagement />}
+                      />
+                      <Route path="logs" element={<AdminLogManagement />} />
+                      <Route path="boards" element={<AdminBoardManagement />} />
+                      <Route
+                        path="board-detail/:type/:postId"
+                        element={<AdminBoardDetailManagement />}
+                      />
+                      <Route
+                        path="banner"
+                        element={<AdminBannerManagement />}
+                      />
+                      <Route
+                        path="support"
+                        element={<AdminCustomerSupport />}
+                      />
+                      <Route
+                        path="policy/create"
+                        element={<AdminPolicyCreate />}
+                      />
+                      <Route
+                        path="advertisement"
+                        element={<AdminAdvertisementManagement />}
+                      />
+                      <Route path="qna/create" element={<AdminQnaCreate />} />
+                      <Route path="qna/:id" element={<AdminQnaDetail />} />
+                      <Route
+                        path="policy/:id"
+                        element={<AdminPolicyDetail />}
+                      />
+                      <Route
+                        path="inquiry/:id"
+                        element={<AdminInquiryDetail />}
+                      />
+                      <Route path="mypage" element={<MyPage />} />
+                      <Route path="login" element={<LoginPage />} />
+                    </Routes>
+                  </AdminProvider>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </AuthProvider>
+  );
+};
 
 export default App;
