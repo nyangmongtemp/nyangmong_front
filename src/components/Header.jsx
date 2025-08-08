@@ -57,7 +57,7 @@ const Header = () => {
             >
               <div className="w-8 h-8 rounded-md flex items-center justify-center overflow-hidden">
                 <img
-                  src="https://nyangmong-prod-images.s3.ap-northeast-2.amazonaws.com/4c603260-b0d4-46af-a741-5f0463196775_profile.jpg"
+                  src="https://nyangmong-prod-images.s3.ap-northeast-2.amazonaws.com/f94dedc4-8303-4681-90af-d29329d81185_profile.jpg"
                   alt="냥몽 로고"
                   className="w-full h-full object-cover"
                 />
