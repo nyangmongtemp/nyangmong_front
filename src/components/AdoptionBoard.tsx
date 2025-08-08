@@ -43,9 +43,12 @@ const AdoptionBoard = () => {
           age: animal.age,
           gender: animal.sexCd === "M" ? "수컷" : "암컷",
           price: "무료분양",
-          date: animal.happenDt ? 
-            `${animal.happenDt.substring(0, 4)}.${animal.happenDt.substring(4, 6)}.${animal.happenDt.substring(6, 8)}` : 
-            "날짜 정보 없음",
+          date: animal.happenDt
+            ? `${animal.happenDt.substring(0, 4)}.${animal.happenDt.substring(
+                4,
+                6
+              )}.${animal.happenDt.substring(6, 8)}`
+            : "날짜 정보 없음",
           neuterYn: animal.neuterYn,
           careTel: animal.careTel,
         }));

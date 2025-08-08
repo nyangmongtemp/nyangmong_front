@@ -482,6 +482,15 @@ const AdoptionPage = () => {
     }
   }, [adoptionPosts]);
 
+  // HTTP를 HTTPS로 변환하는 함수
+  const convertToHttps = (url) => {
+    if (!url) return url;
+    if (url.startsWith("http://")) {
+      return url.replace("http://", "https://");
+    }
+    return url;
+  };
+
   const PostCard = ({ post, isRescue = false }) => (
     <Card
       className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -497,7 +506,7 @@ const AdoptionPage = () => {
     >
       <div className="relative">
         <img
-          src={post.image}
+          src={convertToHttps(post.image)}
           alt={post.title}
           className="w-full h-72 object-cover"
         />
@@ -1361,22 +1370,6 @@ const AdoptionPage = () => {
         message={alertDialog.message}
         type={alertDialog.type}
       />
-
-      <footer className="bg-white border-t mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-600">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xs">냥</span>
-              </div>
-              <p className="font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                냥몽 - 반려동물과 함께하는 따뜻한 커뮤니티
-              </p>
-            </div>
-            <p className="text-sm">© 2024 냥몽. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
