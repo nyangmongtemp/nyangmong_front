@@ -38,6 +38,7 @@ import { useAuth } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import AlertDialog from "@/components/ui/alert-dialog";
 import { logUserEvent } from "../hooks/user-log-hook";
+import { ABS, API_BASE_URL } from "../../configs/host-config.js";
 
 const AdoptionPage = () => {
   const navigate = useNavigate();
@@ -506,7 +507,7 @@ const AdoptionPage = () => {
     >
       <div className="relative">
         <img
-          src={convertToHttps(post.image)}
+          src={`${API_BASE_URL}${ABS}/stray-animal-board/prozy-image?imageUrl=${post.image}`}
           alt={post.title}
           className="w-full h-72 object-cover"
         />
