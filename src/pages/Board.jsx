@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD, FESTIVAL } from "../../configs/host-config";
+import { logUserEvent } from "../hooks/user-log-hook";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -43,6 +44,10 @@ const Board = () => {
 
   useEffect(() => {
     console.log(type);
+
+    logUserEvent("board_view", {
+      selectedCategory: type,
+    });
 
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);

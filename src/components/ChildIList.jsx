@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
 import { useAuth } from "../context/UserContext";
+import { logUserEvent } from "../hooks/user-log-hook";
 
 // 날짜 포맷 함수 추가
 const formatDateTime = (dateString) => {
@@ -46,6 +47,11 @@ const ChildIList = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
+
+    logUserEvent("board_view", {
+      selectedCategory: "introduction",
+    });
+
     axiosInstance
       .get(`${API_BASE_URL}${BOARD}/list/INTRODUCTION`, {
         params: { page: 0, size: 1000 }, // 충분히 크게!

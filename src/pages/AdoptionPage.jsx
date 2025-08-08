@@ -37,6 +37,7 @@ import { strayAnimalAPI, adoptionAPI } from "../../configs/api-utils.js";
 import { useAuth } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import AlertDialog from "@/components/ui/alert-dialog";
+import { logUserEvent } from "../hooks/user-log-hook";
 
 const AdoptionPage = () => {
   const navigate = useNavigate();
@@ -205,7 +206,9 @@ const AdoptionPage = () => {
 
       // API 응답 형식에 맞게 데이터 추출 (result 객체 안에 content가 있음)
       const resultData = response.result || response;
-      setStrayAnimals(resultData.content || resultData.data || resultData || []);
+      setStrayAnimals(
+        resultData.content || resultData.data || resultData || []
+      );
 
       if (resultData.pageable) {
         // API는 0-based, UI는 1-based로 변환
@@ -234,6 +237,11 @@ const AdoptionPage = () => {
   useEffect(() => {
     fetchStrayAnimals(0);
     // 분양게시판은 탭이 선택될 때만 로드하도록 변경
+
+    // 페이지 렌더링 이벤트 로깅
+    logUserEvent("board_view", {
+      selectedCategory: selectedCategory,
+    });
   }, []);
 
   // 분양게시판 탭이 선택될 때 데이터 로드
@@ -337,7 +345,9 @@ const AdoptionPage = () => {
 
       // API 응답 형식에 맞게 데이터 추출 (result 객체 안에 content가 있음)
       const resultData = response.result || response;
-      setAdoptionPosts(resultData.content || resultData.data || resultData || []);
+      setAdoptionPosts(
+        resultData.content || resultData.data || resultData || []
+      );
 
       if (resultData.pageable) {
         setAdoptionCurrentPage(resultData.pageable.pageNumber);
@@ -498,19 +508,19 @@ const AdoptionPage = () => {
         )}
         {/* 분양게시판일 때만 예약상태 뱃지 표시 */}
         {!isRescue && (
-          <Badge 
+          <Badge
             className={`absolute top-2 right-2 ${
-              post.reservationStatus === "R" 
-                ? "bg-yellow-500 hover:bg-yellow-500" 
-                : post.reservationStatus === "C" 
-                ? "bg-gray-500 hover:bg-gray-500" 
+              post.reservationStatus === "R"
+                ? "bg-yellow-500 hover:bg-yellow-500"
+                : post.reservationStatus === "C"
+                ? "bg-gray-500 hover:bg-gray-500"
                 : "bg-green-500 hover:bg-green-500"
             }`}
           >
-            {post.reservationStatus === "R" 
-              ? "예약중" 
-              : post.reservationStatus === "C" 
-              ? "분양완료" 
+            {post.reservationStatus === "R"
+              ? "예약중"
+              : post.reservationStatus === "C"
+              ? "분양완료"
               : "예약가능"}
           </Badge>
         )}
