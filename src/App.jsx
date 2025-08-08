@@ -80,7 +80,7 @@ const App = () => {
         />
         <meta name="robots" content="index, follow" />
 
-        {/ Open Graph 기본값 /}
+        {/* Open Graph 기본값 */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="냥몽" />
         <meta property="og:title" content="냥몽" />
@@ -90,7 +90,7 @@ const App = () => {
         />
         <meta property="og:image" content="/냥몽 이미지 로고 누끼.png" />
 
-        {/ Twitter Card 기본값 */}
+        {/* Twitter Card 기본값 */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="냥몽" />
         <meta

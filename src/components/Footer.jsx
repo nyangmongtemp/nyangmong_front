@@ -20,7 +20,7 @@ const Footer = () => {
             </p>
           </div>
 
-          {/ 링크 섹션 /}
+          {/* 링크 섹션 */}
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
             <Link
               to="/customer/terms"
@@ -37,7 +37,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/ 구분선 */}
+        {/* 구분선 */}
         <div className="border-t border-gray-700 mt-6 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-2 md:mb-0">
