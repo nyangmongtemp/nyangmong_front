@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { strayAnimalAPI } from "../../configs/api-utils.js";
 import AlertDialog from "@/components/ui/alert-dialog";
+import { API_BASE_URL, ABS } from "../../configs/host-config";
 
 const RescueDetail = () => {
   const { id } = useParams();
