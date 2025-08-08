@@ -180,13 +180,15 @@ const MapComponent = ({
         markersRef.current.push(marker);
         // 인포윈도우 내용
         const infoContent = `
-            <div style="padding:16px;min-width:320px;font-family:Arial,sans-serif;">
-              <div style="margin-bottom:8px;"><strong style="color:#ff9800;font-size:18px;">${
-                festival.title
-              }</strong></div>
+            <div style="padding:16px;min-width:320px;max-width:420px;font-family:Arial,sans-serif;">
+              <div style="margin-bottom:8px;word-wrap:break-word;overflow-wrap:break-word;">
+                <strong style="color:#ff9800;font-size:16px;line-height:1.3;">${
+                  festival.title
+                }</strong>
+              </div>
               <div style="margin-bottom:12px;">
-                <strong style="color:#ff9800;font-size:16px;">장소명:</strong>
-                <p style="margin:4px 0;font-size:16px;font-weight:bold;">${
+                <strong style="color:#ff9800;font-size:14px;">장소명:</strong>
+                <p style="margin:4px 0;font-size:14px;font-weight:bold;word-wrap:break-word;overflow-wrap:break-word;">${
                   result[0].place_name || festival.location || "정보 없음"
                 }</p>
               </div>
@@ -198,7 +200,7 @@ const MapComponent = ({
               </div>
               <div style="margin-bottom:8px;">
                 <strong style="color:#ff9800;font-size:14px;">상세주소:</strong>
-                <p style="margin:4px 0;font-size:14px;">${
+                <p style="margin:4px 0;font-size:14px;word-wrap:break-word;overflow-wrap:break-word;">${
                   result[0].road_address_name ||
                   result[0].address_name ||
                   festival.location ||
@@ -207,12 +209,12 @@ const MapComponent = ({
               </div>
               ${
                 festival.url
-                  ? `<div style=\"margin-top:8px;\"><a href=\"${festival.url}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#007bff;text-decoration:underline;font-size:14px;\">행사 상세 정보 바로가기</a></div>`
+                  ? `<div style=\"margin-top:8px;\"><a href=\"${festival.url}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#007bff;text-decoration:underline;font-size:13px;\">행사 상세 정보 바로가기</a></div>`
                   : ""
               }
               ${
                 result[0].place_url
-                  ? `<div style=\"margin-top:12px;\"><a href=\"${result[0].place_url}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#007bff;text-decoration:none;font-size:14px;padding:6px 12px;border:1px solid #007bff;border-radius:4px;display:inline-block;\">카카오맵에서 보기</a></div>`
+                  ? `<div style=\"margin-top:12px;\"><a href=\"${result[0].place_url}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#007bff;text-decoration:none;font-size:13px;padding:6px 12px;border:1px solid #007bff;border-radius:4px;display:inline-block;word-wrap:break-word;overflow-wrap:break-word;\">카카오맵에서 보기</a></div>`
                   : ""
               }
             </div>
