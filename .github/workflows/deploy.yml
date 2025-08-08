@@ -34,6 +34,11 @@ jobs:
       - name: Create .env file from secret
         run: echo "${{ secrets.ENV_USER_FILE }}" > .env
 
+      - name: Create firebase-config.js from secret
+        run: |
+          mkdir -p config
+          echo "${{ secrets.FIREBASE_CONFIG }}" > config/firebase-config.js
+
       - name: Build React App
         run: CI=false npm run build
 
