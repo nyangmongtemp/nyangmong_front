@@ -55,8 +55,12 @@ const Header = () => {
               onClick={() => navigate("/")}
               className="flex items-center space-x-2"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">냥</span>
+              <div className="w-8 h-8 rounded-md flex items-center justify-center overflow-hidden">
+                <img
+                  src="https://nyangmong-prod-images.s3.ap-northeast-2.amazonaws.com/4c603260-b0d4-46af-a741-5f0463196775_profile.jpg"
+                  alt="냥몽 로고"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
                 냥몽
