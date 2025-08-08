@@ -241,7 +241,7 @@ const AdoptionPage = () => {
 
     // 페이지 렌더링 이벤트 로깅
     logUserEvent("board_view", {
-      selectedCategory: selectedCategory,
+      selectedCategory: "stray-animal",
     });
   }, []);
 
@@ -253,6 +253,9 @@ const AdoptionPage = () => {
     if (activeTab === "adoption") {
       fetchAdoptionPosts(0);
     }
+    logUserEvent("board_view", {
+      selectedCategory: "adoption",
+    });
   }, [activeTab]);
 
   // 검색 필터 변경 시 데이터 다시 로드 (페이지는 0으로 리셋)
