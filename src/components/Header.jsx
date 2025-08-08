@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import MobileSidebar from "@/components/MobileSidebar";
 import { useNavigate } from "react-router-dom";
+import { logUserEvent } from "@/utils/analyticsUtils"; // 경로는 실제 프로젝트 구조에 맞게 수정하세요
 
 const Header = () => {
   const navigate = useNavigate();
@@ -81,6 +82,11 @@ const Header = () => {
                       <DropdownMenuItem key={subItem.name}>
                         <a
                           href={subItem.href}
+                          onClick={() =>
+                            logUserEvent("click_board_category", {
+                              board: mapCategoryToParam(subItem.name),
+                            })
+                          }
                           className="text-gray-700 hover:text-orange-500"
                         >
                           {subItem.name}
@@ -92,9 +98,12 @@ const Header = () => {
               ) : (
                 <button
                   key={category.name}
-                  onClick={() =>
-                    category.href !== "#" && navigate(category.href)
-                  }
+                  onClick={() => {
+                    logUserEvent("click_board_category", {
+                      board: mapCategoryToParam(category.name),
+                    });
+                    if (category.href !== "#") navigate(category.href);
+                  }}
                   className="text-gray-700 hover:text-orange-500 transition-colors font-medium flex items-center space-x-1"
                 >
                   {category.icon && <category.icon className="h-4 w-4" />}
