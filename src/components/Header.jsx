@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import MobileSidebar from "@/components/MobileSidebar";
 import { useNavigate } from "react-router-dom";
-import { logUserEvent } from "@/utils/analyticsUtils"; // 경로는 실제 프로젝트 구조에 맞게 수정하세요
+import { logUserEvent } from "../hooks/user-log-hook";
 
 const Header = () => {
   const navigate = useNavigate();
