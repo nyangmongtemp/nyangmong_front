@@ -11,7 +11,7 @@ import CreatePost from "./pages/CreatePost";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/Signup";
 import AdoptionPage from "./pages/AdoptionPage.jsx";
-import AdoptionCreate from "./pages/AdoptionCreate";
+import AdoptionCreate from "./pages/AdoptionCreate.jsx";
 import AdoptionBoard from "./components/AdoptionBoard";
 import AdoptionDetail from "./pages/AdoptionDetail";
 import RescueDetail from "./pages/RescueDetail";
