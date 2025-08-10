@@ -231,7 +231,7 @@ const AdoptionPage = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     // UI는 1-based, API 호출은 1-based로 변환
-    fetchStrayAnimals(page + 1);
+    fetchStrayAnimals(page);
   };
 
   // 컴포넌트 마운트 시 데이터 로드
