@@ -23,12 +23,20 @@ import { logUserEvent } from "../hooks/user-log-hook";
 const formatDateTime = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  return date.toLocaleDateString("ko-KR");
+};
+
+// content에서 이미지 태그를 "이미지" 텍스트로 대체하는 함수
+const formatContent = (content) => {
+  if (!content) return "";
+
+  // HTML 태그를 제거하고 이미지 태그는 "이미지"로 대체
+  let formattedContent = content
+    .replace(/<img[^>]*>/gi, "이미지") // 이미지 태그를 "이미지"로 대체
+    .replace(/<[^>]*>/g, "") // 나머지 HTML 태그 제거
+    .trim();
+
+  return formattedContent;
 };
 
 const Board = () => {
@@ -342,10 +350,9 @@ const Board = () => {
                               </Badge>
                             )}
                           </div>
-                          <div
-                            className="text-gray-600 text-sm mb-3 line-clamp-2"
-                            dangerouslySetInnerHTML={{ __html: post.content }}
-                          />
+                          <div className="text-gray-600 text-sm mb-3 line-clamp-2">
+                            {formatContent(post.content)}
+                          </div>
 
                           {/* 행사 설명 */}
                           {post.description && (
