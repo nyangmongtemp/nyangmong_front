@@ -24,6 +24,7 @@ const CreatePost = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
   const [originalFileName, setOriginalFileName] = useState(null); // 원본 파일명 저장
+  const [imageBlob, setImageBlob] = useState(null); // 크롭된 이미지 Blob 저장
   const [showCropModal, setShowCropModal] = useState(false);
   //const isEdit = location.pathname.startsWith("/update-post");
   let isEdit;
@@ -96,44 +97,8 @@ const CreatePost = () => {
   };
 
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
-    // 원본 파일명을 유지한 새로운 File 객체 생성
-    let croppedFile;
-    if (originalFileName) {
-      // 원본 파일의 확장자 추출
-      const fileExtension = originalFileName.split(".").pop().toLowerCase();
-
-      // MIME 타입에 따른 확장자 매핑
-      const mimeToExtension = {
-        "image/jpeg": "jpg",
-        "image/jpg": "jpg",
-        "image/png": "png",
-        "image/bmp": "bmp",
-        "image/gif": "gif",
-      };
-
-      // Blob의 MIME 타입에 맞는 확장자 사용
-      const extension = mimeToExtension[croppedBlob.type] || fileExtension;
-
-      // 원본 파일명에서 확장자만 변경
-      const nameWithoutExtension = originalFileName.substring(
-        0,
-        originalFileName.lastIndexOf(".")
-      );
-      const newFileName = `${nameWithoutExtension}_cropped.${extension}`;
-
-      // File 객체로 변환하여 파일명 유지
-      croppedFile = new File([croppedBlob], newFileName, {
-        type: croppedBlob.type,
-      });
-    } else {
-      // 원본 파일명이 없는 경우 기본값 사용
-      croppedFile = new File([croppedBlob], "cropped_image.jpg", {
-        type: croppedBlob.type,
-      });
-    }
-
     setImagePreview(croppedImageUrl);
-    setSelectedImage(croppedFile);
+    setImageBlob(croppedBlob); // Blob 저장
     setShowCropModal(false);
   };
 
@@ -142,6 +107,7 @@ const CreatePost = () => {
     setImagePreview(null);
     setOriginalImageSrc(null);
     setOriginalFileName(null); // 원본 파일명도 초기화
+    setImageBlob(null); // Blob도 초기화
   };
 
   const handleSubmit = async (e) => {
@@ -182,8 +148,13 @@ const CreatePost = () => {
       )
     );
 
-    if (selectedImage) {
-      formData.append("thumbnailImage", selectedImage);
+    if (imageBlob) {
+      // 원본 파일명을 유지하면서 Blob을 File 객체로 변환
+      const originalName = originalFileName || "image.jpg"; // 기본 파일명 설정
+      const imageFile = new File([imageBlob], originalName, {
+        type: imageBlob.type,
+      });
+      formData.append("thumbnailImage", imageFile);
     } else {
       // 이미지가 없으면 빈 Blob을 추가 (null 대신)
       formData.append("thumbnailImage", new Blob([]), "empty.jpg");
