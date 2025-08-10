@@ -23,8 +23,6 @@ const CreatePost = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
-  const [originalFileName, setOriginalFileName] = useState(null); // 원본 파일명 저장
-  const [originalMimeType, setOriginalMimeType] = useState(null); // 원본 MIME 타입 저장
   const [imageBlob, setImageBlob] = useState(null); // 크롭된 이미지 Blob 저장
   const [showCropModal, setShowCropModal] = useState(false);
   //const isEdit = location.pathname.startsWith("/update-post");
@@ -85,9 +83,10 @@ const CreatePost = () => {
         return;
       }
 
-      // 원본 파일명과 MIME 타입 저장
-      setOriginalFileName(file.name);
-      setOriginalMimeType(file.type);
+      console.log("=== 이미지 선택 정보 ===");
+      console.log("원본 파일명:", file.name);
+      console.log("원본 MIME 타입:", file.type);
+      console.log("파일 크기:", file.size, "bytes");
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -99,6 +98,10 @@ const CreatePost = () => {
   };
 
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
+    console.log("=== 크롭 완료 정보 ===");
+    console.log("크롭된 Blob MIME 타입:", croppedBlob.type);
+    console.log("크롭된 Blob 크기:", croppedBlob.size, "bytes");
+
     setImagePreview(croppedImageUrl);
     setImageBlob(croppedBlob); // Blob 저장
     setShowCropModal(false);
@@ -108,8 +111,6 @@ const CreatePost = () => {
     setSelectedImage(null);
     setImagePreview(null);
     setOriginalImageSrc(null);
-    setOriginalFileName(null); // 원본 파일명도 초기화
-    setOriginalMimeType(null); // 원본 MIME 타입도 초기화
     setImageBlob(null); // Blob도 초기화
   };
 
@@ -152,17 +153,45 @@ const CreatePost = () => {
     );
 
     if (imageBlob) {
-      // 원본 파일명을 유지하면서 Blob을 File 객체로 변환
-      const originalName = originalFileName || "image.jpg"; // 기본 파일명 설정
-      const imageFile = new File([imageBlob], originalName, {
+      // UserMyPage와 동일한 방식: 기본 파일명 사용
+      const imageFile = new File([imageBlob], "image.jpg", {
         type: imageBlob.type,
       });
+
+      console.log("=== FormData 이미지 정보 ===");
+      console.log("생성된 File 객체 이름:", imageFile.name);
+      console.log("생성된 File 객체 MIME 타입:", imageFile.type);
+      console.log("생성된 File 객체 크기:", imageFile.size, "bytes");
+
       formData.append("thumbnailImage", imageFile);
     } else if (isEdit) {
       // 게시물 수정 시 이미지가 없으면 null을 명시적으로 전송
+      console.log("=== 게시물 수정 - 이미지 없음 ===");
+      console.log("thumbnailImage: null");
       formData.append("thumbnailImage", "null");
+    } else {
+      console.log("=== 게시물 생성 - 이미지 없음 ===");
+      console.log("thumbnailImage: 필드 추가 안함");
     }
     // 게시물 생성 시 이미지가 없으면 아무것도 추가하지 않음
+
+    console.log("=== FormData 전체 정보 ===");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}:`, {
+          name: value.name,
+          type: value.type,
+          size: value.size,
+        });
+      } else if (value instanceof Blob) {
+        console.log(`${key}:`, {
+          type: value.type,
+          size: value.size,
+        });
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
 
     try {
       // 토큰 확인
@@ -388,7 +417,6 @@ const CreatePost = () => {
         onClose={() => setShowCropModal(false)}
         imageSrc={originalImageSrc}
         onCropComplete={handleCropComplete}
-        outputType={originalMimeType || "image/jpeg"} // 원본 MIME 타입 전달
       />
 
       {/* 푸터 */}
