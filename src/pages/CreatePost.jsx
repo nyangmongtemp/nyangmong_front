@@ -24,6 +24,7 @@ const CreatePost = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
   const [imageBlob, setImageBlob] = useState(null); // 크롭된 이미지 Blob 저장
+  const [originalFileExtension, setOriginalFileExtension] = useState(null); // 원본 파일 확장자 저장
   const [showCropModal, setShowCropModal] = useState(false);
   //const isEdit = location.pathname.startsWith("/update-post");
   let isEdit;
@@ -83,10 +84,12 @@ const CreatePost = () => {
         return;
       }
 
-      console.log("=== 이미지 선택 정보 ===");
-      console.log("원본 파일명:", file.name);
-      console.log("원본 MIME 타입:", file.type);
-      console.log("파일 크기:", file.size, "bytes");
+      // 원본 파일의 확장자 추출
+      const fileName = file.name;
+      const extension = fileName
+        .substring(fileName.lastIndexOf("."))
+        .toLowerCase();
+      setOriginalFileExtension(extension);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -98,10 +101,6 @@ const CreatePost = () => {
   };
 
   const handleCropComplete = (croppedImageUrl, croppedBlob) => {
-    console.log("=== 크롭 완료 정보 ===");
-    console.log("크롭된 Blob MIME 타입:", croppedBlob.type);
-    console.log("크롭된 Blob 크기:", croppedBlob.size, "bytes");
-
     setImagePreview(croppedImageUrl);
     setImageBlob(croppedBlob); // Blob 저장
     setShowCropModal(false);
@@ -112,6 +111,7 @@ const CreatePost = () => {
     setImagePreview(null);
     setOriginalImageSrc(null);
     setImageBlob(null); // Blob도 초기화
+    setOriginalFileExtension(null); // 확장자도 초기화
   };
 
   const handleSubmit = async (e) => {
@@ -153,61 +153,26 @@ const CreatePost = () => {
     );
 
     if (imageBlob) {
-      // UserMyPage와 동일한 방식: 기본 파일명 사용
-      const imageFile = new File([imageBlob], "image.jpg", {
+      // 원본 파일의 확장자를 유지하면서 파일명 생성
+      const extension = originalFileExtension || ".jpg"; // 기본값
+      const fileName = `image${extension}`;
+
+      const imageFile = new File([imageBlob], fileName, {
         type: imageBlob.type,
       });
-
-      console.log("=== FormData 이미지 정보 ===");
-      console.log("생성된 File 객체 이름:", imageFile.name);
-      console.log("생성된 File 객체 MIME 타입:", imageFile.type);
-      console.log("생성된 File 객체 크기:", imageFile.size, "bytes");
 
       formData.append("thumbnailImage", imageFile);
     } else if (isEdit) {
       // 게시물 수정 시 이미지가 없으면 null을 명시적으로 전송
-      console.log("=== 게시물 수정 - 이미지 없음 ===");
-      console.log("thumbnailImage: null");
       formData.append("thumbnailImage", "null");
-    } else {
-      console.log("=== 게시물 생성 - 이미지 없음 ===");
-      console.log("thumbnailImage: 필드 추가 안함");
     }
     // 게시물 생성 시 이미지가 없으면 아무것도 추가하지 않음
-
-    console.log("=== FormData 전체 정보 ===");
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}:`, {
-          name: value.name,
-          type: value.type,
-          size: value.size,
-        });
-      } else if (value instanceof Blob) {
-        console.log(`${key}:`, {
-          type: value.type,
-          size: value.size,
-        });
-      } else {
-        console.log(`${key}:`, value);
-      }
-    }
 
     try {
       // 토큰 확인
       const storedToken = localStorage.getItem("token");
-      console.log("저장된 토큰:", storedToken ? "있음" : "없음");
-      console.log("useAuth 토큰:", token ? "있음" : "없음");
-      console.log("로그인 상태:", isLoggedIn);
-      console.log("실제 토큰 값:", token);
-
-      console.log(id);
-      console.log(type);
-      console.log(isEdit);
-      console.log(formData);
 
       // 게이트웨이를 통해 board-service로 요청
-      console.log("게이트웨이를 통해 board-service로 요청");
 
       if (isEdit) {
         const response = await axiosInstance.put(
@@ -220,7 +185,6 @@ const CreatePost = () => {
             },
           }
         );
-        console.log(response);
 
         alert("게시글이 수정되었습니다.");
         navigate(`/board/${type}`);
@@ -235,7 +199,6 @@ const CreatePost = () => {
           }
         );
 
-        console.log("게시글 생성 응답:", response.data);
         alert("게시글이 등록되었습니다.");
         navigate(`/board/${type}`);
       }
