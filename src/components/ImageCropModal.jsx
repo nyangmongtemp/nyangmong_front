@@ -1,12 +1,22 @@
-
 import React, { useState, useRef } from "react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Crop, X } from "lucide-react";
 
-const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete, outputType = "image/jpeg" }) => {
+const ImageCropModal = ({
+  isOpen,
+  onClose,
+  imageSrc,
+  onCropComplete,
+  outputType = "image/jpeg",
+}) => {
   const [crop, setCrop] = useState({
     unit: "%",
     width: 50,
@@ -15,18 +25,18 @@ const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete, outputType 
     y: 25,
   });
   const [completedCrop, setCompletedCrop] = useState(null);
-  const imageRef = useRef(null);
+  const [imageRef, setImageRef] = useState(null);
   const canvasRef = useRef(null);
 
   const onImageLoad = (e) => {
-    imageRef.current = e.currentTarget;
+    setImageRef(e.currentTarget);
   };
 
   const handleCropComplete = () => {
-    if (!completedCrop || !imageRef.current) return;
+    if (!completedCrop || !imageRef) return;
 
     const canvas = canvasRef.current;
-    const image = imageRef.current;
+    const image = imageRef;
     const ctx = canvas.getContext("2d");
 
     if (!ctx) return;
@@ -49,13 +59,34 @@ const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete, outputType 
       canvas.height
     );
 
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const croppedImageUrl = URL.createObjectURL(blob);
-        onCropComplete(croppedImageUrl, blob);
-        onClose();
+    // 원본 이미지의 MIME 타입을 감지하여 적절한 outputType 결정
+    let detectedOutputType = outputType;
+
+    // imageSrc가 data URL인 경우 MIME 타입 추출
+    if (imageSrc && imageSrc.startsWith("data:")) {
+      const mimeType = imageSrc.split(";")[0].split(":")[1];
+      if (mimeType && mimeType.startsWith("image/")) {
+        detectedOutputType = mimeType;
       }
-    }, outputType, 0.8);
+    }
+
+    // 이미지 타입별 품질 설정
+    let quality = 0.8;
+    if (detectedOutputType === "image/png") {
+      quality = undefined; // PNG는 품질 설정이 의미없음
+    }
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const croppedImageUrl = URL.createObjectURL(blob);
+          onCropComplete(croppedImageUrl, blob);
+          onClose();
+        }
+      },
+      detectedOutputType,
+      quality
+    );
   };
 
   return (
@@ -89,10 +120,7 @@ const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete, outputType 
             </div>
           )}
 
-          <canvas
-            ref={canvasRef}
-            className="hidden"
-          />
+          <canvas ref={canvasRef} className="hidden" />
 
           <div className="flex justify-end space-x-4">
             <Button variant="outline" onClick={onClose}>

@@ -24,6 +24,7 @@ const CreatePost = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [originalImageSrc, setOriginalImageSrc] = useState(null);
   const [originalFileName, setOriginalFileName] = useState(null); // 원본 파일명 저장
+  const [originalMimeType, setOriginalMimeType] = useState(null); // 원본 MIME 타입 저장
   const [imageBlob, setImageBlob] = useState(null); // 크롭된 이미지 Blob 저장
   const [showCropModal, setShowCropModal] = useState(false);
   //const isEdit = location.pathname.startsWith("/update-post");
@@ -84,8 +85,9 @@ const CreatePost = () => {
         return;
       }
 
-      // 원본 파일명과 확장자 저장
+      // 원본 파일명과 MIME 타입 저장
       setOriginalFileName(file.name);
+      setOriginalMimeType(file.type);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -107,6 +109,7 @@ const CreatePost = () => {
     setImagePreview(null);
     setOriginalImageSrc(null);
     setOriginalFileName(null); // 원본 파일명도 초기화
+    setOriginalMimeType(null); // 원본 MIME 타입도 초기화
     setImageBlob(null); // Blob도 초기화
   };
 
@@ -155,10 +158,11 @@ const CreatePost = () => {
         type: imageBlob.type,
       });
       formData.append("thumbnailImage", imageFile);
-    } else {
-      // 이미지가 없으면 빈 Blob을 추가 (null 대신)
-      formData.append("thumbnailImage", new Blob([]), "empty.jpg");
+    } else if (isEdit) {
+      // 게시물 수정 시 이미지가 없으면 null을 명시적으로 전송
+      formData.append("thumbnailImage", "null");
     }
+    // 게시물 생성 시 이미지가 없으면 아무것도 추가하지 않음
 
     try {
       // 토큰 확인
@@ -182,6 +186,7 @@ const CreatePost = () => {
           formData,
           {
             headers: {
+              Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data",
             },
           }
@@ -383,6 +388,7 @@ const CreatePost = () => {
         onClose={() => setShowCropModal(false)}
         imageSrc={originalImageSrc}
         onCropComplete={handleCropComplete}
+        outputType={originalMimeType || "image/jpeg"} // 원본 MIME 타입 전달
       />
 
       {/* 푸터 */}
