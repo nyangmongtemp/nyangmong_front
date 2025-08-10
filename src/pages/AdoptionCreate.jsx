@@ -69,32 +69,58 @@ const AdoptionCreate = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit && id) {
       setFetchLoading(true);
+      setFetchError(null);
+
+      console.log("편집 모드 - ID:", id);
+
       adoptionAPI
         .getAdoptionDetail(id)
-        .then((data) => {
-          setFormData({
-            title: data.title || "",
-            content: data.content || "",
-            petCategory: data.petCategory || "",
-            petKind: data.petKind || "",
-            sex: data.sexCode || "",
-            age: data.age || "",
-            address: data.address || "",
-            neutered: data.neuterYn || "",
-            vaccinated: data.vaccine || "",
-            fee: data.fee || "",
-            imageUrl: data.imageUrl || "",
-          });
+        .then((response) => {
+          console.log("API 응답:", response);
+
+          // 응답 구조 확인 및 데이터 추출
+          let data = response;
+          if (response.data) data = response.data;
+          if (response.result) data = response.result;
+
+          console.log("추출된 데이터:", data);
+
+          // 필드 매핑 및 기본값 설정
+          const mappedData = {
+            title: data.title || data.title || "",
+            content: data.content || data.content || "",
+            petCategory: data.petCategory || data.petCategory || "",
+            petKind: data.petKind || data.petKind || "",
+            sex: data.sexCode || data.sex || data.sexCode || "",
+            age: data.age || data.age || "",
+            address: data.address || data.address || "",
+            neutered: data.neuterYn || data.neutered || data.neuterYn || "",
+            vaccinated: data.vaccine || data.vaccinated || data.vaccine || "",
+            fee: data.fee || data.fee || "",
+            imageUrl:
+              data.imageUrl || data.thumbnailImage || data.imageUrl || "",
+          };
+
+          console.log("매핑된 데이터:", mappedData);
+
+          setFormData(mappedData);
+
           if (data.thumbnailImage || data.imageUrl) {
             setImagePreview(data.thumbnailImage || data.imageUrl);
             setSelectedImage(null); // 기존 이미지는 Blob이 아님
           }
+
           setFetchError(null);
         })
-        .catch(() => {
-          setFetchError("게시글 정보를 불러오지 못했습니다.");
+        .catch((error) => {
+          console.error("게시글 정보 불러오기 실패:", error);
+          setFetchError(
+            `게시글 정보를 불러오지 못했습니다: ${
+              error.message || "알 수 없는 오류"
+            }`
+          );
         })
         .finally(() => setFetchLoading(false));
     }
@@ -316,10 +342,40 @@ const AdoptionCreate = () => {
   };
 
   if (fetchLoading) {
-    return <div className="p-8 text-center">게시글 정보를 불러오는 중...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-orange-500 mr-2" />
+            <span className="text-gray-600">게시글 정보를 불러오는 중...</span>
+          </div>
+        </main>
+      </div>
+    );
   }
   if (fetchError) {
-    return <div className="p-8 text-center text-red-500">{fetchError}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="text-red-500 text-lg font-medium mb-4">
+              게시글 정보를 불러올 수 없습니다
+            </div>
+            <div className="text-gray-600 text-center mb-6">{fetchError}</div>
+            <Button
+              onClick={() =>
+                navigate("/adoption", { state: { tab: "adoption" } })
+              }
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              목록으로 돌아가기
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   // 로그인하지 않은 경우 로딩 화면 표시
@@ -368,6 +424,16 @@ const AdoptionCreate = () => {
                     ? "기존 정보를 수정할 수 있습니다."
                     : "새로운 가족을 기다리는 반려동물을 등록해주세요."}
                 </p>
+
+                {/* 편집 모드일 때만 표시되는 상태 정보 */}
+                {isEdit && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center text-blue-800 text-sm">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                      편집 모드: ID {id}번 게시글을 수정 중입니다.
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">

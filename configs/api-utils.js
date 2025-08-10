@@ -1,5 +1,5 @@
-import axiosInstance from './axios-config';
-import { handleAxiosError } from './HandleAxiosError';
+import axiosInstance from "./axios-config";
+import { handleAxiosError } from "./HandleAxiosError";
 import { API_ENDPOINTS } from "./api-endpoints";
 
 // 기본 API 호출 함수들
@@ -65,7 +65,7 @@ export const apiUtils = {
       const response = await axiosInstance.post(endpoint, formData, {
         ...config,
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
           ...config.headers,
         },
       });
@@ -78,7 +78,11 @@ export const apiUtils = {
 };
 
 // 페이지네이션 헬퍼
-export const createPaginationParams = (page = 1, size = 10, sort = 'createdAt,desc') => {
+export const createPaginationParams = (
+  page = 1,
+  size = 10,
+  sort = "createdAt,desc"
+) => {
   return {
     page: page - 1, // 백엔드에서 0-based pagination을 사용한다고 가정
     size,
@@ -89,17 +93,17 @@ export const createPaginationParams = (page = 1, size = 10, sort = 'createdAt,de
 // 검색 파라미터 헬퍼
 export const createSearchParams = (searchTerm, filters = {}) => {
   const params = new URLSearchParams();
-  
+
   if (searchTerm) {
-    params.append('search', searchTerm);
+    params.append("search", searchTerm);
   }
-  
+
   Object.entries(filters).forEach(([key, value]) => {
-    if (value !== null && value !== undefined && value !== '') {
+    if (value !== null && value !== undefined && value !== "") {
       params.append(key, value);
     }
   });
-  
+
   return params.toString();
 };
 
@@ -114,7 +118,7 @@ export const extractErrorMessage = (error) => {
   if (error.message) {
     return error.message;
   }
-  return '알 수 없는 오류가 발생했습니다.';
+  return "알 수 없는 오류가 발생했습니다.";
 };
 
 // 성공 메시지 추출
@@ -125,62 +129,80 @@ export const extractSuccessMessage = (response) => {
   if (response.msg) {
     return response.msg;
   }
-  return '요청이 성공적으로 처리되었습니다.';
+  return "요청이 성공적으로 처리되었습니다.";
 };
 
 // 유기동물 관련 API 함수들
 export const strayAnimalAPI = {
   // 유기동물 목록 조회
-  getStrayAnimals: async (searchWord = '', kindFilter = '', addressFilter = '', genderFilter = '', page = 0, pageSize = 12) => {
+  getStrayAnimals: async (
+    searchWord = "",
+    kindFilter = "",
+    addressFilter = "",
+    genderFilter = "",
+    page = 0,
+    pageSize = 12
+  ) => {
     const params = new URLSearchParams();
-    if (searchWord) params.append('searchWord', searchWord);
-    if (kindFilter) params.append('upKindNm', kindFilter);
-    if (addressFilter) params.append('careAddr', addressFilter);
-    if (genderFilter) params.append('sexCode', genderFilter);
-    params.append('page', page);
-    params.append('pageSize', pageSize);
-    
-    return await apiUtils.get(`/animalboard-service/stray-animal-board/list?${params.toString()}`);
+    if (searchWord) params.append("searchWord", searchWord);
+    if (kindFilter) params.append("upKindNm", kindFilter);
+    if (addressFilter) params.append("careAddr", addressFilter);
+    if (genderFilter) params.append("sexCode", genderFilter);
+    params.append("page", page);
+    params.append("pageSize", pageSize);
+
+    return await apiUtils.get(
+      `/animalboard-service/stray-animal-board/list?${params.toString()}`
+    );
   },
 
   // 유기동물 상세 조회
   getStrayAnimalDetail: async (desertionNo) => {
-    return await apiUtils.get(`/animalboard-service/stray-animal-board/${desertionNo}`);
+    return await apiUtils.get(
+      `/animalboard-service/stray-animal-board/${desertionNo}`
+    );
   },
 };
 
 // 분양게시판 관련 API 함수들
 export const adoptionAPI = {
   // 분양게시판 목록 조회
-  getAdoptionBoardPosts: async (searchWord = '', petCategory = '', address = '', sex = '', page = 1, pageSize = 12) => {
+  getAdoptionBoardPosts: async (
+    searchWord = "",
+    petCategory = "",
+    address = "",
+    sex = "",
+    page = 1,
+    pageSize = 12
+  ) => {
     const params = new URLSearchParams();
-    if (searchWord) params.append('searchWord', searchWord);
-    if (petCategory) params.append('petCategory', petCategory);
-    if (address) params.append('address', address);
-    if (sex) params.append('sex', sex);
-    params.append('page', page);
-    params.append('pageSize', pageSize);
-    
-    return await apiUtils.get(`/animalboard-service/animal-board/list?${params.toString()}`);
+    if (searchWord) params.append("searchWord", searchWord);
+    if (petCategory) params.append("petCategory", petCategory);
+    if (address) params.append("address", address);
+    if (sex) params.append("sex", sex);
+    params.append("page", page);
+    params.append("pageSize", pageSize);
+
+    return await apiUtils.get(
+      `/animalboard-service/animal-board/list?${params.toString()}`
+    );
   },
 
   // 분양게시판 상세 조회
   getAdoptionBoardDetail: async (postId) => {
-    return await apiUtils.get(`/animalboard-service/animal-board/public/${postId}`);
+    return await apiUtils.get(
+      `/animalboard-service/animal-board/public/${postId}`
+    );
   },
 
   // 분양글 등록
   createAdoptionPost: async (formData, token) => {
-    return await apiUtils.post(
-      '/animalboard-service/animal-board',
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-          // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
-        }
-      }
-    );
+    return await apiUtils.post("/animalboard-service/animal-board", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
+      },
+    });
   },
 
   // 분양 상세 조회 (별칭)
@@ -195,23 +217,20 @@ export const adoptionAPI = {
       formData,
       {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
           // Content-Type은 axios가 FormData일 때 자동으로 multipart/form-data로 설정
-        }
+        },
       }
     );
   },
 
   // 분양글 삭제
   deleteAdoptionPost: async (id, token) => {
-    return await apiUtils.delete(
-      `/animalboard-service/animal-board/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    return await apiUtils.delete(`/animalboard-service/animal-board/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
 
   // 예약상태 변경
@@ -222,12 +241,12 @@ export const adoptionAPI = {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
   },
-}; 
+};
 
 export const getAdminLogList = async (page = 0, size = 10, searchWord = "") => {
   const params = new URLSearchParams();
@@ -245,9 +264,15 @@ export const getAdminLogList = async (page = 0, size = 10, searchWord = "") => {
     }
   );
   return response.result;
-}; 
+};
 
-export const getAdminUserList = async (page = 0, size = 10, search = "", report = "false", active = "all") => {
+export const getAdminUserList = async (
+  page = 0,
+  size = 10,
+  search = "",
+  report = "false",
+  active = "all"
+) => {
   const params = new URLSearchParams();
   if (search) {
     params.append("keyword", search);
@@ -267,28 +292,31 @@ export const getAdminUserList = async (page = 0, size = 10, search = "", report 
     }
   );
   return response.result;
-}; 
+};
 
 export const getAdminUserDetail = async (userId) => {
   const adminToken = sessionStorage.getItem("adminToken");
-  const response = await apiUtils.get(
-    API_ENDPOINTS.ADMIN.USER_DETAIL(userId),
-    {
-      headers: {
-        Authorization: `Bearer ${adminToken}`,
-      },
-    }
-  );
+  const response = await apiUtils.get(API_ENDPOINTS.ADMIN.USER_DETAIL(userId), {
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+    },
+  });
   return response.result;
-}; 
+};
 
 // 1:1 문의(고객센터) 목록 조회
-export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "", answered = "all") => {
+export const getAdminInquiryList = async (
+  page = 1,
+  size = 10,
+  searchWord = "",
+  answered = "all"
+) => {
   const params = new URLSearchParams();
   params.append("page", page);
   params.append("size", size);
   if (searchWord) params.append("searchWord", searchWord);
-  if (answered === "true" || answered === "false") params.append("answered", answered);
+  if (answered === "true" || answered === "false")
+    params.append("answered", answered);
 
   const adminToken = sessionStorage.getItem("adminToken");
   const response = await apiUtils.get(
@@ -300,7 +328,7 @@ export const getAdminInquiryList = async (page = 1, size = 10, searchWord = "", 
     }
   );
   return response.result;
-}; 
+};
 
 export const getAdminInquiryDetail = async (informId) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -313,7 +341,7 @@ export const getAdminInquiryDetail = async (informId) => {
     }
   );
   return response.result;
-}; 
+};
 
 export const patchAdminInquiryReply = async (informId, reply) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -323,25 +351,22 @@ export const patchAdminInquiryReply = async (informId, reply) => {
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }
   );
   return response.result;
-}; 
+};
 
 export const getAdminTermsLastPost = async () => {
   const adminToken = sessionStorage.getItem("adminToken");
-  const response = await apiUtils.get(
-    `/admin-service/admin/terms/lastPost`,
-    {
-      headers: {
-        Authorization: `Bearer ${adminToken}`,
-      },
-    }
-  );
+  const response = await apiUtils.get(`/admin-service/admin/terms/lastPost`, {
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+    },
+  });
   return response.result;
-}; 
+};
 
 export const createAdminTerms = async (category, data) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -351,7 +376,7 @@ export const createAdminTerms = async (category, data) => {
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }
   );
@@ -366,14 +391,19 @@ export const updateAdminTerms = async (category, id, data) => {
     {
       headers: {
         Authorization: `Bearer ${adminToken}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }
   );
   return response.result;
-}; 
+};
 
-export const getAdminTermsList = async (category, page = 1, size = 10, searchWord = "") => {
+export const getAdminTermsList = async (
+  category,
+  page = 1,
+  size = 10,
+  searchWord = ""
+) => {
   const params = new URLSearchParams();
   params.append("page", page);
   params.append("size", size);
@@ -415,7 +445,7 @@ export const deleteAdminTerms = async (category, id) => {
     }
   );
   return response.result;
-}; 
+};
 
 export const getUserReportHistory = async (userId) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -428,7 +458,7 @@ export const getUserReportHistory = async (userId) => {
     }
   );
   return response.result;
-}; 
+};
 
 export const patchReportConfirm = async (reportId) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -442,7 +472,7 @@ export const patchReportConfirm = async (reportId) => {
     }
   );
   return response.result;
-}; 
+};
 
 export const patchUserBan = async (userId, releaseAt) => {
   const adminToken = sessionStorage.getItem("adminToken");
@@ -456,4 +486,4 @@ export const patchUserBan = async (userId, releaseAt) => {
     }
   );
   return response.result;
-}; 
+};

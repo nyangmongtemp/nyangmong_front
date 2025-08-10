@@ -510,7 +510,11 @@ const AdoptionPage = () => {
     >
       <div className="relative">
         <img
-          src={`${API_BASE_URL}${ABS}/stray-animal-board/proxy-image?imageUrl=${post.image}`}
+          src={
+            isRescue
+              ? `${API_BASE_URL}${ABS}/stray-animal-board/proxy-image?imageUrl=${post.image}`
+              : post.image
+          }
           alt={post.title}
           className="w-full h-72 object-cover"
         />
