@@ -242,7 +242,7 @@ const Signup = () => {
       email: formData.email,
       password: formData.password,
       userName: formData.name,
-      nickname: formData.nickname,
+      nickname: formData.nickname || formData.name, // 닉네임이 비어있으면 이름을 사용
     });
 
     form.append("user", new Blob([userJson], { type: "application/json" }));
@@ -349,7 +349,6 @@ const Signup = () => {
                     className="pl-10"
                     value={formData.nickname}
                     onChange={handleInputChange}
-                    required
                   />
                 </div>
               </div>
