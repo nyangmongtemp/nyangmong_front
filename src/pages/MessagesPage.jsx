@@ -130,6 +130,7 @@ const MessagesPage = () => {
         console.log(err);
       }
     };
+
     if (token) fetchUserData();
   };
 

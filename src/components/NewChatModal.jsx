@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, Send } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +14,7 @@ import { useAuth } from "../context/UserContext";
 import axiosInstance from "../../configs/axios-config";
 
 const NewChatModal = ({ onSuccess }) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1: 사용자 검색, 2: 사용자 선택, 3: 메시지 입력
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -59,7 +61,17 @@ const NewChatModal = ({ onSuccess }) => {
 
       console.log("Chat created:", response);
       alert("메시지가 전송되었습니다!");
+
+      // 모달 닫기
       onSuccess();
+
+      // MessagePage로 이동
+      navigate("/messages");
+
+      // 페이지 새로고침 (약간의 지연 후 실행)
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (err) {
       if (err.response?.status === 400) {
         alert("본인에게는 메시지를 보낼 수 없습니다.");
