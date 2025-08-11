@@ -3,12 +3,14 @@ import { Card } from "@/components/ui/card";
 import { Heart, MessageCircle, Crown } from "lucide-react";
 import axiosInstance from "../../configs/axios-config";
 import { API_BASE_URL, BOARD } from "../../configs/host-config";
+import { useNavigate } from "react-router-dom";
 
 const PetShowcase = () => {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
@@ -31,6 +33,7 @@ const PetShowcase = () => {
         // API 응답을 컴포넌트에서 사용할 형태로 매핑
         const mappedPets = response.data.map((pet, index) => ({
           id: pet.postId,
+          postid: pet.postId,
           name: pet.title,
           image: pet.thumbnailImage,
           likes: pet.likeCount || 0,
@@ -89,6 +92,7 @@ const PetShowcase = () => {
       className={`overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer ${
         isLarge ? "md:h-full" : "h-48"
       } relative`}
+      onClick={() => navigate(`/detail/introduction/${pet.postid ?? pet.id}`)}
     >
       <div className="relative h-full">
         <img
