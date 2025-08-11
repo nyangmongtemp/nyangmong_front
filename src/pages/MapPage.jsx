@@ -20,6 +20,7 @@ import {
   HOSPITAL,
   STYLE,
 } from "../../configs/host-config";
+import { logUserEvent } from "../../hooks/user-log-hook";
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -63,6 +64,14 @@ const MapPage = () => {
   const [groomingList, setGroomingList] = useState([]);
   // 미용실 상세 정보 상태 (MapComponent로 전달)
   const [selectedGroomingDetail, setSelectedGroomingDetail] = useState(null);
+  // 페이지 첫 렌더링 시 기본 로그 이벤트 전송
+  useEffect(() => {
+    logUserEvent("map_view", {
+      selectedCategory: "행사정보",
+      selectRegion: "전체",
+    });
+  }, []);
+
   // 미용실 지역 변경 시 리스트 요청
   useEffect(() => {
     const groomingCategories = [
@@ -428,6 +437,15 @@ const MapPage = () => {
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
     setSelectedLocation(null);
+
+    // 카테고리 선택 시 로그 이벤트 전송
+    const categoryName =
+      categories.find((cat) => cat.id === categoryId)?.name || categoryId;
+    logUserEvent("map_view", {
+      selectedCategory: categoryName,
+      selectRegion: "전체", // 카테고리 변경 시 기본값
+    });
+
     // 문화시설 카테고리 클릭 시 하위 카테고리 표시
     if (categoryId === "culture") {
       setShowCultureSubCategories(true);
@@ -578,7 +596,18 @@ const MapPage = () => {
                         {/* 문화시설 지역 선택 셀렉트박스 */}
                         <Select
                           value={selectedCultureRegion}
-                          onValueChange={setSelectedCultureRegion}
+                          onValueChange={(value) => {
+                            setSelectedCultureRegion(value);
+                            // 문화시설 지역 선택 시 로그 이벤트 전송
+                            const regionLabel =
+                              cultureRegionOptions.find(
+                                (opt) => opt.value === value
+                              )?.label || value;
+                            logUserEvent("map_view", {
+                              selectedCategory: "반려동물 입장가능 문화시설",
+                              selectRegion: regionLabel,
+                            });
+                          }}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="지역 선택" />
@@ -604,7 +633,18 @@ const MapPage = () => {
                       <div className="flex flex-wrap items-center gap-4">
                         <Select
                           value={selectedHospitalRegion}
-                          onValueChange={setSelectedHospitalRegion}
+                          onValueChange={(value) => {
+                            setSelectedHospitalRegion(value);
+                            // 동물병원 지역 선택 시 로그 이벤트 전송
+                            const regionLabel =
+                              hospitalRegionOptions.find(
+                                (opt) => opt.value === value
+                              )?.label || value;
+                            logUserEvent("map_view", {
+                              selectedCategory: "동물병원",
+                              selectRegion: regionLabel,
+                            });
+                          }}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="지역 선택" />
@@ -649,7 +689,21 @@ const MapPage = () => {
                         {/* 상위 지역(도/시) 셀렉트박스 */}
                         <Select
                           value={selectedGroomingRegion}
-                          onValueChange={setSelectedGroomingRegion}
+                          onValueChange={(value) => {
+                            setSelectedGroomingRegion(value);
+                            // 미용실 지역 선택 시 로그 이벤트 전송
+                            const regionLabel =
+                              hospitalRegionOptions.find(
+                                (opt) => opt.value === value
+                              )?.label || value;
+                            logUserEvent("map_view", {
+                              selectedCategory:
+                                categories.find(
+                                  (cat) => cat.id === selectedCategory
+                                )?.name || selectedCategory,
+                              selectRegion: regionLabel,
+                            });
+                          }}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="지역 선택" />
