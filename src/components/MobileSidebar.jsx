@@ -158,7 +158,7 @@ const MobileSidebar = () => {
       ],
     },
     { name: "자유게시판", href: "/board/free" },
-    { name: "행사게시판", href: "/board/festival" },
+    { name: "행사게시판", href: "/board/event" },
     { name: "지도", href: "/map", icon: MapPin },
   ];
 
