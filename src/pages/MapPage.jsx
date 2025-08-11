@@ -20,7 +20,7 @@ import {
   HOSPITAL,
   STYLE,
 } from "../../configs/host-config";
-import { logUserEvent } from "../../hooks/user-log-hook";
+import { logUserEvent } from "../hooks/user-log-hook";
 
 const MapPage = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
