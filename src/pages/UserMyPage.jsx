@@ -240,7 +240,9 @@ const UserMyPage = () => {
       } else {
         // 기존 방식으로 쿼리 파라미터 사용
         response = await axiosInstance.get(
-          `${API_BASE_URL}${BOARD}/mypage/${category}?page=${currentPage}&size=${itemsPerPage}`,
+          `${API_BASE_URL}${BOARD}/mypage/${category}?page=${
+            currentPage - 1
+          }&size=${itemsPerPage}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
