@@ -889,7 +889,12 @@ const MapPage = () => {
                     {groomingList.map((shop) => (
                       <Card
                         key={shop.id}
-                        className="cursor-pointer transition-all hover:shadow-md w-[320px] min-w-[320px] max-w-[320px]"
+                        className={`cursor-pointer transition-all hover:shadow-md w-[320px] min-w-[320px] max-w-[320px] ${
+                          selectedGroomingDetail &&
+                          selectedGroomingDetail.id === shop.id
+                            ? "ring-2 ring-orange-500 border-orange-500"
+                            : ""
+                        }`}
                         onClick={() => handleGroomingCardClick(shop)}
                       >
                         <CardContent className="p-4">
