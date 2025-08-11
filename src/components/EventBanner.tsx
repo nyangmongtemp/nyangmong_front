@@ -68,18 +68,7 @@ const EventBanner = () => {
                     {banners[currentSlide].description ||
                       "자세한 내용을 확인해보세요"}
                   </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>
-                        {banners[currentSlide].location || "위치 정보"}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>{banners[currentSlide].period || "기간 정보"}</span>
-                    </div>
-                  </div>
+                  <div className="space-y-2"></div>
                 </div>
               </div>
             </div>

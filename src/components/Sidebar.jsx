@@ -206,7 +206,7 @@ const Sidebar = () => {
         email: loginData.email,
         password: loginData.password,
       });
-      console.log(res);
+      //console.log(res);
 
       login(
         res.data.result.token,

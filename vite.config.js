@@ -15,6 +15,11 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false,
       },
+      '/board-service': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
       '/user-service': {
         target: 'http://localhost:8000',
         changeOrigin: true,
