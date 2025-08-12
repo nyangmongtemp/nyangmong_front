@@ -103,7 +103,7 @@ const AdoptionDetail = () => {
         //console.log("post 상태 설정 완료:", postData);
       } catch (err) {
         //console.error("분양 상세 조회 실패:", err);
-        setError("분양글을 불러오는데 실패했습니다.");
+        setError("입양글을 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);
       }
@@ -135,7 +135,7 @@ const AdoptionDetail = () => {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">분양글을 불러오는 중...</p>
+              <p className="mt-4 text-gray-600">입양글을 불러오는 중...</p>
             </div>
           </div>
         </main>
@@ -174,7 +174,7 @@ const AdoptionDetail = () => {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <p className="text-gray-500 mb-4">분양글을 찾을 수 없습니다.</p>
+              <p className="text-gray-500 mb-4">입양글을 찾을 수 없습니다.</p>
               <Button
                 onClick={() =>
                   navigate("/adoption", { state: { tab: "adoption" } })
@@ -216,7 +216,7 @@ const AdoptionDetail = () => {
                       <span>목록으로</span>
                     </Button>
                     <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
-                      <span>분양게시판</span>
+                      <span>입양게시판</span>
                       <span>{">"}</span>
                       <span>{post.title}</span>
                     </div>
@@ -256,7 +256,7 @@ const AdoptionDetail = () => {
                       {post.fee === 0 ||
                       post.fee === null ||
                       post.fee === undefined
-                        ? "무료분양"
+                        ? "무료입양"
                         : `${Number(post.fee).toLocaleString()}원`}
                     </Badge>
                     {/* 예약상태 표시 */}
@@ -305,7 +305,7 @@ const AdoptionDetail = () => {
                           {post.reservationStatus === "R"
                             ? "예약중"
                             : post.reservationStatus === "C"
-                            ? "분양완료"
+                            ? "입양완료"
                             : "예약가능"}
                         </Badge>
                       )}
@@ -429,7 +429,7 @@ const AdoptionDetail = () => {
                           {post.fee === 0 ||
                           post.fee === null ||
                           post.fee === undefined
-                            ? "무료분양"
+                            ? "무료입양"
                             : `${Number(post.fee).toLocaleString()}원`}
                         </p>
                       </div>

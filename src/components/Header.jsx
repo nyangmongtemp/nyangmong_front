@@ -17,7 +17,7 @@ const Header = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const categories = [
-    { name: "분양게시판", href: "/adoption" },
+    { name: "입양게시판", href: "/adoption" },
     {
       name: "정보게시판",
       href: "/",

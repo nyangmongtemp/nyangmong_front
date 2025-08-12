@@ -768,12 +768,6 @@ const AdoptionPage = () => {
   };
 
   const renderAdoptionPagination = () => {
-    console.log("분양게시판 페이징 렌더링:", {
-      adoptionCurrentPage,
-      adoptionTotalPages,
-      adoptionTotalElements,
-    });
-
     // 모바일에서는 간단한 페이징, 데스크톱에서는 전체 페이징
     if (isMobile) {
       // 모바일에서는 3개 페이지 번호만 표시
@@ -981,8 +975,8 @@ const AdoptionPage = () => {
               >
                 <div className="flex justify-between items-center mb-6">
                   <TabsList className="grid w-auto grid-cols-2">
-                    <TabsTrigger value="rescue">유기동물분양게시판</TabsTrigger>
-                    <TabsTrigger value="adoption">분양게시판</TabsTrigger>
+                    <TabsTrigger value="rescue">유기동물입양게시판</TabsTrigger>
+                    <TabsTrigger value="adoption">입양게시판</TabsTrigger>
                   </TabsList>
                 </div>
 
@@ -1071,7 +1065,7 @@ const AdoptionPage = () => {
                     <div className="flex justify-between items-center">
                       <div>
                         <h2 className="text-2xl font-bold text-gray-800">
-                          유기동물분양게시판
+                          유기동물입양게시판
                         </h2>
                         <p className="text-sm text-gray-600">
                           새로운 가족을 기다리는 아이들
@@ -1252,7 +1246,7 @@ const AdoptionPage = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h2 className="text-2xl font-bold text-gray-800">
-                          분양게시판
+                          입양게시판
                         </h2>
                         <p className="text-sm text-gray-600">
                           새로운 가족을 기다리는 아이들
@@ -1266,7 +1260,7 @@ const AdoptionPage = () => {
                             onClick={() => navigate("/adoption/create")}
                           >
                             <Plus className="h-4 w-4 mr-2" />
-                            분양글 작성
+                            입양글 작성
                           </Button>
                         )}
                         {/* 총 데이터 개수는 항상 표시 */}
@@ -1291,7 +1285,7 @@ const AdoptionPage = () => {
                       <div className="flex items-center justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-orange-500 mr-2" />
                         <span className="text-gray-600">
-                          분양게시판 정보를 불러오는 중...
+                          입양게시판 정보를 불러오는 중...
                         </span>
                       </div>
                     )}
@@ -1321,7 +1315,7 @@ const AdoptionPage = () => {
                         <div className="flex items-center justify-center py-12">
                           <div className="text-center">
                             <p className="text-gray-500 mb-4">
-                              검색 조건에 맞는 분양글이 없습니다.
+                              검색 조건에 맞는 입양글이 없습니다.
                             </p>
                             <Button
                               onClick={() => {
