@@ -78,13 +78,8 @@ const Sidebar = () => {
           setNotifications(parsedNotifications);
           setNotificationCount(parsedNotifications.length);
           setHasNotifications(parsedNotifications.length > 0);
-          console.log(
-            "📱 알림 상태 복원 완료:",
-            parsedNotifications.length,
-            "개"
-          );
         } catch (error) {
-          console.error(" 알림 상태 복원 실패:", error);
+          //console.error(" 알림 상태 복원 실패:", error);
           // 잘못된 데이터인 경우 제거
           localStorage.removeItem(`notifications_${email}`);
         }
@@ -107,11 +102,6 @@ const Sidebar = () => {
     const handleBeforeUnload = () => {
       if (isLoggedIn && email && notifications.length > 0) {
         saveNotificationsToStorage(notifications);
-        console.log(
-          "💾 페이지 떠날 때 알림 상태 저장:",
-          notifications.length,
-          "개"
-        );
       }
     };
 
@@ -166,7 +156,7 @@ const Sidebar = () => {
   }, []);
 
   const handleKakaoLogin = () => {
-    console.log("카카오 로그인 버튼 클릭!");
+    //console.log("카카오 로그인 버튼 클릭!");
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&prompt=login`;
 
     window.open(
@@ -183,8 +173,8 @@ const Sidebar = () => {
         event.data.type === "OAUTH_SUCCESS" &&
         event.data.provider === "KAKAO"
       ) {
-        console.log(" 카카오 로그인 성공!");
-        console.log(event);
+        //console.log(" 카카오 로그인 성공!");
+        // console.log(event);
         kakaoLogin(
           event.data.token,
           event.data.email,
@@ -273,17 +263,11 @@ const Sidebar = () => {
         }));
         setPopularPosts(mappedPosts);
       } catch (error) {
-        console.error("인기 게시글 불러오기 실패:", error);
-        console.error("에러 상세:", {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          url: error.config?.url,
-        });
+        //console.error("인기 게시글 불러오기 실패:", error);
 
         // 404 에러일 때 더 명확한 메시지
         if (error.response?.status === 404) {
-          console.warn("인기 게시글 API가 백엔드에서 구현되지 않았습니다.");
+          //console.warn("인기 게시글 API가 백엔드에서 구현되지 않았습니다.");
         }
 
         setPopularPosts([]);
@@ -307,7 +291,7 @@ const Sidebar = () => {
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    console.log("🔔 SSE 알림 연결 시작 - 로그인 상태:", isLoggedIn);
+    //console.log("🔔 SSE 알림 연결 시작 - 로그인 상태:", isLoggedIn);
 
     let eventSource = null;
     let healthCheckInterval = null;
@@ -328,19 +312,19 @@ const Sidebar = () => {
 
       // 연결 성공 이벤트
       eventSource.addEventListener("connect", (event) => {
-        console.log("✅ SSE 연결 성공:", event.data);
+        // console.log("✅ SSE 연결 성공:", event.data);
       });
 
       // 새로운 메시지 알림 이벤트
       eventSource.addEventListener("message", (event) => {
         try {
-          console.log("📨 SSE 메시지 수신:", event.data);
+          // console.log("📨 SSE 메시지 수신:", event.data);
 
           const message = JSON.parse(event.data);
 
           // 메시지 데이터가 있는 경우 알림 처리
           if (message.senderNickname && message.senderId) {
-            console.log("🎉 새로운 메시지 알림 감지!");
+            //  console.log("🎉 새로운 메시지 알림 감지!");
 
             // 알림 데이터 생성
             const notification = {
@@ -372,13 +356,13 @@ const Sidebar = () => {
             });
           }
         } catch (error) {
-          console.error(" SSE 메시지 파싱 오류:", error);
+          // console.error(" SSE 메시지 파싱 오류:", error);
         }
       });
 
       // 하트비트 이벤트 (연결 상태 확인)
       eventSource.addEventListener("heartbeat", (event) => {
-        console.log(" 하트비트 수신:", event.data);
+        //  console.log(" 하트비트 수신:", event.data);
       });
 
       // 에러 처리 - 연결 상태만 로깅
@@ -389,12 +373,12 @@ const Sidebar = () => {
           event.error.message &&
           event.error.message.includes("No activity within")
         ) {
-          console.log(" 하트비트 타임아웃 - 정상적인 상황입니다");
+          //   console.log(" 하트비트 타임아웃 - 정상적인 상황입니다");
           return; // EventSourcePolyfill이 자동으로 재연결
         }
 
         // 실제 연결 오류인 경우
-        console.error(" SSE 연결 오류:", event);
+        //  console.error(" SSE 연결 오류:", event);
       });
 
       return eventSource;
@@ -414,21 +398,18 @@ const Sidebar = () => {
         const healthStatus = healthResponse.data;
 
         if (healthStatus === "disconnected") {
-          console.log(
-            "⚠️ SSE emitter 연결이 끊어졌습니다. 재연결을 시도합니다."
-          );
           eventSource = createEventSource();
         } else if (healthStatus === "connected") {
-          console.log("✅ SSE emitter 연결 상태 정상");
+          //console.log("✅ SSE emitter 연결 상태 정상");
         }
       } catch (error) {
         if (error.status === 401 || error.response?.status === 401) {
-          console.log("이거는 로그가 나와야 함.");
+          // console.log("이거는 로그가 나와야 함.");
         }
 
-        console.error("❌ SSE emitter 건강상태 확인 실패:", error);
+        //console.error("❌ SSE emitter 건강상태 확인 실패:", error);
         // 에러 발생 시 재연결 시도
-        console.log("🔄 에러로 인한 SSE 재연결 시도");
+        // console.log("🔄 에러로 인한 SSE 재연결 시도");
         eventSource = createEventSource();
       }
     }, 30000); // 30초마다 체크
@@ -440,7 +421,7 @@ const Sidebar = () => {
         eventSource &&
         eventSource.readyState === EventSourcePolyfill.CLOSED
       ) {
-        console.log("🔄 페이지 포커스 시 연결 복구 시도");
+        //   console.log("🔄 페이지 포커스 시 연결 복구 시도");
         eventSource = createEventSource();
       }
     };
@@ -449,7 +430,7 @@ const Sidebar = () => {
 
     // 연결 해제 시 정리
     return () => {
-      console.log("🔌 SSE 연결 해제");
+      //   console.log("🔌 SSE 연결 해제");
       window.removeEventListener("focus", handleFocus);
       if (healthCheckInterval) {
         clearInterval(healthCheckInterval);
@@ -482,14 +463,14 @@ const Sidebar = () => {
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/terms/lastPost`
       );
-      console.log("이용약관 응답:", response);
+      //   console.log("이용약관 응답:", response);
 
       if (response.data && response.data.result) {
         setTermsContent(response.data.result.content || "");
       }
       setShowTermsModal(true);
     } catch (error) {
-      console.error("이용약관 조회 실패:", error);
+      //   console.error("이용약관 조회 실패:", error);
       setTermsContent("이용약관을 불러올 수 없습니다.");
       setShowTermsModal(true);
     }
@@ -501,14 +482,14 @@ const Sidebar = () => {
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/policy/lastPost`
       );
-      console.log("정보처리방침 응답:", response);
+      //  console.log("정보처리방침 응답:", response);
 
       if (response.data && response.data.result) {
         setPolicyContent(response.data.result.content || "");
       }
       setShowPolicyModal(true);
     } catch (error) {
-      console.error("정보처리방침 조회 실패:", error);
+      //  console.error("정보처리방침 조회 실패:", error);
       setPolicyContent("정보처리방침을 불러올 수 없습니다.");
       setShowPolicyModal(true);
     }
