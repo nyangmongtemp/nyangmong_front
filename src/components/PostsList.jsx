@@ -44,7 +44,7 @@ const PostsList = ({ userId, category }) => {
     const fetchPosts = async () => {
       if (!token || !category) return;
       setIsLoading(true);
-      console.log(category);
+      //console.log(category);
 
       try {
         let url, params, response;
@@ -58,14 +58,14 @@ const PostsList = ({ userId, category }) => {
           const queryString = Object.entries(params)
             .map(([key, value]) => `${key}=${value}`)
             .join("&");
-          console.log("[분양] 실제 요청 URL:", `${url}?${queryString}`);
+          //console.log("[분양] 실제 요청 URL:", `${url}?${queryString}`);
           response = await axiosInstance.get(url, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
             params,
           });
-          console.log("[분양] 응답 객체:", response);
+          //console.log("[분양] 응답 객체:", response);
           // 분양 게시판 응답 구조에 맞게 세팅
           if (response.data && Array.isArray(response.data.content)) {
             setPosts(response.data.content);
@@ -82,14 +82,14 @@ const PostsList = ({ userId, category }) => {
           const queryString = Object.entries(params)
             .map(([key, value]) => `${key}=${value}`)
             .join("&");
-          console.log("실제 요청 URL:", `${url}?${queryString}`);
+          //console.log("실제 요청 URL:", `${url}?${queryString}`);
           response = await axiosInstance.get(url, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
             params,
           });
-          console.log(response);
+          //console.log(response);
           if (response.data.result) {
             setPosts(
               Array.isArray(response.data.result)

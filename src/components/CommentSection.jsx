@@ -73,12 +73,12 @@ const CommentSection = ({
           contentId: postId,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       setCommentCount(response.data.result.commentCount);
       setLikeCount(response.data.result.likeCount);
     } catch (err) {
-      console.error("좋아요/댓글 개수 조회 실패:", err);
+      //console.error("좋아요/댓글 개수 조회 실패:", err);
     }
   };
 
@@ -94,12 +94,12 @@ const CommentSection = ({
         category: category,
         contentId: postId,
       });
-      console.log(response);
+      //console.log(response);
 
       setIsLiked(!isLiked);
       setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
     } catch (err) {
-      console.error("좋아요 토글 실패:", err);
+      //console.error("좋아요 토글 실패:", err);
       alert("좋아요 처리에 실패했습니다.");
     }
   };
@@ -123,7 +123,7 @@ const CommentSection = ({
           contentId: postId,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       // === 배열 추출을 안전하게! ===
       let newComments = [];
@@ -146,7 +146,7 @@ const CommentSection = ({
 
       setHasMore(pageNum < totalPages);
     } catch (err) {
-      console.error("댓글 조회 실패:", err);
+      //console.error("댓글 조회 실패:", err);
       setError("댓글을 불러오는데 실패했습니다.");
       if (!append) {
         setComments([]);
@@ -180,7 +180,7 @@ const CommentSection = ({
           hidden: hidden,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       setNewComment("");
       setHidden(false);
@@ -212,7 +212,7 @@ const CommentSection = ({
       // 댓글 수정 후 현재 페이지 다시 로드
       fetchComments(page, false);
     } catch (err) {
-      console.error("댓글 수정 실패:", err);
+      //console.error("댓글 수정 실패:", err);
       alert("댓글 수정에 실패했습니다.");
     }
   };
@@ -222,7 +222,7 @@ const CommentSection = ({
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 
     try {
-      console.log(commentId);
+      //console.log(commentId);
 
       const response = await axiosInstance.delete(
         `${API_BASE_URL}${MAIN}/comment/delete/${commentId}`
@@ -233,7 +233,7 @@ const CommentSection = ({
       fetchComments(1, false);
       fetchCommentLikeCount(); // 댓글 개수 업데이트
     } catch (err) {
-      console.error("댓글 삭제 실패:", err);
+      //console.error("댓글 삭제 실패:", err);
       alert("댓글 삭제에 실패했습니다.");
     }
   };
@@ -242,7 +242,7 @@ const CommentSection = ({
   const handleReplySubmit = async (commentId) => {
     if (!replyText.trim()) return;
     try {
-      console.log("답글 작성:", commentId, replyText);
+      //console.log("답글 작성:", commentId, replyText);
       const response = await axiosInstance.post(
         `${API_BASE_URL}${MAIN}/reply/create`,
         {
@@ -276,7 +276,7 @@ const CommentSection = ({
       // 댓글 개수 업데이트
       fetchCommentLikeCount();
     } catch (err) {
-      console.error("답글 작성 실패:", err);
+      //console.error("답글 작성 실패:", err);
       alert("답글 작성에 실패했습니다.");
     }
   };
@@ -293,12 +293,12 @@ const CommentSection = ({
           contentId: postId,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       // 백엔드에서 true/false 반환한다고 가정
       setIsLiked(!!response.data?.result);
     } catch (err) {
-      console.error("좋아요 여부 조회 실패:", err);
+      //console.error("좋아요 여부 조회 실패:", err);
     }
   };
 
@@ -306,12 +306,12 @@ const CommentSection = ({
   const getNowLoggedUserId = async () => {
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
-      console.log(response);
+      //console.log(response);
 
       setNowLoggedUserId(response.data);
       return response.data;
     } catch (err) {
-      console.error("유저 ID 조회 실패:", err);
+      //console.error("유저 ID 조회 실패:", err);
       setNowLoggedUserId(null);
       return null;
     }
@@ -368,7 +368,7 @@ const CommentSection = ({
           commentId,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       if (response.data === true) {
         setRevealedComments((prev) => ({ ...prev, [commentId]: true }));
@@ -431,7 +431,7 @@ const CommentSection = ({
           content,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       // 대댓글 생성 성공 시 즉시 상태 업데이트
       const newReply = response.data?.result || response.data;
@@ -457,7 +457,7 @@ const CommentSection = ({
       // 댓글 개수 업데이트
       fetchCommentLikeCount();
     } catch (err) {
-      console.error("대댓글 작성 실패:", err);
+      //console.error("대댓글 작성 실패:", err);
       alert("대댓글 작성에 실패했습니다.");
     }
   };
@@ -465,8 +465,8 @@ const CommentSection = ({
   const handleReplyEditSubmit = async (replyId, parentCommentId) => {
     if (!replyEditText.trim()) return;
     try {
-      console.log(replyId);
-      console.log(replyEditText);
+      //console.log(replyId);
+      //console.log(replyEditText);
 
       const response = await axiosInstance.patch(
         `${API_BASE_URL}${MAIN}/reply/modify`,
@@ -475,7 +475,7 @@ const CommentSection = ({
           content: replyEditText,
         }
       );
-      console.log(response);
+      //console.log(response);
 
       // 대댓글 수정 성공 시 즉시 상태 업데이트
       setRepliesByCommentId((prev) => ({
@@ -492,7 +492,7 @@ const CommentSection = ({
       setReplyEditText("");
       alert("대댓글이 수정되었습니다.");
     } catch (err) {
-      console.error("대댓글 수정 실패:", err);
+      //console.error("대댓글 수정 실패:", err);
       alert("대댓글 수정에 실패했습니다.");
     }
   };
@@ -503,7 +503,7 @@ const CommentSection = ({
       const response = await axiosInstance.delete(
         `${API_BASE_URL}${MAIN}/reply/delete/${replyId}`
       );
-      console.log(response);
+      //console.log(response);
 
       // 대댓글 삭제 성공 시 즉시 상태 업데이트
       setRepliesByCommentId((prev) => {
@@ -539,7 +539,7 @@ const CommentSection = ({
       alert("대댓글 삭제가 완료되었습니다.");
       fetchCommentLikeCount();
     } catch (err) {
-      console.error("대댓글 삭제 실패:", err);
+      //console.error("대댓글 삭제 실패:", err);
       alert("대댓글 삭제에 실패했습니다.");
     }
   };

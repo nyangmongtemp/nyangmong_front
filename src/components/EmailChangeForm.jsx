@@ -46,11 +46,11 @@ const EmailChangeForm = ({ currentEmail }) => {
           },
         }
       );
-      console.log(res);
+      //console.log(res);
 
       setIsEmailSent(true);
     } catch (error) {
-      console.error("이메일 발송 실패:", error);
+      //console.error("이메일 발송 실패:", error);
     } finally {
       setIsSending(false);
     }
@@ -70,13 +70,13 @@ const EmailChangeForm = ({ currentEmail }) => {
           },
         }
       );
-      console.log(res);
+      //console.log(res);
       setIsCodeVerified(true);
       alert("이메일 변경이 완료되었습니다.");
       logout();
       navigate("/");
     } catch (error) {
-      console.error("인증 실패:", error);
+      //console.error("인증 실패:", error);
     }
   };
 

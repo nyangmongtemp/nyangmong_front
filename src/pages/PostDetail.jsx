@@ -222,14 +222,6 @@ const PostDetail = () => {
                         <Eye className="w-4 h-4 mr-1" />
                         조회 {post.views}
                       </div>
-                      <div className="flex items-center">
-                        <Heart className="w-4 h-4 mr-1" />
-                        좋아요 {post.likes}
-                      </div>
-                      <div className="flex items-center">
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        댓글 {comments.length}
-                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2">

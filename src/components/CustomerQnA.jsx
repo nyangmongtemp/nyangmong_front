@@ -27,16 +27,16 @@ const CustomerQnA = () => {
 
     try {
       // 디버깅을 위해 페이지 번호 출력
-      console.log("요청할 페이지 번호:", page);
+      //console.log("요청할 페이지 번호:", page);
 
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/qna/list/${page}`
       );
-      console.log(`${API_BASE_URL}${TERMS}/qna/list/${page}`);
-      console.log("Q&A 조회 응답:", response.data);
+      //console.log(`${API_BASE_URL}${TERMS}/qna/list/${page}`);
+      //console.log("Q&A 조회 응답:", response.data);
       setQnaData(response.data.result);
     } catch (err) {
-      console.error("Q&A 조회 에러:", err);
+      //console.error("Q&A 조회 에러:", err);
       setError("Q&A를 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -53,7 +53,7 @@ const CustomerQnA = () => {
   };
 
   const handleQnAClick = (termsId) => {
-    console.log("클릭된 termsId:", termsId);
+    //console.log("클릭된 termsId:", termsId);
     navigate(`/customer-qna-detail/${termsId}`);
   };
 

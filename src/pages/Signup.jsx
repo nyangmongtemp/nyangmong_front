@@ -122,7 +122,6 @@ const Signup = () => {
       }
       setShowTermsModal(true);
     } catch (error) {
-      console.error("이용약관 조회 실패:", error);
       setTermsContent("이용약관을 불러올 수 없습니다.");
       setShowTermsModal(true);
     }
@@ -141,7 +140,6 @@ const Signup = () => {
       }
       setShowPrivacyModal(true);
     } catch (error) {
-      console.error("개인정보 처리방침 조회 실패:", error);
       setPrivacyContent("개인정보 처리방침을 불러올 수 없습니다.");
       setShowPrivacyModal(true);
     }
@@ -191,7 +189,6 @@ const Signup = () => {
       } else if (error.response?.code === "PARAM-006") {
         alert("이미 가입된 이메일입니다.");
       }
-      console.log(error);
       setEmailSent(false);
     }
   };
@@ -250,7 +247,6 @@ const Signup = () => {
     // 이미지가 있을 경우만 첨부
     if (profileImage) {
       form.append("profileImage", profileImage);
-      console.log(profileImage);
     }
 
     try {
@@ -263,11 +259,10 @@ const Signup = () => {
           },
         }
       );
-      console.log("회원가입 성공:", res);
       navigate("/");
       // 성공 처리 추가 (예: 이동, 알림 등)
     } catch (error) {
-      console.error("회원가입 실패:", error);
+      alert(error.response.data.message);
     }
   };
 

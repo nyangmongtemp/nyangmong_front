@@ -73,19 +73,19 @@ const AdoptionCreate = () => {
       setFetchLoading(true);
       setFetchError(null);
 
-      console.log("편집 모드 - ID:", id);
+      //console.log("편집 모드 - ID:", id);
 
       adoptionAPI
         .getAdoptionDetail(id)
         .then((response) => {
-          console.log("API 응답:", response);
+          //console.log("API 응답:", response);
 
           // 응답 구조 확인 및 데이터 추출
           let data = response;
           if (response.data) data = response.data;
           if (response.result) data = response.result;
 
-          console.log("추출된 데이터:", data);
+          //console.log("추출된 데이터:", data);
 
           // 필드 매핑 및 기본값 설정
           const mappedData = {
@@ -103,7 +103,7 @@ const AdoptionCreate = () => {
               data.imageUrl || data.thumbnailImage || data.imageUrl || "",
           };
 
-          console.log("매핑된 데이터:", mappedData);
+          //console.log("매핑된 데이터:", mappedData);
 
           setFormData(mappedData);
 
@@ -115,7 +115,7 @@ const AdoptionCreate = () => {
           setFetchError(null);
         })
         .catch((error) => {
-          console.error("게시글 정보 불러오기 실패:", error);
+          //console.error("게시글 정보 불러오기 실패:", error);
           setFetchError(
             `게시글 정보를 불러오지 못했습니다: ${
               error.message || "알 수 없는 오류"
@@ -300,7 +300,7 @@ const AdoptionCreate = () => {
         alert("분양글이 성공적으로 수정되었습니다.");
         navigate("/adoption", { state: { tab: "adoption" } });
       } catch (error) {
-        console.error("분양글 수정 실패:", error);
+        //console.error("분양글 수정 실패:", error);
         if (error.response) {
           alert(
             `에러: ${error.response.status} - ${
@@ -323,7 +323,7 @@ const AdoptionCreate = () => {
       alert("분양글이 성공적으로 등록되었습니다.");
       navigate("/adoption", { state: { tab: "adoption" } });
     } catch (error) {
-      console.error("분양글 등록 실패:", error);
+      //console.error("분양글 등록 실패:", error);
       if (error.response) {
         // axios 에러 응답
         alert(

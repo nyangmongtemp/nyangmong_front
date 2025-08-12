@@ -203,7 +203,7 @@ const CreatePost = () => {
         navigate(`/board/${type}`);
       }
     } catch (err) {
-      console.error("게시글 생성 에러:", err);
+      //console.error("게시글 생성 에러:", err);
       alert(
         isEdit ? "게시글 수정에 실패했습니다." : "게시글 등록에 실패했습니다."
       );

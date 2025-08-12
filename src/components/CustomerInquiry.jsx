@@ -91,7 +91,7 @@ const CustomerInquiry = () => {
           sort: sortParam,
         };
         const res = await axiosInstance.get(url, { params });
-        console.log(res);
+        //console.log(res);
         setInquiries(res.data.result.content || []);
         setTotalPages(res.data.result.totalPages || 1);
       } catch (err) {
@@ -115,7 +115,7 @@ const CustomerInquiry = () => {
       const url = `${API_BASE_URL}${USER}/inform/detail/${informId}`;
       const res = await axiosInstance.get(url);
       setDetailData(res.data.result);
-      console.log("상세조회 응답:", res.data);
+      //console.log("상세조회 응답:", res.data);
     } catch (err) {
       setDetailError("상세 정보를 불러오지 못했습니다.");
       setDetailData(null);

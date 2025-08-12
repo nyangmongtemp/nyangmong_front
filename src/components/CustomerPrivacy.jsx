@@ -16,17 +16,17 @@ const CustomerPrivacy = () => {
 
     try {
       // 디버깅을 위해 페이지 번호 출력
-      console.log("요청할 페이지 번호:", page);
+      //console.log("요청할 페이지 번호:", page);
 
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/policy/list/${page}`
       );
-      console.log(`${API_BASE_URL}${TERMS}/policy/list/${page}`);
+      //console.log(`${API_BASE_URL}${TERMS}/policy/list/${page}`);
 
-      console.log("개인정보처리방침 조회 응답:", response.data);
+      //console.log("개인정보처리방침 조회 응답:", response.data);
       setPrivacyData(response.data.result);
     } catch (err) {
-      console.error("개인정보처리방침 조회 에러:", err);
+      //console.error("개인정보처리방침 조회 에러:", err);
       setError("개인정보처리방침을 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -43,7 +43,7 @@ const CustomerPrivacy = () => {
   };
 
   const handleTermsClick = (termsId) => {
-    console.log("클릭된 termsId:", termsId);
+    // console.log("클릭된 termsId:", termsId);
     navigate(`/customer-privacy-detail/${termsId}`);
   };
 

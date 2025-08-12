@@ -63,14 +63,6 @@ const RecentPosts = () => {
             imageUrl: item.thumbnailImage || null,
           }));
         } catch (err) {
-          console.error(`${category} 게시판 API 에러:`, err);
-          console.error("에러 상세:", {
-            status: err.response?.status,
-            statusText: err.response?.statusText,
-            data: err.response?.data,
-            url: err.config?.url,
-          });
-
           // 404 에러일 때 더 명확한 메시지
           if (err.response?.status === 404) {
             console.warn(

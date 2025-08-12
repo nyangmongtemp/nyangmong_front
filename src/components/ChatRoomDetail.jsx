@@ -25,7 +25,7 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
         const response = await axiosInstance.get(
           `${API_BASE_URL}${USER}/chat/list/${chatId}`
         );
-        console.log("Chat messages:", response);
+        //console.log("Chat messages:", response);
 
         if (response.data && response.data.result) {
           setMessages(response.data.result);
@@ -36,7 +36,7 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
           setReceiverId(response.data.result[0].receiverId);
         }
       } catch (err) {
-        console.error("Failed to fetch messages:", err);
+        //console.error("Failed to fetch messages:", err);
       } finally {
         setLoading(false);
       }
@@ -58,14 +58,14 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
     if (!newMessage.trim()) return;
 
     try {
-      console.log(receiverId);
+      //console.log(receiverId);
 
       const response = await axiosInstance.post(`${API_BASE_URL}${USER}/send`, {
         receiverId: receiverId,
         content: newMessage,
       });
 
-      console.log("Message sent:", response);
+      //console.log("Message sent:", response);
 
       // 메시지 목록 새로고침
       const messagesResponse = await axiosInstance.get(
@@ -77,7 +77,7 @@ const ChatRoomDetail = ({ chatId, onBack, currentUserNickname, myUserId }) => {
 
       setNewMessage("");
     } catch (err) {
-      console.error("Failed to send message:", err);
+      //console.error("Failed to send message:", err);
       alert("메시지 전송에 실패했습니다.");
     }
   };

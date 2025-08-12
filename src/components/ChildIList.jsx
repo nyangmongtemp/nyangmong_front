@@ -57,7 +57,7 @@ const ChildIList = () => {
         params: { page: 0, size: 1000 }, // 충분히 크게!
       })
       .then((res) => {
-        console.log(res);
+        //console.log(res);
 
         const content = res.data.content || [];
         // 최신순 정렬(내림차순)

@@ -51,7 +51,7 @@ const Board = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    console.log(type);
+    //console.log(type);
 
     logUserEvent("board_view", {
       selectedCategory: type,
@@ -149,7 +149,7 @@ const Board = () => {
                 params: { page: 0, size: 100 },
               }
             );
-            console.log(res);
+            //console.log(res);
 
             const content = res.data.content || res.data;
 
@@ -179,7 +179,7 @@ const Board = () => {
         }
         setCurrentPage(1); // 페이지 초기화
       } catch (err) {
-        console.error(`${type} 게시글 불러오기 실패`, err);
+        //console.error(`${type} 게시글 불러오기 실패`, err);
         setApiPosts([]); // 에러 시 빈 배열
       }
     };

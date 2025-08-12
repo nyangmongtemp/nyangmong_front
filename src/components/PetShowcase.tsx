@@ -28,7 +28,7 @@ const PetShowcase = () => {
         const response = await axiosInstance.get(
           `${API_BASE_URL}${BOARD}/main`
         );
-        console.log(response);
+        //console.log(response);
 
         // API 응답을 컴포넌트에서 사용할 형태로 매핑
         const mappedPets = response.data.map((pet, index) => ({
@@ -44,7 +44,7 @@ const PetShowcase = () => {
 
         setPets(mappedPets);
       } catch (err) {
-        console.error("인기 소개 게시글 조회 실패:", err);
+        //console.error("인기 소개 게시글 조회 실패:", err);
         setError("인기 게시글을 불러오는데 실패했습니다.");
         // 에러 시 기본 데이터 설정
         setPets([

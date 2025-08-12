@@ -51,7 +51,7 @@ const CommentsList = () => {
   // 댓글 데이터 가져오기
   const fetchMyComments = useCallback(
     async (page = 0) => {
-      console.log("fetchMyComments 함수 내부, 받은 page:", page);
+      //console.log("fetchMyComments 함수 내부, 받은 page:", page);
       if (!token) return;
 
       setIsLoading(true);
@@ -69,26 +69,10 @@ const CommentsList = () => {
             },
           }
         );
-        console.log(
-          "실제 요청 URL:",
-          `${API_BASE_URL}${MAIN}/comment/mypage?page=${page}&size=${itemsPerPage}&sort=createAt,desc`
-        );
 
-        console.log("API 응답:", response.data);
-        console.log("댓글 데이터:", response.data.result);
+        //console.log("API 응답:", response.data);
+        //console.log("댓글 데이터:", response.data.result);
         if (response.data.result && response.data.result.content) {
-          console.log(
-            "댓글 ID 목록:",
-            response.data.result.content.map((c) => c.commentId)
-          );
-          console.log("현재 페이지:", page);
-          console.log("페이지 크기:", itemsPerPage);
-          console.log("총 페이지 수:", response.data.result.totalPages);
-          console.log("총 요소 수:", response.data.result.totalElements);
-          console.log(
-            "현재 페이지 요소 수:",
-            response.data.result.content.length
-          );
         }
 
         if (response.data.result) {
@@ -97,7 +81,7 @@ const CommentsList = () => {
           setTotalElements(response.data.result.totalElements || 0);
         }
       } catch (error) {
-        console.error("댓글 데이터 가져오기 실패:", error);
+        //console.error("댓글 데이터 가져오기 실패:", error);
         setComments([]);
       } finally {
         setIsLoading(false);
@@ -108,15 +92,15 @@ const CommentsList = () => {
 
   // 컴포넌트 마운트 시 댓글 데이터 가져오기
   useEffect(() => {
-    console.log("페이지 변경됨:", currentPage);
-    console.log("fetchMyComments 함수 호출, 전달된 page:", currentPage);
+    //console.log("페이지 변경됨:", currentPage);
+    //console.log("fetchMyComments 함수 호출, 전달된 page:", currentPage);
     fetchMyComments(currentPage);
   }, [fetchMyComments, currentPage]);
 
   // 댓글 클릭 핸들러
   const handleCommentClick = (comment) => {
     const { category, contentId } = comment;
-    console.log(comment);
+    //console.log(comment);
 
     if (category === "ADOPT") {
       navigate(`/adoption-detail/${contentId}`);

@@ -160,7 +160,6 @@ const Sidebar = () => {
         setCurrentAdSlide(0); // 새로 받아오면 첫 슬라이드로
       } catch (error) {
         setAds([]);
-        console.error("광고 불러오기 실패:", error);
       }
     };
     fetchAds();

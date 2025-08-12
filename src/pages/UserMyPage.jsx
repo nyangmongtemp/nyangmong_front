@@ -88,7 +88,7 @@ const UserMyPage = () => {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
 
         const data = response.data.result;
 
@@ -105,7 +105,7 @@ const UserMyPage = () => {
           address: data.address || "",
         });
       } catch (err) {
-        console.log(err);
+        //  console.log(err);
       }
     };
     if (token) fetchUserData();
@@ -160,13 +160,13 @@ const UserMyPage = () => {
         }
       );
 
-      console.log("회원 정보 수정 성공:", response);
+      //   console.log("회원 정보 수정 성공:", response);
       alert(
         "회원 정보가 성공적으로 수정되었습니다. 다시 로그인을 진행해주세요"
       );
       logout();
     } catch (error) {
-      console.error("회원 정보 수정 실패:", error);
+      //  console.error("회원 정보 수정 실패:", error);
       alert("회원 정보 수정에 실패했습니다.");
     }
   };
@@ -221,7 +221,7 @@ const UserMyPage = () => {
     if (!token) return;
 
     try {
-      console.log("현재 페이지:", currentPage);
+      //  console.log("현재 페이지:", currentPage);
 
       let response;
 
@@ -251,18 +251,7 @@ const UserMyPage = () => {
         );
       }
 
-      console.log(`${category} 게시판 내 게시물 응답:`, response);
-      console.log("응답 데이터 구조:", {
-        hasData: !!response.data,
-        hasResult: !!response.data?.result,
-        hasContent: !!response.data?.content,
-        resultType: typeof response.data?.result,
-        contentType: typeof response.data?.content,
-        totalPages:
-          response.data?.totalPages || response.data?.result?.totalPages,
-        currentPage: currentPage,
-        itemsPerPage: itemsPerPage,
-      });
+      //  console.log(`${category} 게시판 내 게시물 응답:`, response);
 
       // CommentSection과 동일한 응답 구조 처리
       let newPosts = [];
@@ -285,11 +274,11 @@ const UserMyPage = () => {
         totalPages = response.data.totalPages || 1;
       }
 
-      console.log("매핑된 게시물 데이터:", newPosts);
+      // console.log("매핑된 게시물 데이터:", newPosts);
       setMyPosts(newPosts);
       setTotalPages(totalPages);
     } catch (error) {
-      console.error(`${category} 게시판 내 게시물 조회 실패:`, error);
+      // console.error(`${category} 게시판 내 게시물 조회 실패:`, error);
       setMyPosts([]);
       setTotalPages(1);
     }
@@ -325,14 +314,14 @@ const UserMyPage = () => {
         }
       );
 
-      console.log("회원 탈퇴 성공:", response);
+      // console.log("회원 탈퇴 성공:", response);
       alert("회원 탈퇴가 완료되었습니다.");
 
       // 로그아웃 처리 (알림 데이터도 함께 삭제됨)
       logout();
       navigate("/");
     } catch (error) {
-      console.error("회원 탈퇴 실패:", error);
+      // console.error("회원 탈퇴 실패:", error);
       alert("회원 탈퇴에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsDeleting(false);

@@ -26,7 +26,6 @@ const AuthSidebar = () => {
             password,
           }
         );
-        console.log("로그인 성공", response.data);
 
         // 예시: useAuth에서 로그인 처리 (토큰 저장 등)
         user.login(response.data);
@@ -36,7 +35,6 @@ const AuthSidebar = () => {
           email,
           password,
         });
-        console.log("회원가입 성공", response.data);
 
         // 회원가입 후 로그인 페이지로 전환
         setIsLogin(true);

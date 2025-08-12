@@ -32,12 +32,12 @@ const NewChatModal = ({ onSuccess }) => {
         `${API_BASE_URL}${USER}/search/${searchTerm}`
       );
 
-      console.log("Search results:", response);
+      //console.log("Search results:", response);
       if (response.data && response.data.result) {
         setSearchResults(response.data.result);
       }
     } catch (err) {
-      console.error("Search failed:", err);
+      //console.error("Search failed:", err);
       alert("사용자 검색에 실패했습니다.");
     } finally {
       setLoading(false);
@@ -59,7 +59,7 @@ const NewChatModal = ({ onSuccess }) => {
         content: message,
       });
 
-      console.log("Chat created:", response);
+      //console.log("Chat created:", response);
       alert("메시지가 전송되었습니다!");
 
       // 모달 닫기

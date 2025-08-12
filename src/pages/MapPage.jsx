@@ -99,12 +99,12 @@ const MapPage = () => {
           );
           setGroomingDistrictOptions(sortedDistricts);
           setSelectedGroomingDistrict(sortedDistricts[0] || "");
-          console.log("미용실 지역 리스트 응답:", res);
+          //console.log("미용실 지역 리스트 응답:", res);
         })
         .catch((err) => {
           setGroomingDistrictOptions([]);
           setSelectedGroomingDistrict("");
-          console.error("미용실 지역 리스트 요청 실패:", err);
+          //console.error("미용실 지역 리스트 요청 실패:", err);
         });
     } else {
       setShowGroomingRegion(false);
@@ -138,11 +138,11 @@ const MapPage = () => {
         .then((res) => {
           const list = res.data?.result || [];
           setGroomingList(list);
-          console.log("미용실 리스트 응답:", res);
+          //console.log("미용실 리스트 응답:", res);
         })
         .catch((err) => {
           setGroomingList([]);
-          console.error("미용실 리스트 요청 실패:", err);
+          //console.error("미용실 리스트 요청 실패:", err);
         });
     }
   }, [selectedCategory, selectedGroomingRegion, selectedGroomingDistrict]);
@@ -338,7 +338,7 @@ const MapPage = () => {
       axiosInstance
         .get(`${API_BASE_URL}${FESTIVAL}/api/all`)
         .then((res) => {
-          console.log(res);
+          //console.log(res);
 
           setFestivalList(res.data || []);
         })
@@ -353,8 +353,8 @@ const MapPage = () => {
   useEffect(() => {
     if (selectedCategory === "culture") {
       setIsCultureLoading(true);
-      console.log(selectedCultureRegion);
-      console.log(selectedCultureSubCategory);
+      //console.log(selectedCultureRegion);
+      //console.log(selectedCultureSubCategory);
 
       axiosInstance
         .post(`${API_BASE_URL}${MAP}/find`, {
@@ -362,7 +362,7 @@ const MapPage = () => {
           contentType: selectedCultureSubCategory,
         })
         .then((res) => {
-          console.log(res);
+          //console.log(res);
 
           setCultureLocations(res.data?.result || res.data || []);
         })
@@ -376,13 +376,13 @@ const MapPage = () => {
   // 동물병원 지역 변경 시 category 요청
   useEffect(() => {
     if (selectedCategory === "hospital") {
-      console.log("동물병원 지역 선택:", selectedHospitalRegion);
+      //console.log("동물병원 지역 선택:", selectedHospitalRegion);
 
       // category 요청으로 두 번째 셀렉트박스 옵션 가져오기
       axiosInstance
         .get(`${API_BASE_URL}${HOSPITAL}/category/${selectedHospitalRegion}`)
         .then((res) => {
-          console.log("동물병원 category 응답:", res);
+          //console.log("동물병원 category 응답:", res);
           const categoryData = res.data?.result || res.data || [];
           // 가나다순으로 정렬
           const sortedCategoryData = categoryData.sort((a, b) =>
@@ -396,7 +396,7 @@ const MapPage = () => {
           }
         })
         .catch((err) => {
-          console.error("동물병원 category 요청 실패:", err);
+          // console.error("동물병원 category 요청 실패:", err);
           setHospitalCategoryOptions([]);
           setSelectedHospitalCategory("");
         });
@@ -407,7 +407,7 @@ const MapPage = () => {
   useEffect(() => {
     if (selectedCategory === "hospital" && selectedHospitalCategory) {
       setIsHospitalLoading(true);
-      console.log("동물병원 카테고리 선택:", selectedHospitalCategory);
+      // console.log("동물병원 카테고리 선택:", selectedHospitalCategory);
 
       // list 요청
       axiosInstance
@@ -415,7 +415,7 @@ const MapPage = () => {
           `${API_BASE_URL}${HOSPITAL}/list/${selectedHospitalRegion}/${selectedHospitalCategory}`
         )
         .then((res) => {
-          console.log("동물병원 list 응답:", res);
+          // console.log("동물병원 list 응답:", res);
           // res.data.result에서 동물병원 배열을 가져옴 (전체)
           const hospitalData = Array.isArray(res.data?.result)
             ? res.data.result
@@ -423,7 +423,7 @@ const MapPage = () => {
           setHospitalList(hospitalData);
         })
         .catch((err) => {
-          console.error("동물병원 list 요청 실패:", err);
+          //  console.error("동물병원 list 요청 실패:", err);
           setHospitalList([]);
         })
         .finally(() => setIsHospitalLoading(false));
@@ -477,7 +477,7 @@ const MapPage = () => {
       const res = await axiosInstance.get(
         `${API_BASE_URL}${MAP}/detail/${location.mapId}`
       );
-      console.log(res);
+      // console.log(res);
 
       setSelectedCultureDetail(res.data?.result || res.data || null);
     } catch (err) {
@@ -495,7 +495,7 @@ const MapPage = () => {
       const res = await axiosInstance.get(
         `${API_BASE_URL}${HOSPITAL}/detail/${hospital.hospitalId}`
       );
-      console.log("동물병원 상세 정보 응답:", res);
+      //  console.log("동물병원 상세 정보 응답:", res);
 
       setSelectedHospitalInfo(res.data?.result || res.data || null);
     } catch (err) {
@@ -509,14 +509,14 @@ const MapPage = () => {
     axiosInstance
       .get(`${API_BASE_URL}${STYLE}/detail/${selectedCategory}/${shop.id}`)
       .then((res) => {
-        console.log(res.data.result);
+        //    console.log(res.data.result);
 
         setSelectedGroomingDetail(res.data.result || null);
-        console.log(selectedGroomingDetail);
+        //    console.log(selectedGroomingDetail);
       })
       .catch((err) => {
         setSelectedGroomingDetail(null);
-        console.error("미용실 상세 정보 요청 실패:", err);
+        //  console.error("미용실 상세 정보 요청 실패:", err);
       });
   };
 

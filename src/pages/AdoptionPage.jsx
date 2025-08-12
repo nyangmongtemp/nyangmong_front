@@ -219,7 +219,7 @@ const AdoptionPage = () => {
       setTotalPages(resultData.totalPages || 0);
       setTotalElements(resultData.totalElements || 0);
     } catch (err) {
-      console.error("유기동물 목록 조회 실패:", err);
+      // console.error("유기동물 목록 조회 실패:", err);
       setError("유기동물 목록을 불러오는데 실패했습니다.");
       setStrayAnimals([]);
     } finally {
@@ -332,7 +332,7 @@ const AdoptionPage = () => {
         pageSize
       );
 
-      console.log(response);
+      //console.log(response);
 
       // API 응답이 HTML인 경우 (백엔드 서버 연결 실패)
       if (
@@ -359,7 +359,7 @@ const AdoptionPage = () => {
       setAdoptionTotalPages(resultData.totalPages || 0);
       setAdoptionTotalElements(resultData.totalElements || 0);
     } catch (err) {
-      console.error("분양게시판 목록 조회 실패:", err);
+      //console.error("분양게시판 목록 조회 실패:", err);
 
       // 네트워크 오류인 경우 더 친화적인 메시지 표시
       if (err.code === "ERR_NETWORK" || err.message?.includes("네트워크")) {

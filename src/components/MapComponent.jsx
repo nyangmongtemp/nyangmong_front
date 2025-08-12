@@ -154,7 +154,7 @@ const MapComponent = ({
     mapInstanceRef.current = new window.kakao.maps.Map(mapContainer, mapOption);
     // Places API로 장소명 검색
     const ps = new window.kakao.maps.services.Places();
-    console.log(ps);
+    //console.log(ps);
 
     ps.keywordSearch(festival.location, function (result, status) {
       if (
@@ -546,15 +546,10 @@ const MapComponent = ({
         infoWindowRef.current.close();
         infoWindowRef.current = null;
       }
-      // mapx: 위도, mapy: 경도
-      console.log(
-        "미용실 마커 좌표(mapx, mapy):",
-        selectedGroomingDetail.mapx,
-        selectedGroomingDetail.mapy
-      );
+
       const lat = parseFloat(selectedGroomingDetail.mapy); // 위도
       const lng = parseFloat(selectedGroomingDetail.mapx); // 경도
-      console.log("lat:", lat, "lng:", lng);
+      //console.log("lat:", lat, "lng:", lng);
       const latlng = new window.kakao.maps.LatLng(lat, lng);
       mapInstanceRef.current.setCenter(latlng);
       mapInstanceRef.current.setLevel(5); // 진단용: 지도 확대
@@ -563,7 +558,7 @@ const MapComponent = ({
         position: latlng,
         map: mapInstanceRef.current,
       });
-      console.log("마커 객체:", marker);
+      //console.log("마커 객체:", marker);
       markersRef.current.push(marker);
       // 인포윈도우 내용 (동물병원과 동일한 디자인 + 도로명주소, 휴무일, 영업시간, 더보기)
       const infoContent = `

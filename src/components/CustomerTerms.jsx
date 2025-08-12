@@ -27,10 +27,10 @@ const CustomerTerms = () => {
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/terms/lastPost`
       );
-      console.log("이용약관 조회 응답:", response.data);
+      //console.log("이용약관 조회 응답:", response.data);
       setTermsData(response.data.result);
     } catch (err) {
-      console.error("이용약관 조회 에러:", err);
+      //console.error("이용약관 조회 에러:", err);
       setError("이용약관을 불러오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);

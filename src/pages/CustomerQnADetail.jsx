@@ -36,14 +36,14 @@ const CustomerQnADetail = () => {
   const fetchQnAData = async () => {
     setLoading(true);
     try {
-      console.log("클릭된 termsId:", id);
+      //console.log("클릭된 termsId:", id);
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/qna/${id}`
       );
-      console.log("Q&A 상세 조회 응답:", response.data);
+      //console.log("Q&A 상세 조회 응답:", response.data);
       setData(response.data.result);
     } catch (error) {
-      console.error("Q&A 상세 조회 에러:", error);
+      //console.error("Q&A 상세 조회 에러:", error);
       setError("Q&A 조회에 실패했습니다.");
     } finally {
       setLoading(false);

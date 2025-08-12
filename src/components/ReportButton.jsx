@@ -19,14 +19,14 @@ const ReportButton = ({ category, accusedUserId }) => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      console.log(category, accusedUserId, reason);
+      //console.log(category, accusedUserId, reason);
 
       const res = await axiosInstance.post(`${API_BASE_URL}${USER}/report`, {
         userId: accusedUserId,
         category: category,
         content: reason,
       });
-      console.log(res);
+      //console.log(res);
       setOpen(false);
       setReason("");
       alert("신고가 접수되었습니다.");

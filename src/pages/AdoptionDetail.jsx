@@ -73,18 +73,18 @@ const AdoptionDetail = () => {
 
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
-      console.log(response);
+      //console.log(response);
 
       setNowLoggedUserId(response.data);
       return response.data;
     } catch (err) {
-      console.error("유저 ID 조회 실패:", err);
+      //console.error("유저 ID 조회 실패:", err);
       setNowLoggedUserId(null);
       return null;
     }
   };
 
-  console.log("AdoptionDetail 컴포넌트 로드됨, id:", id);
+  //console.log("AdoptionDetail 컴포넌트 로드됨, id:", id);
 
   useEffect(() => {
     const fetchAdoptionDetail = async () => {
@@ -95,17 +95,14 @@ const AdoptionDetail = () => {
 
       try {
         const response = await adoptionAPI.getAdoptionDetail(id);
-        console.log("분양 상세 API 응답:", response);
-        console.log("응답 타입:", typeof response);
-        console.log("응답 키들:", Object.keys(response || {}));
 
         // API 응답에서 result 객체를 추출하여 설정
         const postData = response.result || response;
         setPost(postData);
         getNowLoggedUserId();
-        console.log("post 상태 설정 완료:", postData);
+        //console.log("post 상태 설정 완료:", postData);
       } catch (err) {
-        console.error("분양 상세 조회 실패:", err);
+        //console.error("분양 상세 조회 실패:", err);
         setError("분양글을 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);

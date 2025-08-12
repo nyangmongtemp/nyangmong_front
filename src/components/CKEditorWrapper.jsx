@@ -272,10 +272,10 @@ const CKEditorWrapper = ({
             }
           )
             .then((response) => {
-              console.log("응답 상태:", response.status, response.statusText);
+              //console.log("응답 상태:", response.status, response.statusText);
               if (!response.ok) {
                 return response.text().then((text) => {
-                  console.error("업로드 실패 상세:", text);
+                  //console.error("업로드 실패 상세:", text);
                   throw new Error(
                     `Upload failed: ${response.status} ${response.statusText}`
                   );
@@ -284,7 +284,7 @@ const CKEditorWrapper = ({
               return response.json();
             })
             .then((data) => {
-              console.log("업로드 응답:", data);
+              //console.log("업로드 응답:", data);
               return { default: data.url };
             });
         });

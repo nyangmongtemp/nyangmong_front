@@ -38,12 +38,12 @@ const ChildDetail = () => {
   const getNowLoggedUserId = async () => {
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}${USER}/findId`);
-      console.log(response);
+      // console.log(response);
 
       setNowLoggedUserId(response.data);
       return response.data;
     } catch (err) {
-      console.error("유저 ID 조회 실패:", err);
+      //console.error("유저 ID 조회 실패:", err);
       setNowLoggedUserId(null);
       return null;
     }
@@ -56,7 +56,7 @@ const ChildDetail = () => {
     axiosInstance
       .get(`${API_BASE_URL}${BOARD}/detail/INTRODUCTION/${id}`)
       .then((res) => {
-        console.log(res);
+        //console.log(res);
 
         let data = res.data.result || res.data.data || res.data;
         if (Array.isArray(data)) data = data[0];

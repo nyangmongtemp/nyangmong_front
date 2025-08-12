@@ -40,8 +40,7 @@ const MessagesPage = () => {
   const fetchUserData = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}${USER}/chat`);
-      console.log(response);
-
+      //   console.log(response);
       const data = response.data.result;
       setMessages(data);
       const firstChat = data[0];
@@ -51,9 +50,9 @@ const MessagesPage = () => {
       } else {
         setMyUserId(firstChat.userId2);
       }
-      console.log(myUserId);
+      //    console.log(myUserId);
     } catch (err) {
-      console.log(err);
+      ///     console.log(err);
     }
   }, []);
 
@@ -127,7 +126,7 @@ const MessagesPage = () => {
         const data = response.data.result;
         setMessages(data);
       } catch (err) {
-        console.log(err);
+        //    console.log(err);
       }
     };
 
@@ -144,7 +143,7 @@ const MessagesPage = () => {
 
     try {
       await axiosInstance.delete(`${API_BASE_URL}${USER}/clear/${chatId}`);
-      console.log("채팅방 삭제 성공");
+      //  console.log("채팅방 삭제 성공");
 
       // 채팅 목록에서 삭제된 채팅방 제거
       setMessages((prev) => prev.filter((chat) => chat.chatId !== chatId));
@@ -154,7 +153,7 @@ const MessagesPage = () => {
         setSelectedChatId(null);
       }
     } catch (error) {
-      console.error("채팅방 삭제 실패:", error);
+      //    console.error("채팅방 삭제 실패:", error);
       alert("채팅방 삭제에 실패했습니다.");
     }
   };

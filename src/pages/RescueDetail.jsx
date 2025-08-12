@@ -40,7 +40,7 @@ const RescueDetail = () => {
 
   useEffect(() => {
     const fetchAnimalDetail = async () => {
-      console.log("RescueDetail useEffect 실행:", { id });
+      //  console.log("RescueDetail useEffect 실행:", { id });
 
       if (!id) {
         setError("유기동물 정보를 찾을 수 없습니다.");
@@ -50,17 +50,17 @@ const RescueDetail = () => {
 
       try {
         setLoading(true);
-        console.log("API 호출 시작:", id);
+        //  console.log("API 호출 시작:", id);
         const response = await strayAnimalAPI.getStrayAnimalDetail(id);
-        console.log("유기동물 상세 응답:", response);
-        console.log("응답 타입:", typeof response);
-        console.log("응답 키들:", Object.keys(response || {}));
+        //    console.log("유기동물 상세 응답:", response);
+        //console.log("응답 타입:", typeof response);
+        //     console.log("응답 키들:", Object.keys(response || {}));
 
         // API 응답에서 result 객체를 추출하여 설정
         const data = response.result || response;
-        console.log("유기동물 상세 데이터:", data);
-        console.log("데이터 타입:", typeof data);
-        console.log("데이터 키들:", Object.keys(data || {}));
+        //    console.log("유기동물 상세 데이터:", data);
+        //    console.log("데이터 타입:", typeof data);
+        //    console.log("데이터 키들:", Object.keys(data || {}));
 
         // 데이터가 비어있거나 null인지 확인
         if (!data || Object.keys(data).length === 0) {
@@ -69,7 +69,7 @@ const RescueDetail = () => {
 
         setAnimal(data);
       } catch (err) {
-        console.error("유기동물 상세 조회 실패:", err);
+        //     console.error("유기동물 상세 조회 실패:", err);
         setError("유기동물 정보를 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);
@@ -207,8 +207,8 @@ const RescueDetail = () => {
   const images = getImages();
 
   // 디버깅용 로그
-  console.log("RescueDetail 렌더링 - animal:", animal);
-  console.log("RescueDetail 렌더링 - images:", images);
+  // console.log("RescueDetail 렌더링 - animal:", animal);
+  // console.log("RescueDetail 렌더링 - images:", images);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-pink-50">

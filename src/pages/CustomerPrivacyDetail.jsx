@@ -36,14 +36,14 @@ const CustomerPrivacyDetail = () => {
   const fetchPolicyData = async () => {
     setLoading(true);
     try {
-      console.log("클릭된 termsId:", id);
+      //console.log("클릭된 termsId:", id);
       const response = await axiosInstance.get(
         `${API_BASE_URL}${TERMS}/policy/${id}`
       );
-      console.log("개인정보처리방침 상세 조회 응답:", response.data);
+      //console.log("개인정보처리방침 상세 조회 응답:", response.data);
       setData(response.data.result);
     } catch (error) {
-      console.error("개인정보처리방침 상세 조회 에러:", error);
+      //console.error("개인정보처리방침 상세 조회 에러:", error);
       setError("개인정보처리방침 조회에 실패했습니다.");
     } finally {
       setLoading(false);
