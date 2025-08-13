@@ -139,22 +139,6 @@ const Sidebar = () => {
     "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
   ];
 
-  // 광고 목록 API 연동
-  useEffect(() => {
-    const fetchAds = async () => {
-      try {
-        const res = await axiosInstance.get(
-          `${API_BASE_URL}${MAIN}/ads/display`
-        );
-        setAds(res.data.result || []);
-        setCurrentAdSlide(0); // 새로 받아오면 첫 슬라이드로
-      } catch (error) {
-        setAds([]);
-      }
-    };
-    fetchAds();
-  }, []);
-
   const handleKakaoLogin = () => {
     //console.log("카카오 로그인 버튼 클릭!");
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code&prompt=login`;
@@ -828,51 +812,6 @@ const Sidebar = () => {
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 광고 슬라이드 */}
-      <Card className="border-orange-200">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50">
-          <CardTitle className="text-center text-gray-800">광고</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="relative">
-            {ads.length > 0 ? (
-              <>
-                <img
-                  src={ads[currentAdSlide].image}
-                  alt="광고"
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-                {/* 제목 노출 제거됨 */}
-                <button
-                  onClick={() =>
-                    setCurrentAdSlide(
-                      (prev) => (prev - 1 + ads.length) % ads.length
-                    )
-                  }
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-                  disabled={ads.length <= 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() =>
-                    setCurrentAdSlide((prev) => (prev + 1) % ads.length)
-                  }
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 p-1 rounded-full"
-                  disabled={ads.length <= 1}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </>
-            ) : (
-              <div className="w-full h-32 flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
-                광고 배너가 없습니다.
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
