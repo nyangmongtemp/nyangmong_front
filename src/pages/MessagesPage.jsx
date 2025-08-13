@@ -87,7 +87,7 @@ const MessagesPage = () => {
 
     // 항상 월/일 시:분 형식으로 출력
     const month = date.getMonth() + 1;
-    const day = date.getDate();
+    const day = date.getDate() + 9;
     const hour = String(date.getHours()).padStart(2, "0");
     const minute = String(date.getMinutes()).padStart(2, "0");
     return `${month}/${day} ${hour}:${minute}`;
