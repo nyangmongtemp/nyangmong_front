@@ -54,7 +54,7 @@ function formatDateTime(dateString) {
 }
 
 const CustomerInquiry = () => {
-  const [answerFilter, setAnswerFilter] = useState("answered"); // 기본값: answered(응답)
+  const [answerFilter, setAnswerFilter] = useState("unanswered"); // 기본값: answered(응답)
   const [sortOrder, setSortOrder] = useState("latest"); // latest | oldest
   const [currentPage, setCurrentPage] = useState(1);
   const [inquiries, setInquiries] = useState([]);

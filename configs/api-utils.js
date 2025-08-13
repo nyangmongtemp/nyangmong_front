@@ -306,7 +306,7 @@ export const getAdminUserDetail = async (userId) => {
 
 // 1:1 문의(고객센터) 목록 조회
 export const getAdminInquiryList = async (
-  page = 1,
+  page = 0,
   size = 10,
   searchWord = "",
   answered = "all"
